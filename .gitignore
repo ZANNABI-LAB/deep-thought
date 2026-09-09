@@ -1,0 +1,30 @@
+# Node
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# Gradle / JVM
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Env
+.env
+.env.local
+.env*.local
+
+# Editor / OS
+.DS_Store
+.idea/
+*.iml
+.vscode/
+
+# Vercel
+.vercel
+
+# 디자인 원본 (생성 이미지, 대용량)
+design/assets/*-src.png
+# 캔버스 시드 산출물 (working files에서 재생성 가능, ~2MB)
+design/concepts/*-directions.html

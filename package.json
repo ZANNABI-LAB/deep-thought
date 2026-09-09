@@ -1,0 +1,26 @@
+{
+  "name": "deep-thought",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Deep Thought — 기술 블로그 + 굿즈 스토어 (ZANNABI LAB)",
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "fonts": "tsx scripts/subset-fonts.ts",
+    "dev": "npm run dev -w apps/web",
+    "build": "npm run fonts && npm run build -w apps/web",
+    "lint": "npm run lint -w apps/web",
+    "api:dev": "cd apps/api && ./gradlew bootRun",
+    "api:build": "cd apps/api && ./gradlew build",
+    "api:test": "cd apps/api && ./gradlew test",
+    "dot2svg": "tsx scripts/dot-to-svg.ts",
+    "pixelize": "tsx scripts/pixelize.ts"
+  },
+  "devDependencies": {
+    "@types/pngjs": "^6.0.5",
+    "pngjs": "^7.0.0",
+    "subset-font": "^2.7.0",
+    "tsx": "^4.23.13"
+  }
+}

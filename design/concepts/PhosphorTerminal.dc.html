@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: #3dff88; text-decoration: none; }
+    a:hover { color: #8affbb; }
+    .scan { background-image: repeating-linear-gradient(180deg, rgba(255,255,255,.035) 0 1px, transparent 1px 3px); }
+  </style>
+</helmet>
+
+<div style="width: 900px; background: #05080a; color: #d8e6dc; font-family: 'IBM Plex Sans KR', system-ui, sans-serif; padding: 0 0 56px;">
+
+  <div style="display: flex; flex-direction: column; gap: 6px; padding: 40px 48px 28px; border-bottom: 1px solid #1b2620;">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: .18em; color: #3dff88;">DIRECTION A</div>
+    <div style="font-size: 30px; font-weight: 700; letter-spacing: -.01em;">인광 터미널</div>
+    <div style="font-size: 14px; color: #7d8f84; line-height: 1.65; max-width: 640px;">CRT 모니터의 잔광. 검정 바탕에 인광 그린 하나만 쓰고 모노스페이스를 전면에 세운다. 브랜드가 가장 강하게 드러나는 대신, 장문을 오래 읽기에는 눈이 피로하다.</div>
+  </div>
+
+  <div style="padding: 36px 48px 0;">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .16em; color: #566259; margin-bottom: 18px;">LOGOTYPE</div>
+    <div class="scan" style="display: flex; align-items: center; gap: 20px; background: #0b1014; border: 1px solid #1b2620; padding: 32px 28px;">
+      <svg width="52" height="52" viewBox="0 0 12 12" shape-rendering="crispEdges" aria-hidden="true">
+        <path fill="#3dff88" d="M1 2h10v1H1zM1 3h1v6H1zM10 3h1v6h-1zM1 9h10v1H1z"/>
+        <path fill="#d8e6dc" d="M3 5h2v1H3zM7 5h2v1H7zM4 7h4v1H4z"/>
+      </svg>
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 26px; font-weight: 600; letter-spacing: -.02em;">deep<span style="color:#3dff88;">_</span>thought</div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .22em; color: #566259;">ZANNABI LAB</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding: 36px 48px 0;">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .16em; color: #566259; margin-bottom: 18px;">PALETTE</div>
+    <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px;">
+      <div style="display:flex; flex-direction:column; gap:8px;"><div style="height:64px; background:#05080a; border:1px solid #1b2620;"></div><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:#7d8f84;">#05080A<br>bg</div></div>
+      <div style="display:flex; flex-direction:column; gap:8px;"><div style="height:64px; background:#0b1014; border:1px solid #1b2620;"></div><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:#7d8f84;">#0B1014<br>surface</div></div>
+      <div style="display:flex; flex-direction:column; gap:8px;"><div style="height:64px; background:#3dff88;"></div><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:#7d8f84;">#3DFF88<br>accent</div></div>
+      <div style="display:flex; flex-direction:column; gap:8px;"><div style="height:64px; background:#d8e6dc;"></div><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:#7d8f84;">#D8E6DC<br>text</div></div>
+      <div style="display:flex; flex-direction:column; gap:8px;"><div style="height:64px; background:#7d8f84;"></div><div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:#7d8f84;">#7D8F84<br>muted</div></div>
+    </div>
+  </div>
+
+  <div style="padding: 36px 48px 0;">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .16em; color: #566259; margin-bottom: 18px;">HOME</div>
+    <div class="scan" style="border: 1px solid #1b2620; background: #05080a;">
+      <div style="display: flex; align-items: center; gap: 22px; padding: 14px 22px; border-bottom: 1px solid #1b2620; font-family: 'IBM Plex Mono', monospace; font-size: 13px;">
+        <span style="font-weight: 600;">deep<span style="color:#3dff88;">_</span>thought</span>
+        <span style="color:#3dff88;">tech</span><span style="color:#7d8f84;">log</span><span style="color:#7d8f84;">profile</span><span style="color:#7d8f84;">portfolio</span>
+      </div>
+      <div style="padding: 34px 22px 30px;">
+        <div style="font-family:'IBM Plex Mono',monospace; font-size: 13px; color:#3dff88; margin-bottom: 10px;">&gt; whoami</div>
+        <div style="font-size: 22px; font-weight: 700; line-height: 1.4; max-width: 520px;">백엔드 엔지니어의<br>Applied AI 학습 기록</div>
+        <div style="display:flex; flex-direction:column; gap:2px; margin-top: 30px;">
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.16em; color:#566259; padding-bottom:10px;">LOG</div>
+          <div style="display:flex; gap:14px; padding: 9px 0; border-top:1px solid #131b17;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#566259; width:82px;">2026.03.07</span><span style="font-size:14px;">첫 번째 로그</span></div>
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.16em; color:#566259; padding: 20px 0 10px;">TECH</div>
+          <div style="display:flex; gap:14px; padding: 9px 0; border-top:1px solid #131b17;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#566259; width:82px;">Backend</span><span style="font-size:14px;">CQRS 패턴</span></div>
+          <div style="display:flex; gap:14px; padding: 9px 0; border-top:1px solid #131b17;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#566259; width:82px;">Security</span><span style="font-size:14px;">인증과 인가</span></div>
+          <div style="display:flex; gap:14px; padding: 9px 0; border-top:1px solid #131b17;"><span style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#566259; width:82px;">Frontend</span><span style="font-size:14px;">브라우저 렌더링 과정</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding: 36px 48px 0;">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .16em; color: #566259; margin-bottom: 18px;">POST</div>
+    <div style="border: 1px solid #1b2620; background: #05080a; padding: 30px 26px;">
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#3dff88; letter-spacing:.1em;">SECURITY · 2026.03.02</div>
+      <div style="font-size: 21px; font-weight: 700; margin-top: 10px; line-height: 1.45;">인증과 인가: 웹 보안의 핵심 개념과 구현</div>
+      <div style="font-size: 14px; line-height: 1.85; color: #b8c9bd; margin-top: 18px;">인증(Authentication)은 &ldquo;누구인가&rdquo;를 확인하는 절차이고, 인가(Authorization)는 그 주체가 &ldquo;무엇을 할 수 있는가&rdquo;를 결정하는 절차입니다. 둘은 자주 뒤섞여 쓰이지만 책임이 다릅니다.</div>
+      <div style="background:#0b1014; border-left: 2px solid #3dff88; margin-top: 20px; padding: 16px 18px; font-family:'IBM Plex Mono',monospace; font-size: 12.5px; line-height: 1.8; color:#a9c4b2;">
+        <span style="color:#566259;">// 인가 실패는 401이 아니라 403이다</span><br>if (!user.can(<span style="color:#3dff88;">'order:cancel'</span>)) {<br>&nbsp;&nbsp;throw new Forbidden()<br>}
+      </div>
+      <div style="margin-top: 22px; padding-top: 16px; border-top: 1px solid #131b17; font-family:'IBM Plex Mono',monospace; font-size: 11px; color: #566259;">이 글은 매일메일의 질문을 바탕으로 작성되었습니다.</div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
