@@ -1,13 +1,18 @@
+import { SiteHeader } from '@/components/SiteHeader';
+import { Hero } from '@/components/home/Hero';
 import { GodotStage } from '@/components/world/GodotStage';
+import styles from './page.module.css';
 
-/**
- * 홈: 배경 그림 + Godot 월드 + 건물 이름표. 헤더·히어로·패널은 다시 디자인한 뒤 얹는다.
- * 얹을 때는 data-safe="left"/"right" 요소를 GodotStage가 재서 섬을 그 사이에 맞춘다.
- */
+/** 섬은 히어로(data-safe="left")와 패널(data-safe="right") 사이에 맞춰진다 (GodotStage) */
 export default function Home() {
   return (
-    <div className="home">
+    <div className={styles.home}>
       <GodotStage />
+      <div className={styles.ui}>
+        <SiteHeader current="/" />
+        <Hero />
+        <aside className={styles.panel} data-safe="right" />
+      </div>
     </div>
   );
 }

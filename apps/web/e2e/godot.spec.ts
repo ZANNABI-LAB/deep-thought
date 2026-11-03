@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 /** 홈 월드: 배경 그림 위에 투명한 Godot 월드가 뜨고, 클릭하면 월드가 키 입력을 받는다. 캡처는 test-results/qa/ */
 test('홈에서 Godot 월드가 배경 그림 위에 뜬다', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('.space-plate')).toBeVisible();
+  await expect(page.getByTestId('space-plate')).toBeVisible();
   const stage = page.getByTestId('godot-stage');
   await expect(stage).not.toHaveAttribute('data-ready-ms', '', { timeout: 60_000 });
   console.log('readyMs', await stage.getAttribute('data-ready-ms'));

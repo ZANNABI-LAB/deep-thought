@@ -1,8 +1,9 @@
 import Link from 'next/link';
+import styles from './not-found.module.css';
 
 export default function NotFound() {
   return (
-    <main className="not-found">
+    <main className={styles.page}>
       <p className="mono">&gt; SIGNAL LOST // 404</p>
       <h1>이 좌표에는 아무것도 없어요.</h1>
       <p>

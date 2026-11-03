@@ -1,8 +1,8 @@
 # Deep Thought 2.0 — Zannabi's Little Universe
 
 > **Design & Technical Blueprint v2.0**
-> 작성일: 2026-10-30 · 갱신: 2026-11-03
-> 상태: 섬·건물·Zannabi v3·이름표 상호작용·수레 완료. 다음은 시설 화면과 웹 UI
+> 작성일: 2026-10-30 · 갱신: 2026-11-04
+> 상태: 섬·건물·Zannabi v3·이름표 상호작용·수레, 홈 헤더·히어로 완료. 다음은 오른쪽 패널과 시설 위젯
 > 기존 사이트: https://deep-thought.space/ (이전하지 않음, §8 참고)
 
 ### v1.1 → v2.0 주요 변경
@@ -22,8 +22,9 @@
 | --- | --- |
 | [홈 콘셉트](./assets/deep-thought-home-concept.png) | 화면 구성(히어로·섬·오른쪽 패널)과 분위기의 기준. 섬·건물 그림체는 §4.4 |
 | [Zannabi 로고](./assets/zannabi-original-logo.png) | 브랜드 출발점 (흑백 우주 원숭이) |
+| `art/refs/logo-mark-gpt-v3.png` | 헤더 로고 (콘셉트 헤더 로고를 GPT가 따라 그림). 파비콘은 `logo-mark-gpt-v2.png`. 변환은 `art/scripts/logo_mark.py` |
 | `art/refs/zannabi-v3-turnaround.png` | Zannabi v3 4방향 (Tripo 입력). 유리 모양은 `art/refs/zannabi-v3-visor-guide.png` |
-| `art/refs/space/space-bg-gpt-v1.png` | 홈 배경 그림 (섬·UI 없는 우주) |
+| `art/refs/space/space-bg-v3.png` | 홈 배경 그림 (섬·UI 없는 우주). 원본 `space-bg-gpt-v1.png`에서 헤더 로고 뒤 소행성을 지웠다 |
 
 콘셉트 이미지는 아트 디렉션 기준이며 게임 리소스로 쓰지 않는다. 글 제목·날짜·문구는 예시다.
 
@@ -84,7 +85,7 @@
 ### 3.1 네 개의 층
 
 ```text
-④ 웹 UI (DOM)         헤더 · 왼쪽 히어로 · 오른쪽 패널 · 하단 바   (섬 완성 뒤 다시 얹음)
+④ 웹 UI (DOM)         헤더 · 왼쪽 히어로 · 오른쪽 패널(예정)
 ③ 월드 오버레이 (DOM)  건물 이름표 · 수레 안내 · 시설 위젯(예정)
 ② Godot 월드 (iframe)  투명 배경 위에 섬 · 건물 · Zannabi (실시간 3D 렌더)
 ① 배경 그림 (img)      행성 · 성운 · 별 · 먼 소행성 (public/world/space-bg.webp)
@@ -93,26 +94,25 @@
 - **①** 웹이 페이지와 함께 바로 보여 준다. `object-fit: cover`.
 - **②** Godot 화면은 섬·캐릭터 밖이 투명하다 (`?bg=web`). 준비 전에는 숨겨 두고(opacity 0), `WORLD_READY` 뒤 0.25초 동안 보이게 한다.
 - **③** 이름표·안내·위젯은 선명한 텍스트의 웹 요소다. 위치는 월드가 알려 준다 (§6.4).
-- **④** 헤더, 히어로, 패널은 월드 로딩과 무관하게 먼저 그려진다. 지금은 홈에서 빼 두었고 다시 디자인해서 얹는다.
+- **④** 헤더, 히어로, 패널은 월드 로딩과 무관하게 먼저 그려진다. 스타일은 컴포넌트별 CSS Modules, `globals.css`는 토큰·기본 스타일만.
 
-### 3.2 데스크톱 레이아웃 (④를 다시 얹은 뒤)
+### 3.2 데스크톱 레이아웃
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────┐
-│ ◉ DEEP THOUGHT     Explore  Writing  Projects  Reading  About   🔍 Launch│
+│ ◉ DEEP THOUGHT                    Explore                            │
 ├──────────────┬───────────────────────────────────┬───────────────────┤
-│ > ZANNABI LAB│                                   │ ● MISSION LOG     │
-│ A little     │      [ 섬 — 화면 전체 ]           ├───────────────────┤
-│ universe     │                                   │ Ask Zannabi       │
-│ of ideas.    │      이름표 · 툴팁 위젯 (DOM)        ├───────────────────┤
-│ [W][A][S][D] │                                   │ Writing Projects  │
-│ [E] [SPACE]  │                                   │ Reading Notes     │
-│              │                                   ├───────────────────┤
-│              │                                   │ ZANNABI ARCADE    │
+│ > ZANNABI LAB│                                   │ (예정)            │
+│ A little     │      [ 섬 — 화면 전체 ]           │ Quick Routes      │
+│ universe     │                                   │ Writing Projects  │
+│ of ideas.    │      이름표 · 툴팁 위젯 (DOM)     │ Reading Notes     │
+│ [WASD]  [E]  │                                   │                   │
+│ [SPACE] CLICK│                                   │ ZANNABI ARCADE    │
 └──────────────┴───────────────────────────────────┴───────────────────┘
 ```
 
 - 히어로와 패널은 월드 위에 떠 있다. 빈 곳 클릭은 `pointer-events` 규칙으로 월드에 내려간다.
+- 헤더 메뉴는 지금 Explore(홈)만 둔다. 다른 메뉴는 페이지를 만든 뒤 넣는다.
 - 섬이 히어로·패널 사이 빈 영역에 오도록 웹이 `SET_SAFE_AREA`로 알려 준다.
 - 1024px 미만은 모바일 레이아웃(§3.4).
 
@@ -154,7 +154,7 @@
 | `status-online` | `#34D399` | Mission Log 점 같은 상태 표시 |
 | `code-bg` | `#0D1629` | 코드 블록 |
 
-- `apps/web/app/globals.css`에는 지금 쓰는 토큰만 둔다 (surface·border·status-online·code-bg는 패널·글 페이지를 만들 때 넣는다).
+- `apps/web/app/globals.css`에는 지금 쓰는 토큰만 둔다. 나머지는 쓰는 화면을 만들 때 넣는다.
 - 대비는 실제 배경 위에서 WCAG AA로 측정한 뒤 확정한다.
 - 블루는 탐색과 지식, 퍼플은 Arcade에만 쓴다.
 
@@ -162,10 +162,11 @@
 
 | 역할 | 폰트 | 쓰는 곳 |
 | --- | --- | --- |
-| 헤드라인 (영문) | 세리프: Newsreader (후보, 히어로를 다시 얹을 때 불러온다) | "A little universe of ideas.", 섹션 제목 |
+| 헤드라인 (영문) | 세리프: Newsreader 350 | "A little universe of ideas.", 섹션 제목 |
 | 헤드라인 (한글) | 마루 부리 | 한글이 섞인 글 제목 |
 | 본문·UI | Pretendard | 본문, 버튼, 카드 |
 | 라벨·상태 | JetBrains Mono | `> ZANNABI LAB`, MISSION LOG, 키 안내, 날짜 |
+| 헤더 글자 로고 | Pretendard 700, 대문자, 자간 0.2em | `DEEP THOUGHT` |
 
 ### 4.3 컴포넌트 원칙
 
@@ -227,7 +228,7 @@
 
 | 입력 | 동작 |
 | --- | --- |
-| WASD / 방향키 | 화면 기준 8방향 이동 |
+| WASD | 화면 기준 8방향 이동 |
 | Space | 점프 (저중력) |
 | E | 가까운 건물 실행(`INTERACT`), 수레가 더 가까우면 타기·내리기 |
 | 이름표 클릭 | 문 앞까지 걸어가서 실행 (`MOVE_TO_OBJECT` → 텔레포트 위면 돌길, 아니면 길찾기). 수레를 타고 있으면 먼저 내린다 |
@@ -353,9 +354,9 @@ vault 정책이 정리되면 다시 다룬다. 후보안: vault의 `publish: tru
 ```text
 Browser
 └── Next.js 16 (App Router) + React 19 + TypeScript
-    ├── 헤더 · 히어로 · 패널 · 글 페이지 (예정)
+    ├── SiteHeader · Hero (components/) · 패널 · 글 페이지 (예정)
     ├── GodotStage (components/world/GodotStage.tsx)
-    │   ├── ① 배경 그림 <img class="space-plate">
+    │   ├── ① 배경 그림 <img data-testid="space-plate">
     │   ├── ② <iframe src="/godot/index.html?bg=web">  Godot 웹 빌드
     │   └── ③ 건물 이름표 · 수레 안내 (위치는 월드가 알려 준다)
 ```
@@ -365,7 +366,7 @@ Browser
 ```text
 deep-thought/
 ├── apps/
-│   ├── web/                     Next.js 홈(배경 그림 + Godot 월드 + 이름표). public/godot/ 은 Godot 내보내기 결과 (git 제외)
+│   ├── web/                     Next.js 홈(배경 그림 + Godot 월드 + 이름표 + 헤더·히어로). public/godot/ 은 Godot 내보내기 결과 (git 제외)
 │   └── universe-godot/          Godot 4.7 프로젝트
 │       ├── scenes/playground.tscn   홈 월드
 │       ├── scripts/                 playground(배치·웹 메시지), building, prop, rover, zannabi_player/look,
@@ -415,7 +416,7 @@ pnpm --filter @deep-thought/web build
 | 1. Zannabi | **완료** | v3 모델(페인팅 그림체), Tripo 리깅, 통통 걸음·점프·인사·앉기, 유리창 |
 | 2. 웹 통합 | **완료** | Godot 웹 빌드, 투명 합성, 배경 그림, 등장 연출 |
 | 3. 섬 · 건물 | **완료** | 건물 6개, GPT 섬 바닥(돌길 포함), 연료통·탈 수 있는 수레 |
-| 4. 상호작용 | **진행 중** | 근접·E·이름표(건물별 네온)·클릭 이동·수레 완료 → 시설 화면(위젯), 웹 UI(헤더·히어로·패널) 다시 얹기 |
+| 4. 상호작용 | **진행 중** | 근접·E·이름표(건물별 네온)·클릭 이동·수레, 헤더·히어로 완료 → 오른쪽 패널, 시설 위젯 |
 | 5. Blog | 예정 | MDX, 글 목록·상세, SEO, 초기 글 |
 | 6. 로딩 마무리 | 예정 | 캐시, 실패 처리, 모바일 정적 화면 |
 | 7. Arcade | 예정 | 미니게임 |
@@ -440,8 +441,10 @@ pnpm --filter @deep-thought/web build
 | `public/godot/` 배포 방식 | 배포 전 결정 |
 | 배경 그림 해상도 | 1672×940. 큰 화면에서 흐리면 2560 이상으로 다시 받기 |
 | vault 연동 정책 | 보류 |
-| Ask Zannabi 범위 | 단순 검색 → RAG 범위 결정 |
-| 헤드라인 세리프 최종 선택 | 콘셉트와 비교 후 |
+| Ask Zannabi 범위 | 보류. 단순 검색 → RAG 범위 결정 |
+| Mission Log | 보류. 글이 올라오면 패널에 얹는다 |
+| 헤더 검색·Launch 버튼 | 보류. 검색은 글이 생긴 뒤, Launch는 동작을 정한 뒤 |
+| 홈 하단 바 | 보류. 문구를 정한 뒤 얹는다 |
 
 ### 계속 점검할 질문
 

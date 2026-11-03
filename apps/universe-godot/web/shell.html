@@ -19,6 +19,15 @@ body { background: transparent; overflow: hidden; touch-action: none; }
 		<script>
 const GODOT_CONFIG = $GODOT_CONFIG;
 const GODOT_THREADS_ENABLED = $GODOT_THREADS_ENABLED;
+// Godot은 모든 키에 preventDefault를 불러 F5·Ctrl+R까지 막는다. 월드가 쓰는 키만 엔진에 넘긴다.
+// keyup은 조합키를 보지 않는다: W를 누른 채 Ctrl을 떼도 W가 눌린 채로 남지 않게.
+const WORLD_KEYS = new Set(['KeyW', 'KeyA', 'KeyS', 'KeyD', 'Space', 'KeyE']);
+const passToBrowser = (e) => {
+	const combo = e.type === 'keydown' && (e.ctrlKey || e.metaKey || e.altKey);
+	if (combo || !WORLD_KEYS.has(e.code)) e.stopImmediatePropagation();
+};
+window.addEventListener('keydown', passToBrowser, true);
+window.addEventListener('keyup', passToBrowser, true);
 const engine = new Engine(GODOT_CONFIG);
 // 진행률·실패는 부모 페이지가 자기 방식으로 보여 준다 (WORLD_PROGRESS, WORLD_ERROR)
 const post = (msg) => window.parent.postMessage(msg, window.location.origin);

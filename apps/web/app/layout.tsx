@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from 'next';
-import { JetBrains_Mono } from 'next/font/google';
+import { JetBrains_Mono, Newsreader } from 'next/font/google';
 import './globals.css';
 
 const jetbrains = JetBrains_Mono({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-jetbrains' });
+const newsreader = Newsreader({ subsets: ['latin'], style: ['normal', 'italic'], axes: ['opsz'], variable: '--font-newsreader' });
 
 export const metadata: Metadata = {
   title: { default: 'Deep Thought — A little universe of ideas', template: '%s · Deep Thought' },
@@ -13,7 +14,7 @@ export const viewport: Viewport = { themeColor: '#080F1F' };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className={jetbrains.variable}>
+    <html lang="ko" className={`${jetbrains.variable} ${newsreader.variable}`}>
       <body>{children}</body>
     </html>
   );

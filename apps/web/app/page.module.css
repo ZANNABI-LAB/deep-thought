@@ -1,0 +1,38 @@
+.home {
+  position: relative;
+  min-height: 100vh;
+}
+
+/* 빈 곳 클릭은 아래 월드(iframe)로 내려가고, 실제 컨트롤만 클릭을 받는다 */
+.ui {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: clamp(320px, 26vw, 440px) 1fr clamp(320px, 26vw, 440px);
+  grid-template-rows: auto 1fr;
+  column-gap: 24px;
+  padding: 24px 40px;
+  pointer-events: none;
+}
+.ui :is(a, button, input, textarea, select, label) {
+  pointer-events: auto;
+}
+.ui > header {
+  grid-column: 1 / -1;
+}
+
+.panel {
+  grid-column: 3;
+}
+
+@media (max-width: 1023px) {
+  .ui {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr;
+    padding: 24px 16px;
+  }
+  .panel {
+    grid-column: auto;
+  }
+}
