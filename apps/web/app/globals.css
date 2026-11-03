@@ -1,0 +1,211 @@
+@import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css';
+
+:root {
+  color-scheme: dark;
+
+  --space: #080f1f;
+  --text-primary: #f4f5f7;
+  --text-body: #d6d9e0;
+  --text-secondary: #a9b1c3;
+  --text-muted: #7c869b;
+  --accent-blue: #3b82f6;
+  --accent-blue-soft: #93c5fd;
+  --accent-purple: #a78bfa;
+
+  --font-sans: 'Pretendard Variable', Pretendard, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--space);
+  color: var(--text-body);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-blue-soft);
+  outline-offset: 2px;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ───────── 홈: 배경 그림 + 투명한 Godot 월드 + 건물 이름표 ───────── */
+.home {
+  position: relative;
+  min-height: 100vh;
+}
+.stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+.stage-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+/* Godot 월드: 웹이 배경 그림을 깔고 그 위에 투명한 Godot 화면을 얹는다 */
+.godot-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  background: transparent;
+  color-scheme: normal; /* 다크 color-scheme이면 iframe 바탕이 불투명하게 칠해진다 */
+  opacity: 0;
+  transition: opacity 250ms ease-out;
+}
+.stage[data-phase='live'] .godot-frame {
+  opacity: 1;
+}
+.space-plate {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+  pointer-events: none;
+}
+.godot-boot {
+  position: absolute;
+  left: 50%;
+  bottom: 96px;
+  transform: translateX(-50%);
+  color: var(--text-muted);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  pointer-events: none;
+}
+
+.obj-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 6px;
+  background: rgb(8 15 31 / 0.82);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  pointer-events: auto;
+  cursor: pointer;
+  /* 자리는 스크립트가 translate로 준다(건물 중간 높이). 가운데 정렬은 transform으로 — 계산 순서가 translate → scale → transform이고
+     원점이 왼쪽 위라, 활성화 확대(scale)가 자리값에 곱해지지 않고 이름표 가운데를 기준으로만 커진다 */
+  transform: translate(-50%, -50%);
+  transform-origin: 0 0;
+  will-change: translate;
+  opacity: 0.55;
+  transition: border-color 160ms, box-shadow 160ms, opacity 160ms, scale 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+/* 마우스를 올리거나 Zannabi가 건물 가까이 가면(OBJECT_NEAR) 활성화 */
+.obj-label:hover,
+.obj-label[data-near='true'] {
+  opacity: 1;
+}
+/* Godot이 건물 자리(OBJECT_ANCHORS)를 알려 주기 전에는 숨긴다 */
+.stage-overlay:not([data-placed]) .obj-label {
+  visibility: hidden;
+}
+/* 건물마다 대표색 네온: 이름표만 봐도 어느 건물인지 연결된다. --neon은 테두리·번짐, --neon-soft는 E */
+.obj-label {
+  --neon: var(--accent-blue);
+  --neon-soft: var(--accent-blue-soft);
+}
+.obj-label[data-kind='library-dome'] { --neon: #f5a524; --neon-soft: #fcd34d; }   /* 돔 안 따뜻한 조명 */
+.obj-label[data-kind='rocket-hangar'] { --neon: #f05a3a; --neon-soft: #fca5a5; }  /* 로켓 날개 */
+.obj-label[data-kind='writing-station'] { --neon: #4f9dff; --neon-soft: #93c5fd; } /* 태양광 패널·남색 벽 */
+.obj-label[data-kind='ai-terminal'] { --neon: #22d3ee; --neon-soft: #a5f3fc; }    /* 파란 화면 */
+.obj-label[data-kind='arcade-room'] { --neon: var(--accent-purple); --neon-soft: #c4b5fd; } /* 네온 간판 */
+.obj-label[data-kind='radio-tower'] { --neon: #84cc16; --neon-soft: #bef264; }    /* 신호·전파 */
+.obj-label[data-kind='rover'] { --neon: #fbbf24; --neon-soft: #fde68a; }          /* 수레 전조등 */
+/* 수레 안내: 이름표와 같은 모양, 클릭 없음. 안내가 없으면 숨긴다 */
+.ride-prompt {
+  pointer-events: none;
+  transition: opacity 160ms;
+}
+.ride-prompt:not([data-on]) {
+  visibility: hidden;
+  opacity: 0;
+}
+.obj-label[data-near='true'] {
+  scale: 1.1;
+  border-color: var(--neon);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--neon) 28%, transparent);
+}
+.obj-label:hover {
+  border-color: color-mix(in srgb, var(--neon) 60%, transparent);
+}
+/* E는 이름표 안 글자 뒤. 평소에는 폭 0으로 접혀 있다가 활성화되면 펼쳐진다 (폭이 부드럽게 늘어 자리가 툭 튀지 않는다) */
+.obj-label kbd {
+  max-width: 0;
+  margin-left: -8px; /* 접혀 있을 때 gap을 없앤다 */
+  padding: 1px 0;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--neon-soft);
+  opacity: 0;
+  transition: max-width 200ms, margin-left 200ms, padding 200ms, opacity 200ms, border-color 200ms;
+}
+.obj-label[data-near='true'] kbd {
+  max-width: 2.5em;
+  margin-left: 0;
+  padding: 1px 6px;
+  border-color: var(--neon-soft);
+  opacity: 1;
+}
+
+.not-found {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 120px 24px;
+}
+.not-found h1 {
+  margin: 12px 0 16px;
+  color: var(--text-primary);
+  font-size: 28px;
+  font-weight: 600;
+}
+.not-found a {
+  color: var(--accent-blue-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}

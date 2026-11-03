@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+		<title>$GODOT_PROJECT_NAME</title>
+		<!-- 로딩 화면 없음: 배경은 투명하게 두고 부모 페이지(포스터·배경 그림)가 비쳐 보이게 한다 -->
+		<style>
+html, body, #canvas { margin: 0; padding: 0; border: 0; }
+body { background: transparent; overflow: hidden; touch-action: none; }
+#canvas { display: block; }
+#canvas:focus { outline: none; }
+		</style>
+		$GODOT_HEAD_INCLUDE
+	</head>
+	<body>
+		<canvas id="canvas"></canvas>
+		<script src="$GODOT_URL"></script>
+		<script>
+const GODOT_CONFIG = $GODOT_CONFIG;
+const GODOT_THREADS_ENABLED = $GODOT_THREADS_ENABLED;
+const engine = new Engine(GODOT_CONFIG);
+// 진행률·실패는 부모 페이지가 자기 방식으로 보여 준다 (WORLD_PROGRESS, WORLD_ERROR)
+const post = (msg) => window.parent.postMessage(msg, window.location.origin);
+const missing = Engine.getMissingFeatures({ threads: GODOT_THREADS_ENABLED });
+if (missing.length !== 0) {
+	console.error('Godot: missing browser features', missing);
+	post({ type: 'WORLD_ERROR', reason: 'unsupported' });
+} else {
+	const fail = (err) => {
+		console.error('Godot: start failed', err);
+		post({ type: 'WORLD_ERROR', reason: 'failed' });
+	};
+	// 엔진 파일 내려받기 실패는 startGame이 아니라 처리되지 않은 Promise 오류로 온다
+	window.addEventListener('unhandledrejection', (e) => fail(e.reason), { once: true });
+	engine.startGame({
+		onProgress: (loaded, total) => post({ type: 'WORLD_PROGRESS', loaded, total }),
+	}).catch(fail);
+}
+		</script>
+	</body>
+</html>

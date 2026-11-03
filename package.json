@@ -1,0 +1,19 @@
+{
+  "name": "deep-thought",
+  "private": true,
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "dev": "turbo run dev --filter=@deep-thought/web",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "e2e": "pnpm --filter @deep-thought/web e2e",
+    "art:building": "bash art/scripts/build_godot_building.sh",
+    "art:zannabi": "bash art/scripts/build_godot_zannabi_v3.sh",
+    "art:prop": "bash art/scripts/build_godot_prop.sh"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0",
+    "typescript": "^5.9.0"
+  }
+}

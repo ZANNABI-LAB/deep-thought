@@ -1,0 +1,18 @@
+node_modules/
+.next/
+.turbo/
+out/
+coverage/
+playwright-report/
+test-results/
+.env*
+!.env.example
+*.log
+.DS_Store
+art/build/
+*.tsbuildinfo
+.tripo/
+# Godot 웹 빌드 결과물 (apps/universe-godot에서 내보낸다)
+apps/web/public/godot/
+art/models/
+__pycache__/
