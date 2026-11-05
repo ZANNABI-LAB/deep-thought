@@ -23,6 +23,7 @@ const GODOT_THREADS_ENABLED = $GODOT_THREADS_ENABLED;
 // keyup은 조합키를 보지 않는다: W를 누른 채 Ctrl을 떼도 W가 눌린 채로 남지 않게.
 const WORLD_KEYS = new Set(['KeyW', 'KeyA', 'KeyS', 'KeyD', 'Space', 'KeyE']);
 const passToBrowser = (e) => {
+	if (e.type === 'keydown' && e.code === 'Escape') post({ type: 'WORLD_ESCAPE' });
 	const combo = e.type === 'keydown' && (e.ctrlKey || e.metaKey || e.altKey);
 	if (combo || !WORLD_KEYS.has(e.code)) e.stopImmediatePropagation();
 };

@@ -77,7 +77,8 @@
   opacity: 0.55;
   transition: border-color 160ms, box-shadow 160ms, opacity 160ms, scale 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.overlay:not([data-placed]) .label {
+.overlay:not([data-placed]) .label,
+.label[data-open] {
   visibility: hidden;
 }
 .label:hover,
@@ -92,13 +93,13 @@
   border-color: var(--neon);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--neon) 28%, transparent);
 }
-.label[data-kind='library-dome'] { --neon: #f5a524; --neon-soft: #fcd34d; }
-.label[data-kind='rocket-hangar'] { --neon: #f05a3a; --neon-soft: #fca5a5; }
-.label[data-kind='writing-station'] { --neon: #4f9dff; --neon-soft: #93c5fd; }
-.label[data-kind='ai-terminal'] { --neon: #22d3ee; --neon-soft: #a5f3fc; }
-.label[data-kind='arcade-room'] { --neon: var(--accent-purple); --neon-soft: #c4b5fd; }
-.label[data-kind='radio-tower'] { --neon: #84cc16; --neon-soft: #bef264; }
-.label[data-kind='rover'] { --neon: #fbbf24; --neon-soft: #fde68a; }
+.overlay [data-kind='library-dome'] { --neon: #f5a524; --neon-soft: #fcd34d; }
+.overlay [data-kind='rocket-hangar'] { --neon: #f05a3a; --neon-soft: #fca5a5; }
+.overlay [data-kind='writing-station'] { --neon: #4f9dff; --neon-soft: #93c5fd; }
+.overlay [data-kind='ai-terminal'] { --neon: #22d3ee; --neon-soft: #a5f3fc; }
+.overlay [data-kind='arcade-room'] { --neon: var(--accent-purple); --neon-soft: #c4b5fd; }
+.overlay [data-kind='radio-tower'] { --neon: #84cc16; --neon-soft: #bef264; }
+.overlay [data-kind='rover'] { --neon: #fbbf24; --neon-soft: #fde68a; }
 
 /* 폭을 0에서 펼쳐 이름표 자리가 툭 튀지 않게 한다 */
 .label kbd {

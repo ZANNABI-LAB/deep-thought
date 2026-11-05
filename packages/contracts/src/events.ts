@@ -10,6 +10,8 @@ export type WorldToWeb =
   | { type: 'OBJECT_NEAR'; objectId: WorldObjectId }
   | { type: 'OBJECT_LEAVE'; objectId: WorldObjectId }
   | { type: 'INTERACT'; objectId: WorldObjectId }
+  /** 키 입력은 월드에 머물러서 웹이 Escape를 직접 받지 못한다. 셸이 대신 알린다 */
+  | { type: 'WORLD_ESCAPE' }
   /** 건물마다 이름표를 띄울 자리 (건물 중간 높이, iframe 기준 CSS px). 카메라·화면 크기가 바뀔 때만 온다 */
   | { type: 'OBJECT_ANCHORS'; anchors: Partial<Record<WorldObjectId, ScreenPoint>> }
   /** 수레 안내: 가까이 가면 'ride'(E로 타기), 타는 동안 'dismount'(E로 내리기), 아니면 null. 자리는 수레 위 (iframe 기준 CSS px). 바뀔 때만 온다 */

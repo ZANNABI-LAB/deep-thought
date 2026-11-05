@@ -2,7 +2,7 @@
 
 > **Design & Technical Blueprint v2.0**
 > 작성일: 2026-10-30 · 갱신: 2026-11-05
-> 상태: 섬·건물·Zannabi v3·이름표 상호작용·수레, 홈 헤더·히어로·오른쪽 패널 완료. 다음은 시설 위젯
+> 상태: 섬·건물·Zannabi v3·이름표 상호작용·수레, 홈 헤더·히어로·오른쪽 패널, 시설 위젯 틀 완료. 다음은 Writing
 > 기존 사이트: https://deep-thought.space/ (이전하지 않음, §8 참고)
 
 ### v1.1 → v2.0 주요 변경
@@ -209,7 +209,7 @@
 | Rocket Hangar | PROJECTS | 대표 프로젝트 2~3개 | `/projects` |
 | AI Terminal | ASK | Ask Deep Thought 입력창 | — |
 | Arcade Room | ARCADE | 게임 목록, 내 최고 점수 | `/arcade/[game]` |
-| Radio Tower | LAB | GitHub 최근 활동, 진행 중인 실험 | — |
+| Radio Tower | LAB | 지금 연구·실험 중인 것들 | — |
 | Zannabi | — | 소개 대사, 이스터에그 | `/about` |
 
 섬: 떠 있는 돌 섬, 가운데 텔레포트 패드(Zannabi 시작 위치)에서 건물마다 돌길이 뻗는다. 로켓 옆 보급 구역에 연료통과 탈 수 있는 수레. 배치 기준은 `art/refs/village-layout-v1.png`.
@@ -234,26 +234,26 @@
 | E | 가까운 건물 실행(`INTERACT`), 수레가 더 가까우면 타기·내리기 |
 | 이름표 클릭 | 문 앞까지 걸어가서 실행 (`MOVE_TO_OBJECT` → 텔레포트 위면 돌길, 아니면 길찾기). 수레를 타고 있으면 먼저 내린다 |
 | 땅 클릭 | **아무 일도 없다** (클릭은 오브젝트 선택용) |
-| Escape | 열린 위젯 닫기 (예정) |
+| Escape | 열린 위젯 닫기 |
 
 ### 6.2 상태 흐름
 
 ```text
 평소 ──받침판 1.2 안──▶ 근접 (OBJECT_NEAR: 이름표 활성화 + E, Zannabi가 건물을 본다)
                 │
-                └─E / 이름표 클릭─▶ 실행 (INTERACT) ─▶ 옆에 툴팁 위젯 (예정)
+                └─E / 이름표 클릭─▶ 실행 (INTERACT) ─▶ 옆에 시설 위젯
                               │
-     멀어짐 (읽기 위젯) / Escape / 입력창 포커스 (입력 위젯: 이동 정지)
+     멀어짐 / Escape / × / E 다시 누르기 ─▶ 닫힘
 ```
 
-- 지금 웹은 `INTERACT`를 `data-interact`로만 남긴다 (e2e가 확인). 위젯은 다시 만든다.
+- 지금 위젯 내용은 모든 시설이 Coming soon이다. 시설 콘텐츠를 만들면서 하나씩 채운다.
 - **읽기 위젯**: 열린 상태에서도 이동할 수 있고, 상호작용 거리를 벗어나면 닫힌다.
 - **입력 위젯**: 입력창에 포커스가 있는 동안 웹이 `PAUSE_INPUT`을 보낸다 (구현됨).
 
 ### 6.3 툴팁 위젯 배치
 
-- 위젯은 오브젝트의 좌우 중 넓은 쪽에 열고, 화면 밖으로 나가면 반대쪽으로 뒤집는다.
-- 크기: 너비 약 320px, 최대 높이 화면의 60%.
+- 위젯은 건물 이름표가 그 자리에서 위로 펼쳐진 말풍선이다. 맨 아래 줄이 이름표 자리에 그대로 남고 E 자리에 닫기가 온다. 카메라는 움직이지 않는다.
+- 크기: 너비 약 210px. 섬을 가리지 않게 내용은 짧게 두고, 긴 목록은 페이지로 보낸다.
 
 ### 6.4 월드와 웹의 연결
 
@@ -267,6 +267,7 @@ export type WorldToWeb =
   | { type: 'OBJECT_NEAR'; objectId: WorldObjectId }
   | { type: 'OBJECT_LEAVE'; objectId: WorldObjectId }
   | { type: 'INTERACT'; objectId: WorldObjectId }
+  | { type: 'WORLD_ESCAPE' }                                  // 셸(월드 포커스 중 Escape)
   | { type: 'OBJECT_ANCHORS'; anchors: Partial<Record<WorldObjectId, ScreenPoint>> } // 이름표 자리 (바뀔 때만)
   | { type: 'RIDE_PROMPT'; action: 'ride' | 'dismount' | null; at: ScreenPoint };  // 수레 안내 (바뀔 때만)
 
@@ -277,7 +278,7 @@ export type WebToWorld =
   | { type: 'SET_SAFE_AREA'; left: number; right: number };
 ```
 
-위젯을 만들 때 카메라 밀기(`FOCUS_OBJECT`/`RELEASE_FOCUS`)를, 아케이드를 만들 때 그 메시지를 추가한다.
+아케이드를 만들 때 필요한 메시지를 추가한다.
 
 - 월드는 **무엇과 상호작용했는지만** 알린다. 무엇을 열지는 웹이 레지스트리로 정한다.
 - Godot 쪽: `JavaScriptBridge`로 `window.parent.postMessage`, 받는 쪽은 `addEventListener("message")` 콜백 (`scripts/playground.gd`).
@@ -288,7 +289,7 @@ export type WebToWorld =
 ### 6.5 접근성
 
 - 월드는 `aria-hidden`. 같은 목적지를 패널과 헤더 메뉴의 일반 링크로 모두 제공한다.
-- 툴팁 위젯은 `role="dialog"`, 열리면 위젯으로 포커스 이동, 닫으면 월드로 복귀.
+- 시설 위젯은 `role="dialog"`. 열린 채로 걸을 수 있도록 포커스는 월드에 둔다. 입력창이 있는 위젯을 만들면 다시 정한다.
 - `prefers-reduced-motion`: 등장 연출을 끈다.
 - 월드를 한 번도 쓰지 않아도 모든 콘텐츠에 갈 수 있어야 한다.
 
@@ -417,13 +418,15 @@ pnpm --filter @deep-thought/web build
 | 1. Zannabi | **완료** | v3 모델(페인팅 그림체), Tripo 리깅, 통통 걸음·점프·인사·앉기, 유리창 |
 | 2. 웹 통합 | **완료** | Godot 웹 빌드, 투명 합성, 배경 그림, 등장 연출 |
 | 3. 섬 · 건물 | **완료** | 건물 6개, GPT 섬 바닥(돌길 포함), 연료통·탈 수 있는 수레 |
-| 4. 상호작용 | **진행 중** | 근접·E·이름표(건물별 네온)·클릭 이동·수레, 헤더·히어로·오른쪽 패널 완료 → 시설 위젯 |
+| 4. 상호작용 | **진행 중** | 근접·E·이름표(건물별 네온)·클릭 이동·수레, 헤더·히어로·오른쪽 패널, 시설 위젯 틀 완료 |
 | 5. Blog | 예정 | MDX, 글 목록·상세, SEO, 초기 글 |
 | 6. 로딩 마무리 | 예정 | 캐시, 실패 처리, 모바일 정적 화면 |
 | 7. Arcade | 예정 | 미니게임 |
 | 8. Launch | 예정 | 접근성, 성능 예산, 배포, Search Console |
 
 **오픈 조건은 월드 완성이 아니라 글 읽기 경험 완성이다.**
+
+시설 콘텐츠 순서: Writing → Projects → Reading → Ask → Arcade → Lab. 오픈에는 Writing·Projects가 필수이고, Lab은 마지막으로 미룬다.
 
 ### 10.1 섬 · 건물 구현 메모
 

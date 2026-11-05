@@ -11,6 +11,7 @@ import {
   type WorldToWeb,
 } from '@deep-thought/contracts';
 import { Icon } from '../Icon';
+import { FacilityWidget } from './FacilityWidget';
 import styles from './GodotStage.module.css';
 
 type Anchors = Partial<Record<WorldObjectId, ScreenPoint>>;
@@ -32,7 +33,7 @@ function measureSafeArea(stage: HTMLElement) {
 
 /**
  * 배경 그림 위에 투명한 Godot 월드(iframe)와 건물 이름표를 얹는다. 메시지 계약은 @deep-thought/contracts.
- * INTERACT는 아직 data-interact로만 남긴다 (시설 위젯 예정).
+ * INTERACT는 시설 위젯을 연다. 열린 채로 돌아다닐 수 있도록 포커스는 월드에 둔다.
  */
 export function GodotStage() {
   const stageRef = useRef<HTMLDivElement>(null);
@@ -49,6 +50,8 @@ export function GodotStage() {
   const [placed, setPlaced] = useState(false);
   const [nearId, setNearId] = useState<WorldObjectId | null>(null);
   const [interacted, setInteracted] = useState<WorldObjectId | null>(null);
+  const [openId, setOpenId] = useState<WorldObjectId | null>(null);
+  const widgetRef = useRef<HTMLElement>(null);
   const [ride, setRide] = useState<'ride' | 'dismount' | null>(null);
   const rideRef = useRef<HTMLDivElement>(null);
   /** 메시지를 듣기 시작한 뒤에 넣는다: SSR HTML에 미리 있으면 캐시로 빨리 뜬 Godot의 한 번뿐인 WORLD_READY를 놓친다 */
@@ -73,6 +76,9 @@ export function GodotStage() {
       const p = a[id];
       if (el && p) el.style.translate = `${Math.round(p.x)}px ${Math.round(p.y)}px`;
     }
+    const widget = widgetRef.current;
+    const anchor = widget && a[widget.dataset.kind as WorldObjectId];
+    if (widget && anchor) widget.style.translate = `${Math.round(anchor.x)}px ${Math.round(anchor.y)}px`;
   }, []);
 
   useEffect(() => {
@@ -107,9 +113,17 @@ export function GodotStage() {
           break;
         case 'OBJECT_LEAVE':
           setNearId((cur) => (cur === msg.objectId ? null : cur));
+          setOpenId((cur) => (cur === msg.objectId ? null : cur));
           break;
         case 'INTERACT':
-          if (isWorldObjectId(msg.objectId)) setInteracted(msg.objectId);
+          if (isWorldObjectId(msg.objectId)) {
+            const id = msg.objectId;
+            setInteracted(id);
+            setOpenId((cur) => (cur === id ? null : id));
+          }
+          break;
+        case 'WORLD_ESCAPE':
+          setOpenId(null);
           break;
         case 'RIDE_PROMPT':
           setRide(msg.action);
@@ -140,6 +154,17 @@ export function GodotStage() {
       window.removeEventListener('resize', measure);
     };
   }, [send]);
+
+  useLayoutEffect(place, [openId, place]);
+
+  useEffect(() => {
+    if (!openId) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpenId(null);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [openId]);
 
   // 웹 입력창에 글자를 치는 동안 월드 키 입력을 멈춘다
   useEffect(() => {
@@ -209,6 +234,7 @@ export function GodotStage() {
               type="button"
               className={styles.label}
               data-near={near}
+              data-open={openId === id || undefined}
               data-kind={id}
               data-testid={`label-${id}`}
               ref={(el) => {
@@ -228,6 +254,16 @@ export function GodotStage() {
           {ride === 'dismount' ? 'GET OFF' : 'RIDE'}
           <kbd>E</kbd>
         </div>
+        {openId && (
+          <FacilityWidget
+            ref={widgetRef}
+            id={openId}
+            onClose={() => {
+              setOpenId(null);
+              focusWorld();
+            }}
+          />
+        )}
       </div>
     </div>
   );

@@ -30,11 +30,24 @@ test('이름표를 클릭하면 걸어가서 시설을 실행한다', async ({ p
   await dome.click();
   await expect(stage).toHaveAttribute('data-interact', 'library-dome', { timeout: 90_000 });
   await expect(dome).toHaveAttribute('data-near', 'true');
+  const widget = page.getByTestId('facility-widget');
+  await expect(widget).toContainText('READING');
+  await expect(widget).toContainText('Coming soon');
   await page.screenshot({ path: 'test-results/qa/near-dome.png' });
 
   // 키 입력이 월드로 간다: 다른 시설로 걸어간 뒤 E
   await page.getByTestId('label-ai-terminal').click();
   await expect(stage).toHaveAttribute('data-interact', 'ai-terminal', { timeout: 90_000 });
   await expect(dome).toHaveAttribute('data-near', 'false');
+  expect(await page.evaluate(() => document.activeElement?.tagName)).toBe('IFRAME');
+  await expect(widget).toContainText('ASK'); // 멀어지면 닫히고 새 시설에서 다시 열린다
+  await page.screenshot({ path: 'test-results/qa/near-terminal.png' });
+
+  await page.keyboard.press('Escape');
+  await expect(widget).toBeHidden();
+  await page.keyboard.press('KeyE');
+  await expect(widget).toBeVisible({ timeout: 30_000 });
+  await page.getByRole('button', { name: '닫기' }).click();
+  await expect(widget).toBeHidden();
   expect(await page.evaluate(() => document.activeElement?.tagName)).toBe('IFRAME');
 });
