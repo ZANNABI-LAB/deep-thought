@@ -3,7 +3,7 @@
 ## 좌표: "화면 축"(오른쪽, 아래쪽) = 바닥 위 방향. 텔레포트 패드 가운데가 원점
 extends Node3D
 
-const ELEVATION := 36.0  # 26.6°는 다닥다닥, 40°는 너무 높음 (2026-11-02)
+const ELEVATION := 36.0
 const AZIMUTH := 45.0
 ## 화면 축 (카메라 방위 45°): 화면 오른쪽, 화면 아래쪽으로 가는 바닥 방향
 const SCREEN_RIGHT := Vector3(0.70710678, 0, -0.70710678)
@@ -53,7 +53,7 @@ const STONE_PATHS := {
 }
 ## 소품 (scripts/prop.gd, 그림 art/refs/prop-*.png, 빌드 art/scripts/build_godot_prop.sh). at: 화면 축 좌표, yaw: 도, scale: 크기(선택)
 ##   돌길 띠(폭 1.2)·받침판·텔레포트·바위에서 떨어지고 건물 뒤에 가려지지 않는 빈 바닥에 둔다 (tools/path_qa.tscn이 길이 막히지 않는지 확인).
-##   상자·가로등·표지판은 어색해서 뺐다. 보급품은 로켓 보급 구역 하나로 모은다
+##   보급품은 로켓 보급 구역 하나로 모은다
 const PROPS := [
 	# 로켓 보급 구역: 로켓 기단 가까이 하나로 모은다 (로켓 계단·집필실 진입로 사이 통로는 비움, 길 쪽으로 늘어서지 않게)
 	{"name": "RocketFuel", "at": Vector2(5.7, -3.2), "yaw": 0.0, "scene": preload("res://assets/props/fuel_tanks.glb")},

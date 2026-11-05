@@ -1,7 +1,7 @@
 import type { IconName as ObjectIcon } from '@deep-thought/contracts';
 
 /** 건물 아이콘(contracts) + 웹 UI 아이콘 */
-export type IconName = ObjectIcon | 'box' | 'mouse';
+export type IconName = ObjectIcon | 'box' | 'mouse' | 'arrow-right';
 
 const PATHS: Record<IconName, React.ReactNode> = {
   'file-text': (
@@ -29,6 +29,7 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
     </>
   ),
+  'arrow-right': <path d="M5 12h14M13 6l6 6-6 6" />,
   mouse: (
     <>
       <rect x="6" y="3" width="12" height="18" rx="6" />

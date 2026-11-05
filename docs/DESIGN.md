@@ -1,8 +1,8 @@
 # Deep Thought 2.0 — Zannabi's Little Universe
 
 > **Design & Technical Blueprint v2.0**
-> 작성일: 2026-10-30 · 갱신: 2026-11-04
-> 상태: 섬·건물·Zannabi v3·이름표 상호작용·수레, 홈 헤더·히어로 완료. 다음은 오른쪽 패널과 시설 위젯
+> 작성일: 2026-10-30 · 갱신: 2026-11-05
+> 상태: 섬·건물·Zannabi v3·이름표 상호작용·수레, 홈 헤더·히어로·오른쪽 패널 완료. 다음은 시설 위젯
 > 기존 사이트: https://deep-thought.space/ (이전하지 않음, §8 참고)
 
 ### v1.1 → v2.0 주요 변경
@@ -74,7 +74,7 @@
 | 진입 카메라 연출 | **없음** | 시험해 봤지만 등장 연출로 충분 (2026-10-30) |
 | 모바일 | **Godot을 불러오지 않음.** 정적 그림 + 링크 | 약 11MB 다운로드, 키보드 없음, 캐릭터가 너무 작음 |
 | 상호작용 | 건물에 겹친 **이름표**(근접 시 활성화·E) → 시설 내용은 오브젝트 옆 **툴팁형 위젯**(웹, 예정) | 장소와 기능이 연결됨 |
-| 오른쪽 패널 | 콘셉트 그대로 (Mission Log, Ask, Quick Routes, Arcade). 섬 완성 뒤 다시 얹는다 | — |
+| 오른쪽 패널 | 지금은 Ask Deep Thought(준비 중)만 둔다. Mission Log, Quick Routes, Arcade는 뺐다 | 글과 페이지가 아직 없다 (2026-11-05) |
 | 헤드라인 폰트 | **세리프** | 콘셉트의 분위기 |
 | 미니게임 | Star Patrol → Moon Breaker (`/arcade/*` 전용, 엔진 미정. Phaser PoC는 정리하며 뺐다) | 홈 월드와 무관한 별도 게임 |
 
@@ -85,7 +85,7 @@
 ### 3.1 네 개의 층
 
 ```text
-④ 웹 UI (DOM)         헤더 · 왼쪽 히어로 · 오른쪽 패널(예정)
+④ 웹 UI (DOM)         헤더 · 왼쪽 히어로 · 오른쪽 패널
 ③ 월드 오버레이 (DOM)  건물 이름표 · 수레 안내 · 시설 위젯(예정)
 ② Godot 월드 (iframe)  투명 배경 위에 섬 · 건물 · Zannabi (실시간 3D 렌더)
 ① 배경 그림 (img)      행성 · 성운 · 별 · 먼 소행성 (public/world/space-bg.webp)
@@ -102,17 +102,18 @@
 ┌──────────────────────────────────────────────────────────────────────┐
 │ ◉ DEEP THOUGHT                    Explore                            │
 ├──────────────┬───────────────────────────────────┬───────────────────┤
-│ > ZANNABI LAB│                                   │ (예정)            │
-│ A little     │      [ 섬 — 화면 전체 ]           │ Quick Routes      │
-│ universe     │                                   │ Writing Projects  │
-│ of ideas.    │      이름표 · 툴팁 위젯 (DOM)     │ Reading Notes     │
+│ > ZANNABI LAB│                                   │ Ask Deep Thought  │
+│ A little     │      [ 섬 — 화면 전체 ]           │ (준비 중)         │
+│ universe     │                                   │                   │
+│ of ideas.    │      이름표 · 툴팁 위젯 (DOM)     │                   │
+│ > Start      │                                   │                   │
 │ [WASD]  [E]  │                                   │                   │
-│ [SPACE] CLICK│                                   │ ZANNABI ARCADE    │
 └──────────────┴───────────────────────────────────┴───────────────────┘
 ```
 
 - 히어로와 패널은 월드 위에 떠 있다. 빈 곳 클릭은 `pointer-events` 규칙으로 월드에 내려간다.
 - 헤더 메뉴는 지금 Explore(홈)만 둔다. 다른 메뉴는 페이지를 만든 뒤 넣는다.
+- 패널은 1024px 이상에서만 보인다.
 - 섬이 히어로·패널 사이 빈 영역에 오도록 웹이 `SET_SAFE_AREA`로 알려 준다.
 - 1024px 미만은 모바일 레이아웃(§3.4).
 
@@ -206,7 +207,7 @@
 | Writing Station | WRITING | 카테고리·시리즈 둘러보기, 랜덤 글 하나 | `/writing` |
 | Library Dome | READING | 읽은 책과 메모 | `/reading` |
 | Rocket Hangar | PROJECTS | 대표 프로젝트 2~3개 | `/projects` |
-| AI Terminal | ASK | Ask Zannabi 입력창 | — |
+| AI Terminal | ASK | Ask Deep Thought 입력창 | — |
 | Arcade Room | ARCADE | 게임 목록, 내 최고 점수 | `/arcade/[game]` |
 | Radio Tower | LAB | GitHub 최근 활동, 진행 중인 실험 | — |
 | Zannabi | — | 소개 대사, 이스터에그 | `/about` |
@@ -354,7 +355,7 @@ vault 정책이 정리되면 다시 다룬다. 후보안: vault의 `publish: tru
 ```text
 Browser
 └── Next.js 16 (App Router) + React 19 + TypeScript
-    ├── SiteHeader · Hero (components/) · 패널 · 글 페이지 (예정)
+    ├── SiteHeader · Hero · AskPanel (components/) · 글 페이지 (예정)
     ├── GodotStage (components/world/GodotStage.tsx)
     │   ├── ① 배경 그림 <img data-testid="space-plate">
     │   ├── ② <iframe src="/godot/index.html?bg=web">  Godot 웹 빌드
@@ -416,7 +417,7 @@ pnpm --filter @deep-thought/web build
 | 1. Zannabi | **완료** | v3 모델(페인팅 그림체), Tripo 리깅, 통통 걸음·점프·인사·앉기, 유리창 |
 | 2. 웹 통합 | **완료** | Godot 웹 빌드, 투명 합성, 배경 그림, 등장 연출 |
 | 3. 섬 · 건물 | **완료** | 건물 6개, GPT 섬 바닥(돌길 포함), 연료통·탈 수 있는 수레 |
-| 4. 상호작용 | **진행 중** | 근접·E·이름표(건물별 네온)·클릭 이동·수레, 헤더·히어로 완료 → 오른쪽 패널, 시설 위젯 |
+| 4. 상호작용 | **진행 중** | 근접·E·이름표(건물별 네온)·클릭 이동·수레, 헤더·히어로·오른쪽 패널 완료 → 시설 위젯 |
 | 5. Blog | 예정 | MDX, 글 목록·상세, SEO, 초기 글 |
 | 6. 로딩 마무리 | 예정 | 캐시, 실패 처리, 모바일 정적 화면 |
 | 7. Arcade | 예정 | 미니게임 |
@@ -441,7 +442,7 @@ pnpm --filter @deep-thought/web build
 | `public/godot/` 배포 방식 | 배포 전 결정 |
 | 배경 그림 해상도 | 1672×940. 큰 화면에서 흐리면 2560 이상으로 다시 받기 |
 | vault 연동 정책 | 보류 |
-| Ask Zannabi 범위 | 보류. 단순 검색 → RAG 범위 결정 |
+| Ask Deep Thought 범위 | 보류. 지금은 준비 중 패널만 둔다. 단순 검색 → RAG 범위 결정 |
 | Mission Log | 보류. 글이 올라오면 패널에 얹는다 |
 | 헤더 검색·Launch 버튼 | 보류. 검색은 글이 생긴 뒤, Launch는 동작을 정한 뒤 |
 | 홈 하단 바 | 보류. 문구를 정한 뒤 얹는다 |

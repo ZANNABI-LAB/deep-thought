@@ -17,7 +17,7 @@
   --font-mono: var(--font-jetbrains), ui-monospace, monospace;
 
   --radius-card: 12px;
-  --card-bg: rgb(8 15 31 / 0.72);
+  --card-bg: rgb(8 15 31 / 0.84);
   --card-border: rgb(255 255 255 / 0.08);
 }
 

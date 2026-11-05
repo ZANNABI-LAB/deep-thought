@@ -1,4 +1,5 @@
 import { SiteHeader } from '@/components/SiteHeader';
+import { AskPanel } from '@/components/home/AskPanel';
 import { Hero } from '@/components/home/Hero';
 import { GodotStage } from '@/components/world/GodotStage';
 import styles from './page.module.css';
@@ -11,7 +12,9 @@ export default function Home() {
       <div className={styles.ui}>
         <SiteHeader current="/" />
         <Hero />
-        <aside className={styles.panel} data-safe="right" />
+        <aside className={styles.panel} data-safe="right">
+          <AskPanel />
+        </aside>
       </div>
     </div>
   );

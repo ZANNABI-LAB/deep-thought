@@ -24,6 +24,7 @@
 
 .panel {
   grid-column: 3;
+  padding-top: 8px;
 }
 
 @media (max-width: 1023px) {
@@ -33,6 +34,6 @@
     padding: 24px 16px;
   }
   .panel {
-    grid-column: auto;
+    display: none;
   }
 }

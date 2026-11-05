@@ -16,6 +16,7 @@ art/refs/                       기준 그림
   space/space-bg-v3.png         홈 배경 (v1에서 왼쪽 위 소행성을 지움) → apps/web/public/world/space-bg.webp (WebP 품질 85)
   logo-mark-gpt-v3.png          헤더 로고 (GPT 흑백)
   logo-mark-gpt-v2.png          파비콘 (GPT 흑백)
+  ask-zannabi-gpt-v1.png        Ask 패널의 앉은 Zannabi (GPT 흑백) → public/brand/zannabi-sitting.svg
 art/blender/
   export_godot.py               방향(-Y 앞)·크기(키 또는 바닥 폭)·바닥 z=0 정리, 무광 재질, 건물 충돌 치수 <이름>.json
   rig_zannabi_v3.py             Zannabi v3: Tripo 뼈 이름 맞추기 + 동작 (zannabi_motions.py를 쓴다)
@@ -27,7 +28,7 @@ art/scripts/
   build_godot_zannabi_v3.sh     Zannabi (pnpm art:zannabi)
   visor_glass.py                얼굴 창 유리 메시 (assets/zannabi/visor_v3.obj)
   path_guide.py                 돌길 가이드 그림 (tools/path_guide.tscn 데이터 → GPT에 바닥 그림과 함께 준다)
-  logo_mark.py                  로고 그림 → 헤더 SVG(public/brand/zannabi-mark.svg)·파비콘(app/icon.png). potrace 필요
+  logo_mark.py                  GPT 흑백 그림 → 웹 SVG(public/brand/)·파비콘(app/icon.png). potrace 필요
 ```
 
 ## 순서
