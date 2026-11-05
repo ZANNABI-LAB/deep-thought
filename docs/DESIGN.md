@@ -372,7 +372,7 @@ Browser
 ```text
 deep-thought/
 ├── apps/
-│   ├── web/                     Next.js 홈(배경 그림 + Godot 월드 + 이름표 + 헤더·히어로). public/godot/ 은 Godot 내보내기 결과 (git 제외)
+│   ├── web/                     Next.js 홈(배경 그림 + Godot 월드 + 이름표·시설 위젯)과 글 페이지. public/godot/ 은 Godot 내보내기 결과 (git 제외)
 │   └── universe-godot/          Godot 4.7 프로젝트
 │       ├── scenes/playground.tscn   홈 월드
 │       ├── scripts/                 playground(배치·웹 메시지), building, prop, rover, zannabi_player/look,

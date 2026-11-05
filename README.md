@@ -8,12 +8,16 @@
 ## 구조
 
 ```text
-apps/web             Next.js 홈 — 배경 그림 + 투명한 Godot 월드 + 건물 이름표 + 헤더·히어로
+apps/web             Next.js — 홈(배경 그림 + 투명한 Godot 월드 + 이름표·시설 위젯)과 글 페이지
 apps/universe-godot  Godot 4.7 월드 — 섬, 건물, Zannabi(조작·동작), 수레, 웹 빌드
 packages/contracts   건물 레지스트리와 월드↔웹 메시지 타입 (단일 기준)
 art/                 기준 그림, Blender·빌드 스크립트
 docs/                설계 문서와 콘셉트 이미지
 ```
+
+## 글쓰기
+
+`apps/web/content/writing/_template.mdx`를 복사해 영문 소문자·하이픈 이름으로 저장한다 (예: `bff-pattern.mdx`). `draft: true`면 개발 서버에서만 보인다.
 
 ## 개발
 

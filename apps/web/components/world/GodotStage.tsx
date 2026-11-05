@@ -137,6 +137,7 @@ export function GodotStage({ active, latestPost }: { active: boolean; latestPost
   }, [send, place]);
 
   useLayoutEffect(() => {
+    if (!active) return;
     const stage = stageRef.current!;
     const measure = () => {
       const safe = measureSafeArea(stage);
