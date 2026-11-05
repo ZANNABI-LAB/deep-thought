@@ -2,7 +2,7 @@
 
 > **Design & Technical Blueprint v2.0**
 > 작성일: 2026-10-30 · 갱신: 2026-11-05
-> 상태: 섬·건물·Zannabi v3·이름표 상호작용·수레, 홈 헤더·히어로·오른쪽 패널, 시설 위젯 틀 완료. 다음은 Writing
+> 상태: 섬·건물·Zannabi v3·이름표 상호작용·수레, 홈 헤더·히어로·오른쪽 패널, 시설 위젯 틀, Writing 페이지 완료. 다음은 첫 글과 Projects
 > 기존 사이트: https://deep-thought.space/ (이전하지 않음, §8 참고)
 
 ### v1.1 → v2.0 주요 변경
@@ -112,7 +112,7 @@
 ```
 
 - 히어로와 패널은 월드 위에 떠 있다. 빈 곳 클릭은 `pointer-events` 규칙으로 월드에 내려간다.
-- 헤더 메뉴는 지금 Explore(홈)만 둔다. 다른 메뉴는 페이지를 만든 뒤 넣는다.
+- 헤더 메뉴는 지금 Explore(홈)와 Writing을 둔다. 다른 메뉴는 페이지를 만든 뒤 넣는다.
 - 패널은 1024px 이상에서만 보인다.
 - 섬이 히어로·패널 사이 빈 영역에 오도록 웹이 `SET_SAFE_AREA`로 알려 준다.
 - 1024px 미만은 모바일 레이아웃(§3.4).
@@ -125,7 +125,8 @@
 4. **등장**: 섬과 Zannabi가 점처럼 작은 크기에서 0.8초 동안 커지고 끝에서 살짝 넘쳤다 돌아온다(ease-out-back). 카메라 확대라 선이 흐려지지 않는다.
 5. `prefers-reduced-motion`이면 커지지 않고 바로 보인다.
 6. 실패(WebGL 2 없음, 다운로드·초기화 실패)해도 배경과 웹 UI는 그대로다. 셸이 `WORLD_ERROR`를 보내면 로딩 문구를 작은 안내로 바꾼다.
-7. Godot 셸에는 로딩 화면·로고가 없다 (`apps/universe-godot/web/shell.html`, 부트 스플래시 끔).
+7. 월드는 루트 레이아웃(`WorldHost`)에 있다. 홈을 처음 열 때만 시작하고, 다른 페이지로 가면 숨긴 채 `SLEEP_WORLD`로 멈췄다가 돌아오면 `WAKE_WORLD`로 그대로 잇는다. 글 페이지로 바로 들어오면 엔진을 내려받지 않는다.
+8. Godot 셸에는 로딩 화면·로고가 없다 (`apps/universe-godot/web/shell.html`, 부트 스플래시 끔).
 
 ### 3.4 모바일
 
@@ -164,7 +165,7 @@
 | 역할 | 폰트 | 쓰는 곳 |
 | --- | --- | --- |
 | 헤드라인 (영문) | 세리프: Newsreader 350 | "A little universe of ideas.", 섹션 제목 |
-| 헤드라인 (한글) | 마루 부리 | 한글이 섞인 글 제목 |
+| 헤드라인 (한글) | Pretendard 700 (마루 부리는 npm에 없어 보류) | 한글이 섞인 글 제목 |
 | 본문·UI | Pretendard | 본문, 버튼, 카드 |
 | 라벨·상태 | JetBrains Mono | `> ZANNABI LAB`, MISSION LOG, 키 안내, 날짜 |
 | 헤더 글자 로고 | Pretendard 700, 대문자, 자간 0.2em | `DEEP THOUGHT` |
@@ -246,7 +247,7 @@
      멀어짐 / Escape / × / E 다시 누르기 ─▶ 닫힘
 ```
 
-- 지금 위젯 내용은 모든 시설이 Coming soon이다. 시설 콘텐츠를 만들면서 하나씩 채운다.
+- Writing 위젯은 최신 글과 글 목록 링크를 보여 준다 (글이 없으면 Coming soon). 나머지 시설은 Coming soon이고, 콘텐츠를 만들면서 하나씩 채운다.
 - **읽기 위젯**: 열린 상태에서도 이동할 수 있고, 상호작용 거리를 벗어나면 닫힌다.
 - **입력 위젯**: 입력창에 포커스가 있는 동안 웹이 `PAUSE_INPUT`을 보낸다 (구현됨).
 
@@ -275,7 +276,9 @@ export type WebToWorld =
   | { type: 'PAUSE_INPUT' }
   | { type: 'RESUME_INPUT' }
   | { type: 'MOVE_TO_OBJECT'; objectId: WorldObjectId }
-  | { type: 'SET_SAFE_AREA'; left: number; right: number };
+  | { type: 'SET_SAFE_AREA'; left: number; right: number }
+  | { type: 'SLEEP_WORLD' }                                   // 셸이 프레임을 멈춘다
+  | { type: 'WAKE_WORLD' };
 ```
 
 아케이드를 만들 때 필요한 메시지를 추가한다.
@@ -312,16 +315,17 @@ export type WebToWorld =
 
 ### 8.1 콘텐츠
 
-- 원본: `apps/web/content/{writing,projects,reading}/*.mdx`, 빌드 시 정적 생성.
-- 초기 글: 매일메일에서 다룬 주제를 직접 복습하고 **자기 말로 다시 쓴 글**.
-- 프런트매터 스키마는 빌드 시 검증한다 (제목, 요약, 날짜, 카테고리, 태그, 시리즈, 커버 이미지).
+- 원본: `apps/web/content/{writing,projects,reading}/*.mdx`, 빌드 시 정적 생성. 지금은 `writing`만 있다.
+- 초기 글: 매일메일에서 주제를 고른 뒤 직접 공부하고 **자기 말로 다시 쓴 글**.
+- 프런트매터 스키마는 빌드 시 검증한다 (제목, 요약, 날짜, 카테고리, 태그, 시리즈, 커버 이미지, 초안). 틀리면 빌드가 멈춘다 (`lib/writing.ts`).
+- 새 글은 `content/writing/_template.mdx`를 복사해 영문 소문자·하이픈 이름으로 저장한다. `draft: true`면 개발 서버에서만 보인다.
 
 ### 8.2 URL
 
 | 경로 | 내용 |
 | --- | --- |
-| `/` | 홈 (월드). **지금 있는 페이지는 이것과 404뿐** |
-| `/writing`, `/writing/[slug]` | 글 목록, 글 상세 |
+| `/` | 홈 (월드) |
+| `/writing`, `/writing/[slug]` | 글 목록, 글 상세 (구현됨) |
 | `/projects`, `/projects/[slug]` | 프로젝트 |
 | `/reading` | 독서 기록 |
 | `/about` | 소개 |
@@ -335,10 +339,10 @@ vault 정책이 정리되면 다시 다룬다. 후보안: vault의 `publish: tru
 
 ### 8.4 SEO 체크리스트
 
-- [ ] `generateStaticParams`로 모든 글 정적 생성
-- [ ] `generateMetadata`: title, description, canonical, OG 이미지
-- [ ] `sitemap.xml`, `robots.txt`
-- [ ] 글마다 `BlogPosting` JSON-LD
+- [x] `generateStaticParams`로 모든 글 정적 생성
+- [ ] `generateMetadata`: title, description, canonical 완료. OG 이미지 남음
+- [x] `sitemap.xml`, `robots.txt`
+- [x] 글마다 `BlogPosting` JSON-LD
 - [ ] 홈의 히어로·Mission Log·패널 링크가 HTML로 먼저 렌더링
 - [ ] 오픈 후 Search Console에 sitemap 제출
 
@@ -356,7 +360,7 @@ vault 정책이 정리되면 다시 다룬다. 후보안: vault의 `publish: tru
 ```text
 Browser
 └── Next.js 16 (App Router) + React 19 + TypeScript
-    ├── SiteHeader · Hero · AskPanel (components/) · 글 페이지 (예정)
+    ├── SiteHeader · Hero · AskPanel (components/) · 글 페이지 (app/writing/, content/writing/)
     ├── GodotStage (components/world/GodotStage.tsx)
     │   ├── ① 배경 그림 <img data-testid="space-plate">
     │   ├── ② <iframe src="/godot/index.html?bg=web">  Godot 웹 빌드
@@ -419,7 +423,7 @@ pnpm --filter @deep-thought/web build
 | 2. 웹 통합 | **완료** | Godot 웹 빌드, 투명 합성, 배경 그림, 등장 연출 |
 | 3. 섬 · 건물 | **완료** | 건물 6개, GPT 섬 바닥(돌길 포함), 연료통·탈 수 있는 수레 |
 | 4. 상호작용 | **진행 중** | 근접·E·이름표(건물별 네온)·클릭 이동·수레, 헤더·히어로·오른쪽 패널, 시설 위젯 틀 완료 |
-| 5. Blog | 예정 | MDX, 글 목록·상세, SEO, 초기 글 |
+| 5. Blog | **진행 중** | MDX, 글 목록·상세, SEO 완료 → 초기 글 |
 | 6. 로딩 마무리 | 예정 | 캐시, 실패 처리, 모바일 정적 화면 |
 | 7. Arcade | 예정 | 미니게임 |
 | 8. Launch | 예정 | 접근성, 성능 예산, 배포, Search Console |

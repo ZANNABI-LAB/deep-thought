@@ -1,7 +1,10 @@
 import Link from 'next/link';
 import styles from './SiteHeader.module.css';
 
-const NAV = [{ href: '/', label: 'Explore' }] as const;
+const NAV = [
+  { href: '/', label: 'Explore' },
+  { href: '/writing', label: 'Writing' },
+] as const;
 
 export type NavHref = (typeof NAV)[number]['href'];
 

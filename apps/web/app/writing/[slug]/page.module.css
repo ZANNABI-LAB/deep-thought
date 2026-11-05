@@ -1,0 +1,134 @@
+.back {
+  color: var(--accent-blue-soft);
+  font-size: 12px;
+}
+
+.header {
+  margin: 32px 0 40px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.meta {
+  margin: 0 0 16px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.title {
+  margin: 0 0 16px;
+  color: var(--text-primary);
+  font-size: clamp(30px, 4vw, 38px);
+  font-weight: 700;
+  line-height: 1.3;
+  word-break: keep-all;
+}
+
+.summary {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 17px;
+  line-height: 1.7;
+  word-break: keep-all;
+}
+
+.prose {
+  font-size: 17px;
+  line-height: 1.85;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.prose > :first-child {
+  margin-top: 0;
+}
+.prose :is(h2, h3) {
+  color: var(--text-primary);
+  font-weight: 700;
+  line-height: 1.4;
+  scroll-margin-top: 24px;
+}
+.prose h2 {
+  margin: 56px 0 16px;
+  font-size: 26px;
+}
+.prose h3 {
+  margin: 40px 0 12px;
+  font-size: 20px;
+}
+.prose :is(p, ul, ol, blockquote, table, figure) {
+  margin: 0 0 24px;
+}
+.prose :is(ul, ol) {
+  padding-left: 24px;
+}
+.prose li + li {
+  margin-top: 6px;
+}
+.prose a {
+  color: var(--accent-blue-soft);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.prose strong {
+  color: var(--text-primary);
+}
+.prose hr {
+  margin: 48px 0;
+  border: 0;
+  border-top: 1px solid var(--card-border);
+}
+.prose img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-card);
+}
+.prose blockquote {
+  padding-left: 20px;
+  border-left: 2px solid var(--accent-blue);
+  color: var(--text-secondary);
+}
+.prose table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 15px;
+  word-break: normal;
+}
+.prose :is(th, td) {
+  padding: 10px 14px;
+  border: 1px solid var(--card-border);
+  text-align: left;
+}
+.prose th {
+  color: var(--text-primary);
+}
+.prose :is(code, pre) {
+  font-family: var(--font-mono);
+}
+.prose :not(pre) > code {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgb(255 255 255 / 0.08);
+  color: var(--text-primary);
+  font-size: 0.88em;
+}
+.prose [data-rehype-pretty-code-title] {
+  margin-bottom: 8px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+.prose pre {
+  margin: 0;
+  padding: 18px 20px;
+  overflow-x: auto;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-card);
+  background: #0d1526;
+  font-size: 14px;
+  line-height: 1.65;
+  word-break: normal;
+  overflow-wrap: normal;
+}

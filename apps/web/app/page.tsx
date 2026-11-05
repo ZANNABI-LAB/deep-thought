@@ -1,14 +1,12 @@
 import { SiteHeader } from '@/components/SiteHeader';
 import { AskPanel } from '@/components/home/AskPanel';
 import { Hero } from '@/components/home/Hero';
-import { GodotStage } from '@/components/world/GodotStage';
 import styles from './page.module.css';
 
-/** 섬은 히어로(data-safe="left")와 패널(data-safe="right") 사이에 맞춰진다 (GodotStage) */
+/** 월드는 루트 레이아웃의 WorldHost가 띄운다. 섬은 히어로(data-safe="left")와 패널(data-safe="right") 사이에 맞춰진다 */
 export default function Home() {
   return (
     <div className={styles.home}>
-      <GodotStage />
       <div className={styles.ui}>
         <SiteHeader current="/" />
         <Hero />

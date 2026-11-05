@@ -38,6 +38,30 @@
   line-height: 1.15;
 }
 
+.post {
+  display: block;
+  padding: 14px 12px 8px;
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  word-break: keep-all;
+}
+.post:hover {
+  color: var(--neon-soft);
+}
+
+.more {
+  display: block;
+  padding: 0 12px 12px;
+  color: var(--neon-soft);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.more:hover {
+  text-decoration: underline;
+}
+
 .tag {
   display: flex;
   align-items: center;

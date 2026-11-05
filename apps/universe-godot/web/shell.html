@@ -29,6 +29,24 @@ const passToBrowser = (e) => {
 };
 window.addEventListener('keydown', passToBrowser, true);
 window.addEventListener('keyup', passToBrowser, true);
+// 월드를 숨긴 동안(SLEEP_WORLD) 다음 프레임 요청을 붙잡아 두어 엔진을 멈춘다
+const requestFrame = window.requestAnimationFrame.bind(window);
+let sleeping = false;
+let heldFrame = null;
+window.requestAnimationFrame = (callback) => {
+	if (!sleeping) return requestFrame(callback);
+	heldFrame = callback;
+	return 0;
+};
+window.addEventListener('message', (e) => {
+	if (e.origin !== window.location.origin) return;
+	if (e.data?.type === 'SLEEP_WORLD') sleeping = true;
+	if (e.data?.type === 'WAKE_WORLD') {
+		sleeping = false;
+		if (heldFrame) requestFrame(heldFrame);
+		heldFrame = null;
+	}
+});
 const engine = new Engine(GODOT_CONFIG);
 // 진행률·실패는 부모 페이지가 자기 방식으로 보여 준다 (WORLD_PROGRESS, WORLD_ERROR)
 const post = (msg) => window.parent.postMessage(msg, window.location.origin);

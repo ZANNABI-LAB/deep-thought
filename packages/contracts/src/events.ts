@@ -25,7 +25,10 @@ export type WebToWorld =
   /** 이름표를 클릭하면 캐릭터가 걸어가서 상호작용한다 */
   | { type: 'MOVE_TO_OBJECT'; objectId: WorldObjectId }
   /** 섬이 웹 UI에 가리지 않도록 비어 있는 화면 가로 범위(CSS px)를 알린다 */
-  | { type: 'SET_SAFE_AREA'; left: number; right: number };
+  | { type: 'SET_SAFE_AREA'; left: number; right: number }
+  /** 다른 페이지로 가면 월드를 숨긴다. iframe을 가려도 프레임은 계속 돌아서 셸이 직접 멈춘다 */
+  | { type: 'SLEEP_WORLD' }
+  | { type: 'WAKE_WORLD' };
 
 export interface ScreenPoint {
   /** 캔버스 왼쪽 위 기준 CSS px */

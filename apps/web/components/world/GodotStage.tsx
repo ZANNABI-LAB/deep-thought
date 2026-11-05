@@ -11,7 +11,7 @@ import {
   type WorldToWeb,
 } from '@deep-thought/contracts';
 import { Icon } from '../Icon';
-import { FacilityWidget } from './FacilityWidget';
+import { FacilityWidget, type LatestPost } from './FacilityWidget';
 import styles from './GodotStage.module.css';
 
 type Anchors = Partial<Record<WorldObjectId, ScreenPoint>>;
@@ -35,7 +35,7 @@ function measureSafeArea(stage: HTMLElement) {
  * 배경 그림 위에 투명한 Godot 월드(iframe)와 건물 이름표를 얹는다. 메시지 계약은 @deep-thought/contracts.
  * INTERACT는 시설 위젯을 연다. 열린 채로 돌아다닐 수 있도록 포커스는 월드에 둔다.
  */
-export function GodotStage() {
+export function GodotStage({ active, latestPost }: { active: boolean; latestPost?: LatestPost }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLIFrameElement>(null);
   const labelRefs = useRef(new Map<WorldObjectId, HTMLElement>());
@@ -153,9 +153,14 @@ export function GodotStage() {
       ro.disconnect();
       window.removeEventListener('resize', measure);
     };
-  }, [send]);
+  }, [send, active]);
 
   useLayoutEffect(place, [openId, place]);
+
+  // 월드가 뜨기 전에 페이지를 떠났을 수 있어 준비된 뒤에도 다시 알린다
+  useEffect(() => {
+    send({ type: active ? 'WAKE_WORLD' : 'SLEEP_WORLD' });
+  }, [active, readyMs, send]);
 
   useEffect(() => {
     if (!openId) return;
@@ -203,6 +208,7 @@ export function GodotStage() {
       ref={stageRef}
       className={styles.stage}
       data-testid="godot-stage"
+      data-active={active || undefined}
       data-phase={live ? 'live' : 'loading'}
       data-ready-ms={readyMs ?? ''}
       data-input={paused ? 'paused' : 'live'}
@@ -258,6 +264,7 @@ export function GodotStage() {
           <FacilityWidget
             ref={widgetRef}
             id={openId}
+            latestPost={latestPost}
             onClose={() => {
               setOpenId(null);
               focusWorld();
