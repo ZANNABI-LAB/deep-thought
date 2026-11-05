@@ -47,6 +47,8 @@ test('다른 페이지에 갔다 와도 월드를 다시 띄우지 않고, 숨�
   await expect(stage).toBeVisible();
   await expect.poll(frames, { timeout: 60_000 }).toBeGreaterThan(asleep!);
   expect(await world.evaluate(() => (window as any).__alive)).toBe(true);
+  expect(await page.evaluate(() => document.activeElement?.tagName)).toBe('IFRAME');
+  expect(await world.evaluate(() => document.activeElement?.tagName)).toBe('CANVAS');
 });
 
 test('글 페이지로 바로 들어오면 엔진을 내려받지 않는다', async ({ page }) => {

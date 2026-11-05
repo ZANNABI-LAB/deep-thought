@@ -157,6 +157,13 @@ export function GodotStage({ active, latestPost }: { active: boolean; latestPost
 
   useLayoutEffect(place, [openId, place]);
 
+  // 숨기면 iframe이 포커스를 잃어서 돌아올 때 다시 준다
+  const wasHidden = useRef(false);
+  useEffect(() => {
+    if (active && wasHidden.current) focusWorld();
+    wasHidden.current = !active;
+  }, [active, focusWorld]);
+
   // 월드가 뜨기 전에 페이지를 떠났을 수 있어 준비된 뒤에도 다시 알린다
   useEffect(() => {
     send({ type: active ? 'WAKE_WORLD' : 'SLEEP_WORLD' });
