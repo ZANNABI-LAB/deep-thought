@@ -1,4 +1,5 @@
 import { GoogleAnalytics } from '@next/third-parties/google';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata, Viewport } from 'next';
 import { JetBrains_Mono, Newsreader } from 'next/font/google';
 import { WorldHost } from '@/components/world/WorldHost';
@@ -42,6 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <WorldHost latestPost={latest && { slug: latest.slug, title: latest.title }} />
         {children}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(siteJsonLd) }} />
+        <SpeedInsights />
       </body>
       {process.env.VERCEL_ENV === 'production' && <GoogleAnalytics gaId={GA_ID} />}
     </html>
