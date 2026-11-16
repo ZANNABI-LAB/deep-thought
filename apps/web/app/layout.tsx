@@ -12,6 +12,10 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: { default: 'Deep Thought — A little universe of ideas', template: '%s · Deep Thought' },
   description: '코드, 기술, 책, 그리고 더 깊은 생각까지. Zannabi와 함께 탐험하는 개인 지식 연구소.',
+  verification: {
+    google: 'Rb4p0xrGmuz3tPkebAeRxpWCLbaG5ffXvDn8yoJUQ6c',
+    other: { 'naver-site-verification': 'be210a5940ac2c67d682e36441a60b385f3354a5' },
+  },
 };
 
 export const viewport: Viewport = { themeColor: '#080F1F' };

@@ -372,7 +372,7 @@ Browser
 ```text
 deep-thought/
 ├── apps/
-│   ├── web/                     Next.js 홈(배경 그림 + Godot 월드 + 이름표·시설 위젯)과 글 페이지. public/godot/ 은 Godot 내보내기 결과 (git 제외)
+│   ├── web/                     Next.js 홈(배경 그림 + Godot 월드 + 이름표·시설 위젯)과 글 페이지. public/godot/ 은 Godot 내보내기 결과 (커밋한다)
 │   └── universe-godot/          Godot 4.7 프로젝트
 │       ├── scenes/playground.tscn   홈 월드
 │       ├── scripts/                 playground(배치·웹 메시지), building, prop, rover, zannabi_player/look,
@@ -396,7 +396,7 @@ pnpm --filter @deep-thought/web build
 ```
 
 - Godot 템플릿: `~/.local/share/godot/export_templates/4.7.2.stable` (웹만).
-- 배포 시 `public/godot/`을 CI에서 만들거나 별도 저장소에 올리는 방식은 미정.
+- 배포: Vercel(`apps/web` 루트)이 Next만 빌드한다. `public/godot/`은 월드를 바꿀 때 로컬에서 다시 내보내 커밋한다. `index.wasm`(엔진, 약 40MB)은 Godot 버전이 같으면 내용이 같아 git에 한 번만 저장되고, 내보낼 때마다 바뀌는 건 `index.pck`(약 7MB)다.
 
 ### 9.4 테스트와 QA
 
@@ -446,7 +446,6 @@ pnpm --filter @deep-thought/web build
 
 | 항목 | 상태 |
 | --- | --- |
-| `public/godot/` 배포 방식 | 배포 전 결정 |
 | 배경 그림 해상도 | 1672×940. 큰 화면에서 흐리면 2560 이상으로 다시 받기 |
 | vault 연동 정책 | 보류 |
 | Ask Deep Thought 범위 | 보류. 지금은 준비 중 패널만 둔다. 단순 검색 → RAG 범위 결정 |

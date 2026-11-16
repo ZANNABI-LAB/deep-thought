@@ -23,7 +23,7 @@ docs/                설계 문서와 콘셉트 이미지
 
 ```bash
 pnpm install
-# Godot 월드를 웹으로 내보내기 (apps/web/public/godot/, git 제외)
+# Godot 월드를 웹으로 내보내기 (apps/web/public/godot/, 배포용으로 커밋한다)
 godot --headless --path apps/universe-godot --export-release "Web" ../web/public/godot/index.html
 pnpm dev          # http://localhost:3000
 pnpm test         # 단위 테스트

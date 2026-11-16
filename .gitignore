@@ -12,7 +12,5 @@ test-results/
 art/build/
 *.tsbuildinfo
 .tripo/
-# Godot 웹 빌드 결과물 (apps/universe-godot에서 내보낸다)
-apps/web/public/godot/
 art/models/
 __pycache__/
