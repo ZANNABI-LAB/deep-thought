@@ -14,3 +14,4 @@ art/build/
 .tripo/
 art/models/
 __pycache__/
+.vercel

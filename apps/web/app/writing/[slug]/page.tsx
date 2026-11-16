@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { AUTHOR, jsonLdScript, OG_IMAGE, OPEN_GRAPH_BASE, SITE_URL } from '@/lib/site';
 import { formatDate, getPost, getPosts } from '@/lib/writing';
 import styles from './page.module.css';
 
@@ -22,7 +23,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: post.title,
     description: post.summary,
     alternates: { canonical: `/writing/${slug}` },
-    openGraph: { type: 'article', title: post.title, description: post.summary, publishedTime: post.date.toISOString() },
+    openGraph: {
+      ...OPEN_GRAPH_BASE,
+      type: 'article',
+      url: `/writing/${slug}`,
+      title: post.title,
+      description: post.summary,
+      publishedTime: post.date.toISOString(),
+      authors: [AUTHOR.name],
+      tags: post.tags,
+    },
   };
 }
 
@@ -37,11 +47,16 @@ export default async function PostPage({ params }: Props) {
     headline: post.title,
     description: post.summary,
     datePublished: post.date.toISOString(),
+    url: `${SITE_URL}/writing/${post.slug}`,
+    inLanguage: 'ko',
+    keywords: post.tags,
+    author: { '@type': 'Person', name: AUTHOR.name, url: SITE_URL },
+    image: `${SITE_URL}${OG_IMAGE.url}`,
   };
 
   return (
     <article>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }} />
       <Link href="/writing" className={`${styles.back} mono`}>
         &lt; Writing
       </Link>

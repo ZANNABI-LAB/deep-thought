@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { OPEN_GRAPH_BASE, RSS_ALTERNATE } from '@/lib/site';
 import { formatDate, getPosts } from '@/lib/writing';
 import styles from './page.module.css';
 
@@ -8,7 +9,8 @@ const DESCRIPTION = '배우고 이해한 것을 기록합니다.';
 export const metadata: Metadata = {
   title: 'Writing',
   description: DESCRIPTION,
-  alternates: { canonical: '/writing' },
+  alternates: { canonical: '/writing', types: RSS_ALTERNATE },
+  openGraph: { ...OPEN_GRAPH_BASE, title: 'Writing', description: DESCRIPTION, url: '/writing' },
 };
 
 export default function WritingPage() {
