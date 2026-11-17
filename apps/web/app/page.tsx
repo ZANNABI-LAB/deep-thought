@@ -1,8 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { SpaceBackdrop } from '@/components/space/SpaceBackdrop';
-import { ShootingStars } from '@/components/space/ShootingStars';
-import { WindowFrame } from '@/components/space/WindowFrame';
+import { SpaceScene } from '@/components/space/SpaceScene';
 import { RSS_ALTERNATE, SITE_DESCRIPTION, SITE_NAME } from '@/lib/site';
 import styles from './page.module.css';
 
@@ -14,9 +12,7 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <main className={styles.home}>
-      <SpaceBackdrop />
-      <ShootingStars />
-      <WindowFrame />
+      <SpaceScene />
       <div className={styles.hidden}>
         <h1>{SITE_NAME}</h1>
         <p>{SITE_DESCRIPTION}</p>

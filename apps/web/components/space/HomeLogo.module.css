@@ -1,0 +1,95 @@
+/* 창 유리 가운데에서 조금 위. --glass-*·--px는 SpaceScene이 창틀에 맞춰 넣어 준다 */
+.wrap {
+  position: absolute;
+  top: var(--glass-top);
+  right: var(--glass-right);
+  bottom: var(--glass-bottom);
+  left: var(--glass-left);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: calc(var(--px) * 60);
+  pointer-events: none;
+}
+
+.art {
+  position: relative;
+  width: calc(var(--px) * 420);
+  height: calc(var(--px) * 202);
+  clip-path: inset(0 0 100% 0);
+}
+
+/* 등장: 위에서 아래로 한 줄씩 그려진다 */
+.art[data-shown] {
+  animation: draw 900ms steps(34, end) forwards;
+}
+
+@keyframes draw {
+  to {
+    clip-path: inset(0);
+  }
+}
+
+.base {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.base,
+.sparkle,
+.planet {
+  image-rendering: pixelated;
+}
+
+.sparkle,
+.planet {
+  position: absolute;
+  background-repeat: no-repeat;
+}
+
+/* 반짝이: 픽셀답게 밝기가 단계로 툭툭 바뀐다 */
+.sparkle {
+  animation: twinkle 3s steps(1, end) infinite;
+}
+
+@keyframes twinkle {
+  0%,
+  70%,
+  100% {
+    opacity: 1;
+  }
+  78% {
+    opacity: 0.2;
+  }
+  86% {
+    opacity: 0.6;
+  }
+}
+
+/* 토성: 1~2도트씩 위아래로 */
+.planet {
+  animation: bob 4.2s steps(2, jump-none) infinite;
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(calc(var(--px) * -2));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .art,
+  .art[data-shown] {
+    clip-path: none;
+    animation: none;
+  }
+  .sparkle,
+  .planet {
+    animation: none;
+  }
+}

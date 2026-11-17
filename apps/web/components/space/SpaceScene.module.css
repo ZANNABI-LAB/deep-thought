@@ -1,0 +1,61 @@
+/* 전원 켜기 순서: 어두운 창틀 등장 → (전원) 표시등 지지직 → 실내 밝기 → 창밖 → HUD */
+.scene {
+  position: absolute;
+  inset: 0;
+  background: #000;
+}
+
+.space,
+.frame {
+  position: absolute;
+  inset: 0;
+}
+
+.space {
+  opacity: 0;
+  transition: opacity 1400ms ease-in-out 700ms;
+}
+
+.frame {
+  opacity: 0;
+  filter: brightness(0.4);
+  transition:
+    opacity 400ms ease-out,
+    filter 700ms ease-out 250ms;
+}
+
+.hud {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 300ms ease-out;
+  pointer-events: none;
+}
+
+.hud > * {
+  pointer-events: auto;
+}
+
+.scene[data-hud] .hud {
+  opacity: 1;
+}
+
+.scene[data-frame] .frame {
+  opacity: 1;
+}
+
+.scene[data-powered] .space {
+  opacity: 1;
+}
+
+.scene[data-powered] .frame {
+  filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .space,
+  .frame,
+  .hud {
+    transition: none;
+  }
+}

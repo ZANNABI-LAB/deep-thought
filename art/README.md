@@ -1,11 +1,11 @@
 # art — 기준 그림
 
-홈 콘셉트(우주선 창 + HUD)와 Zannabi, 로고의 기준 그림을 둔다. 쓰임은 [docs/DESIGN.md §1](../docs/DESIGN.md).
+홈 시안·창틀·로고와 Zannabi, 파비콘의 기준 그림을 둔다. 쓰임은 [docs/DESIGN.md §1](../docs/DESIGN.md).
 
 ```text
 art/refs/
-  concept/cockpit-gpt-v2.png       홈 콘셉트 (GPT). Zannabi 모습은 잘못 그려졌다
-  concept/cockpit-gpt-v1.png       같은 콘셉트의 앞선 시안
+  concept/home-gpt-v3.png          홈 시안 (ChatGPT). Zannabi 모습은 기준과 다르다
+  concept/logo-gpt-v1.png          홈 로고 원본 (ChatGPT, 1808×870, 검정 배경)
   concept/window-frame-gpt-v2.png  창틀 원본 (ChatGPT, 1672×941, 창 안쪽 투명)
   deep-thought-terminal-gpt-v1.png Zannabi 모습 기준 (유리 헬멧)
   zannabi-v5-turnaround.png        Zannabi 4방향 (헬멧 없는 몸)
@@ -16,6 +16,7 @@ art/refs/
   logo-mark-gpt-v2.png             파비콘
 art/scripts/
   logo_mark.py                     GPT 흑백 그림 → 웹 SVG(public/brand/)·파비콘(app/icon.png). potrace 필요
+  logo.py                          로고 원본 → public/brand/home-logo*.png (바탕·반짝이·토성)
   window_frame.py                  창틀 원본 → public/world/window-frame.png·window-lights.png + 이음·불빛 위치(JSON 출력을 WindowFrame.tsx에 옮긴다)
 ```
 
