@@ -6,8 +6,7 @@
     "dev": "turbo run dev --filter=@deep-thought/web",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
-    "test": "turbo run test",
-    "e2e": "pnpm --filter @deep-thought/web e2e"
+    "test": "turbo run test"
   },
   "devDependencies": {
     "turbo": "^2.5.0",

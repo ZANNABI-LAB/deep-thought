@@ -1,25 +1,22 @@
 import type { Metadata } from 'next';
-import { SiteHeader } from '@/components/SiteHeader';
-import { AskPanel } from '@/components/home/AskPanel';
-import { Hero } from '@/components/home/Hero';
-import { RSS_ALTERNATE } from '@/lib/site';
+import Link from 'next/link';
+import { RSS_ALTERNATE, SITE_DESCRIPTION, SITE_NAME } from '@/lib/site';
 import styles from './page.module.css';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/', types: RSS_ALTERNATE },
 };
 
-/** 월드는 루트 레이아웃의 WorldHost가 띄운다. 섬은 히어로(data-safe="left")와 패널(data-safe="right") 사이에 맞춰진다 */
+/** 새 홈(우주선 창 + HUD)을 만드는 동안은 창밖 우주 배경만 둔다. 글자는 검색·낭독기용 */
 export default function Home() {
   return (
-    <div className={styles.home}>
-      <div className={styles.ui}>
-        <SiteHeader current="/" />
-        <Hero />
-        <aside className={styles.panel} data-safe="right">
-          <AskPanel />
-        </aside>
+    <main className={styles.home}>
+      <div className={styles.space} aria-hidden="true" />
+      <div className={styles.hidden}>
+        <h1>{SITE_NAME}</h1>
+        <p>{SITE_DESCRIPTION}</p>
+        <Link href="/writing">Writing</Link>
       </div>
-    </div>
+    </main>
   );
 }

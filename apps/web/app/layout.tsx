@@ -2,9 +2,7 @@ import { GoogleAnalytics } from '@next/third-parties/google';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata, Viewport } from 'next';
 import { JetBrains_Mono, Newsreader } from 'next/font/google';
-import { WorldHost } from '@/components/world/WorldHost';
 import { AUTHOR, GA_ID, jsonLdScript, OPEN_GRAPH_BASE, RSS_ALTERNATE, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site';
-import { getPosts } from '@/lib/writing';
 import './globals.css';
 
 const jetbrains = JetBrains_Mono({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-jetbrains' });
@@ -35,12 +33,9 @@ const siteJsonLd = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const [latest] = getPosts();
-
   return (
     <html lang="ko" className={`${jetbrains.variable} ${newsreader.variable}`}>
       <body>
-        <WorldHost latestPost={latest && { slug: latest.slug, title: latest.title }} />
         {children}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(siteJsonLd) }} />
         <SpeedInsights />

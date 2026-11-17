@@ -17,9 +17,6 @@ importers:
 
   apps/web:
     dependencies:
-      '@deep-thought/contracts':
-        specifier: workspace:*
-        version: link:../../packages/contracts
       '@mdx-js/loader':
         specifier: ^3.1.1
         version: 3.1.1
@@ -28,7 +25,7 @@ importers:
         version: 3.1.1(@types/react@19.3.0)(react@19.3.1)
       '@next/mdx':
         specifier: ^16.4.3
-        version: 16.4.3(@mdx-js/loader@3.1.1)(@mdx-js/react@3.1.1(@types/react@19.3.0)(react@19.3.1))
+        version: 16.4.6(@mdx-js/loader@3.1.1)(@mdx-js/react@3.1.1(@types/react@19.3.0)(react@19.3.1))
       '@next/third-parties':
         specifier: 16.4.3
         version: 16.4.3(next@16.4.3(@playwright/test@1.64.1)(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react@19.3.1)
@@ -69,9 +66,6 @@ importers:
         specifier: ^4.6.7
         version: 4.6.7
     devDependencies:
-      '@playwright/test':
-        specifier: ^1.56.0
-        version: 1.64.1
       '@types/mdx':
         specifier: ^2.0.14
         version: 2.0.14
@@ -89,15 +83,6 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.7
-        version: 3.2.7(@types/debug@4.1.13)(@types/node@24.19.2)
-
-  packages/contracts:
-    devDependencies:
-      typescript:
-        specifier: ^5.9.0
-        version: 5.9.3
-      vitest:
-        specifier: ^3.2.0
         version: 3.2.7(@types/debug@4.1.13)(@types/node@24.19.2)
 
 packages:
@@ -453,8 +438,8 @@ packages:
   '@next/env@16.4.3':
     resolution: {integrity: sha512-a7tz1QCcWWkwC/rPJcPMJk/UNRu9CFhDd3OHYE5hddbJrs8BqRTalxI6GlKCWEGzRLHN+S/B7a4PAHCtm25aBQ==}
 
-  '@next/mdx@16.4.3':
-    resolution: {integrity: sha512-N86fgGEVCoB0ULnWlmRZcaZnZD5sLmBkZt4CAPxy0b04qpwimlCdhA6MnwdnJBqmByl2OEKHpQt/GpJRz3UUwQ==}
+  '@next/mdx@16.4.6':
+    resolution: {integrity: sha512-WELJwv8gAoBZMYN2z3tUh9984srudBaW3H2uha78aE4JB6NmDkasbH1MredTRb3xSIzNL4tuvEODUR/F+8wdCQ==}
     peerDependencies:
       '@mdx-js/loader': '>=0.15.0'
       '@mdx-js/react': '>=0.15.0'
@@ -1904,7 +1889,7 @@ snapshots:
 
   '@next/env@16.4.3': {}
 
-  '@next/mdx@16.4.3(@mdx-js/loader@3.1.1)(@mdx-js/react@3.1.1(@types/react@19.3.0)(react@19.3.1))':
+  '@next/mdx@16.4.6(@mdx-js/loader@3.1.1)(@mdx-js/react@3.1.1(@types/react@19.3.0)(react@19.3.1))':
     dependencies:
       source-map: 0.7.6
     optionalDependencies:
@@ -1944,6 +1929,7 @@ snapshots:
   '@playwright/test@1.64.1':
     dependencies:
       playwright: 1.64.1
+    optional: true
 
   '@rollup/rollup-android-arm-eabi@4.66.0':
     optional: true
@@ -3019,11 +3005,13 @@ snapshots:
 
   picomatch@4.0.7: {}
 
-  playwright-core@1.64.1: {}
+  playwright-core@1.64.1:
+    optional: true
 
   playwright@1.64.1:
     dependencies:
       playwright-core: 1.64.1
+    optional: true
 
   postcss@8.5.23:
     dependencies:
