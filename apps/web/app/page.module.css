@@ -4,12 +4,6 @@
   background: var(--space);
 }
 
-.space {
-  position: absolute;
-  inset: 0;
-  background: url('/world/space-bg.webp') center / cover no-repeat;
-}
-
 .hidden {
   position: absolute;
   width: 1px;
