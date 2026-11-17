@@ -1,6 +1,0 @@
-[gd_scene format=3]
-
-[ext_resource type="Script" path="res://tools/path_guide.gd" id="1"]
-
-[node name="PathGuide" type="Node"]
-script = ExtResource("1")

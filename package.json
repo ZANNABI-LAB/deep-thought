@@ -7,10 +7,7 @@
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "e2e": "pnpm --filter @deep-thought/web e2e",
-    "art:building": "bash art/scripts/build_godot_building.sh",
-    "art:zannabi": "bash art/scripts/build_godot_zannabi_v3.sh",
-    "art:prop": "bash art/scripts/build_godot_prop.sh"
+    "e2e": "pnpm --filter @deep-thought/web e2e"
   },
   "devDependencies": {
     "turbo": "^2.5.0",
