@@ -1,95 +1,32 @@
-"""홈 로고 GPT 그림 → 420×202 픽셀 아트 PNG 세 장(바탕·반짝이·토성). 좌표는 HomeLogo.tsx와 맞춘다.
+"""홈 로고 GPT 그림(검정 배경) → 배경을 투명하게 뺀 WebP 여러 폭.
 
-python3 art/scripts/logo.py art/refs/concept/logo-gpt-v1.png apps/web/public/brand
+python3 art/scripts/logo.py art/refs/concept/logo-gpt-v2.png apps/web/public/brand
 """
 
-import json
 import sys
-from collections import deque
 from pathlib import Path
 
 import numpy as np
 from PIL import Image
 
-WIDTH = 420
-CREAM = (250, 232, 188)
-PURPLE = (154, 126, 176)
-BACKGROUND = (0, 0, 0)
-
-# 이 상자 안에 통째로 들어가는 덩어리만 그 조각이 된다
-SPARKLE_BOXES = [
-    (61, 25, 7, 10),  # 위 문구 왼쪽 마름모
-    (353, 25, 7, 10),  # 위 문구 오른쪽 마름모
-    (81, 57, 14, 15),
-    (94, 78, 7, 7),
-    (37, 141, 14, 14),
-    (368, 81, 15, 15),
-    (319, 64, 6, 7),  # 토성 옆 작은 별
-]
-PLANET_BOX = (316, 61, 47, 28)
-# 작은 문구는 늘리면 깨져서 웹 글자로 쓴다
-TEXT_ROWS = [(20, 42), (165, 202)]
-
-
-def pixelate(src: Image.Image) -> np.ndarray:
-    height = round(src.height * WIDTH / src.width)
-    small = np.asarray(src.convert('RGB').resize((WIDTH, height), Image.BOX)).astype(float)
-    colors = np.array([CREAM, PURPLE, BACKGROUND], float)
-    nearest = ((small[:, :, None, :] - colors[None, None]) ** 2).sum(-1).argmin(-1)
-    out = np.zeros((height, WIDTH, 4), np.uint8)
-    out[..., :3] = colors[nearest]
-    out[..., 3] = np.where(nearest == 2, 0, 255)
-    return out
-
-
-def components(opaque: np.ndarray) -> list[tuple[tuple[int, int, int, int], list[tuple[int, int]]]]:
-    """8방향으로 이어진 덩어리마다 (상자, 픽셀들)"""
-    h, w = opaque.shape
-    seen = np.zeros_like(opaque)
-    found = []
-    for y, x in zip(*np.where(opaque)):
-        if seen[y, x]:
-            continue
-        seen[y, x] = True
-        queue, pixels = deque([(y, x)]), []
-        while queue:
-            cy, cx = queue.popleft()
-            pixels.append((cy, cx))
-            for ny in range(cy - 1, cy + 2):
-                for nx in range(cx - 1, cx + 2):
-                    if 0 <= ny < h and 0 <= nx < w and opaque[ny, nx] and not seen[ny, nx]:
-                        seen[ny, nx] = True
-                        queue.append((ny, nx))
-        ys, xs = zip(*pixels)
-        found.append(((min(xs), min(ys), max(xs) - min(xs) + 1, max(ys) - min(ys) + 1), pixels))
-    return found
-
-
-def inside(box: tuple[int, int, int, int], outer: tuple[int, int, int, int]) -> bool:
-    x, y, w, h = box
-    ox, oy, ow, oh = outer
-    return ox <= x and oy <= y and x + w <= ox + ow and y + h <= oy + oh
+INKS = np.array([(250, 232, 188), (157, 116, 211)], float)  # 크림, 라벤더
+WIDTHS = [630, 1260, 1808]  # HomeLogo.tsx srcSet과 같다
 
 
 def main() -> None:
-    src, out_dir = sys.argv[1], Path(sys.argv[2])
-    px = pixelate(Image.open(src))
-    base, sparkles, planet = px.copy(), np.zeros_like(px), np.zeros_like(px)
-    for box, pixels in components(px[..., 3] > 0):
-        if any(inside(box, s) for s in SPARKLE_BOXES):
-            layer = sparkles
-        elif inside(box, PLANET_BOX):
-            layer = planet
-        else:
-            continue
-        for y, x in pixels:
-            layer[y, x] = px[y, x]
-            base[y, x] = 0
-    for top, bottom in TEXT_ROWS:
-        base[top:bottom] = 0
-    for name, layer in (('home-logo', base), ('home-logo-sparkles', sparkles), ('home-logo-planet', planet)):
-        Image.fromarray(layer, 'RGBA').save(out_dir / f'{name}.png', optimize=True)
-    print(json.dumps({'size': [WIDTH, px.shape[0]], 'sparkles': SPARKLE_BOXES, 'planet': PLANET_BOX}))
+    src, out_dir = Image.open(sys.argv[1]).convert('RGB'), Path(sys.argv[2])
+    p = np.asarray(src).astype(float)
+    # 검정 위에 섞인 색 = α·잉크. 잉크마다 α를 투영으로 구하고 잔차가 작은 쪽을 고른다
+    alphas = np.clip((p @ INKS.T) / (INKS**2).sum(1), 0, 1)
+    residual = ((p[:, :, None, :] - alphas[..., None] * INKS[None, None]) ** 2).sum(-1)
+    ink = residual.argmin(-1)
+    alpha = np.take_along_axis(alphas, ink[..., None], -1)[..., 0]
+    alpha = np.where(alpha < 0.06, 0, np.where(alpha > 0.94, 1, alpha))
+    logo = Image.fromarray(np.dstack([INKS[ink], alpha * 255]).round().astype(np.uint8), 'RGBA')
+    for width in WIDTHS:
+        size = (width, round(src.height * width / src.width))
+        img = logo if size == logo.size else logo.resize(size, Image.LANCZOS)
+        img.save(out_dir / f'home-logo-{width}.webp', lossless=True, method=6)
 
 
 if __name__ == '__main__':

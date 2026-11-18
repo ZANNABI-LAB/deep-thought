@@ -5,6 +5,7 @@
   right: var(--glass-right);
   bottom: var(--glass-bottom);
   left: var(--glass-left);
+  container-type: size;
   display: grid;
   grid-template-columns: 1fr minmax(380px, 31%);
   column-gap: 4%;
@@ -13,8 +14,8 @@
 
 .logo {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-bottom: 6%;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 21cqh 0 0 16%;
   pointer-events: none;
 }
