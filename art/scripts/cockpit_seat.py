@@ -7,7 +7,6 @@ from PIL import Image
 
 TOLERANCE = 30
 SCALE = 0.42 * 1.12
-GAP = 44
 
 
 def cutout(img: Image.Image) -> Image.Image:
@@ -40,17 +39,10 @@ def split(img: Image.Image) -> tuple[Image.Image, Image.Image]:
 def main() -> None:
     src, out = Path(sys.argv[1]), Path(sys.argv[2])
     seat = cutout(Image.open(src))
-    chair, console = split(seat.crop(seat.getbbox()))
-    gap = int(np.where(~(np.asarray(seat.crop(seat.getbbox()))[..., 3] > 40).any(0))[0].size)
-    size = lambda im: (round(im.width * SCALE), round(im.height * SCALE))
-    chair, console = chair.resize(size(chair), Image.LANCZOS), console.resize(size(console), Image.LANCZOS)
-    width = chair.width + round(gap * SCALE) + GAP + console.width
-    height = max(chair.height, console.height)
-    sheet = Image.new('RGBA', (width, height))
-    sheet.alpha_composite(chair, (0, height - chair.height))
-    sheet.alpha_composite(console, (width - console.width, height - console.height))
-    sheet.save(out, lossless=True, method=6)
-    print(out.name, sheet.size, 'chair', chair.size, 'console', console.size)
+    chair, _ = split(seat.crop(seat.getbbox()))
+    chair = chair.resize((round(chair.width * SCALE), round(chair.height * SCALE)), Image.LANCZOS)
+    chair.save(out, lossless=True, method=6)
+    print(out.name, chair.size)
 
 
 if __name__ == '__main__':

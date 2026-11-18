@@ -5,6 +5,7 @@ import styles from './Zannabi.module.css';
 
 const CELL_W = 200;
 const CELL_H = 240;
+const BODY_HALF = 64;
 const CLIPS: Record<Clip, { frames: number; fps: number; ease?: boolean; advance?: number[]; lead?: number; tail?: number; seated?: boolean }> = {
   idle: { frames: 17, fps: 10 },
   turn: { frames: 7, fps: 11, lead: 1, advance: [0, 0, 1, 2, 4, 6, 8] },
@@ -28,20 +29,22 @@ const CLIPS: Record<Clip, { frames: number; fps: number; ease?: boolean; advance
   stand: { frames: 23, fps: 11, ease: true, seated: true },
 };
 const WALK_ENTRY = 7;
-const travel = (clip: Clip) => (CLIPS[clip].advance ?? []).reduce((sum, d) => sum + d, 0);
+const sum = (list: number[] = []) => list.reduce((total, d) => total + d, 0);
+const travel = (clip: Clip) => sum(CLIPS[clip].advance);
 const STRIDE = travel('walk');
 const STOP = travel('turn-stop');
-const TRIP = travel('turn') + (CLIPS.walk.advance ?? []).slice(WALK_ENTRY).reduce((sum, d) => sum + d, 0) + STOP;
+const TRIP = travel('turn') + sum(CLIPS.walk.advance?.slice(WALK_ENTRY)) + STOP;
 const AROUND = travel('turn-around');
 const SEAT_EDGE = 1;
 const SEAT_BODY = 42;
 const PACE: [number, number] = [0.8, 1.25];
 const READS: Clip[] = ['read', 'read-nod'];
-const SEAT_LIGHTS: [number, number, number, number, 'amber' | 'violet', number][] = [
-  [295, 26, 12, 7, 'amber', 0],
-  [287, 99, 9, 5, 'amber', 700],
-  [299, 99, 9, 5, 'amber', 1400],
-  [267, 95, 11, 9, 'violet', 300],
+const DESK_W = 554;
+const DESK_H = 305;
+const DESK_LIGHTS: [number, number, number, number, 'amber' | 'violet', number][] = [
+  [64, 44, 22, 14, 'violet', 300],
+  [249, 116, 21, 14, 'amber', 0],
+  [281, 116, 21, 14, 'amber', 1200],
 ];
 const REST_MS: [number, number] = [3000, 8000];
 const MIN_TRIP = 0.25;
@@ -105,8 +108,6 @@ const WEIGHTS: [Behavior, number][] = [
   ['hop', 6],
 ];
 
-const src = (clip: Clip) => `/world/zannabi-${clip}.webp`;
-
 function pick(previous: Behavior | null): Behavior {
   const options = WEIGHTS.filter(([b]) => b === 'walk' || b !== previous);
   let roll = Math.random() * options.reduce((sum, [, w]) => sum + w, 0);
@@ -124,42 +125,47 @@ export function Zannabi() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const lane = laneRef.current;
-    const seat = seatRef.current;
-    const body = bodyRef.current;
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    if (!lane || !seat || !body || !canvas || !ctx) return;
+    const lane = laneRef.current!;
+    const seat = seatRef.current!;
+    const body = bodyRef.current!;
+    const canvas = canvasRef.current!;
+    const ctx = canvas.getContext('2d')!;
+    const hud = lane.parentElement!;
+    const logo = hud.querySelector<HTMLElement>('[data-zannabi-anchor] img')!;
 
-    const images = new Map<Clip, HTMLImageElement>();
-    for (const clip of Object.keys(CLIPS) as Clip[]) {
-      const img = new Image();
-      img.src = src(clip);
-      img
-        .decode()
-        .then(() => images.set(clip, img))
-        .catch(() => {});
-    }
+    const images = new Map(
+      (Object.keys(CLIPS) as Clip[]).map((clip) => {
+        const img = new Image();
+        img.src = `/world/zannabi-${clip}.webp`;
+        return [clip, img];
+      }),
+    );
 
     let width = 0;
     let margin = 0;
     let scale = 1;
     let seatX = 0;
+    let x = 0;
+    let target = 0;
+    let drawn = '';
     const measure = () => {
       const dpr = devicePixelRatio;
       canvas.width = Math.round(canvas.clientWidth * dpr);
       canvas.height = Math.round(canvas.clientHeight * dpr);
-      margin = canvas.clientWidth / 4;
-      width = Math.max(0, lane.clientWidth - margin * 2);
+      ctx.imageSmoothingQuality = 'high';
+      drawn = '';
+      lane.style.width = `${(logo.offsetLeft + logo.offsetWidth / 2) * 2}px`;
       scale = canvas.clientHeight / CELL_H;
-      seatX = parseFloat(getComputedStyle(seat).left) - (SEAT_EDGE + SEAT_BODY) * scale + margin;
+      margin = BODY_HALF * scale;
+      width = Math.max(0, lane.clientWidth - margin * 2);
+      seatX = parseFloat(getComputedStyle(seat).left) - (SEAT_EDGE + SEAT_BODY) * scale - margin + canvas.clientWidth / 2;
+      x = Math.min(x, width);
+      target = Math.min(target, width);
     };
     measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(lane);
 
-    let x = width * 0.55;
-    let target = x;
+    x = width * 0.55;
+    target = x;
     let dir = 1;
     let queue: Step[] = [];
     let step: Step | null = null;
@@ -178,19 +184,17 @@ export function Zannabi() {
 
     const paint = () => {
       const current = clip();
-      const img = images.get(current) ?? (current === 'idle' ? undefined : images.get('idle'));
       const shift = CLIPS[current].seated ? SEAT_BODY * scale : 0;
       const left = Math.round((margin + x - canvas.clientWidth / 2 + shift) * devicePixelRatio) / devicePixelRatio;
+      const key = `${current} ${tick} ${left} ${dir}`;
+      if (key === drawn) return;
+      drawn = key;
       body.style.transform = `translateX(${left}px) scaleX(${dir})`;
-      if (!img) return;
-      const frame = img === images.get(current) ? tick : 0;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.imageSmoothingQuality = 'high';
-      ctx.drawImage(img, frame * CELL_W, 0, CELL_W, CELL_H, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(images.get(current)!, tick * CELL_W, 0, CELL_W, CELL_H, 0, 0, canvas.width, canvas.height);
     };
 
     const toSeat = (): Step[] | null => {
-      if (!(['sit', 'stand', ...READS] as Clip[]).every((c) => images.has(c))) return null;
       const d = (seatX - x) / scale;
       const toward = d > 0 ? 1 : -1;
       const before = toward !== dir;
@@ -299,23 +303,35 @@ export function Zannabi() {
 
     const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
     let id = 0;
-    let last = performance.now();
+    let last = 0;
     let acc = 0;
     const loop = (now: number) => {
       acc += Math.min(now - last, 250);
       last = now;
-      if (!still) {
-        let wait = interval();
-        while (acc >= wait) {
-          acc -= wait;
-          advance(now);
-          wait = interval();
-        }
+      let wait = interval();
+      while (acc >= wait) {
+        acc -= wait;
+        advance(now);
+        wait = interval();
       }
       paint();
       id = requestAnimationFrame(loop);
     };
-    id = requestAnimationFrame(loop);
+    let alive = true;
+    let ready = false;
+    const observer = new ResizeObserver(() => {
+      measure();
+      if (ready && still) paint();
+    });
+    observer.observe(hud);
+    observer.observe(logo);
+    Promise.all([...images.values()].map((img) => img.decode())).then(() => {
+      if (!alive) return;
+      ready = true;
+      if (still) return paint();
+      last = performance.now();
+      id = requestAnimationFrame(loop);
+    });
 
     let hover = 0;
     const enter = () => {
@@ -327,6 +343,7 @@ export function Zannabi() {
     canvas.addEventListener('pointerleave', leave);
     canvas.addEventListener('click', greet);
     return () => {
+      alive = false;
       cancelAnimationFrame(id);
       observer.disconnect();
       clearTimeout(hover);
@@ -338,15 +355,18 @@ export function Zannabi() {
 
   return (
     <div ref={laneRef} className={styles.lane} aria-hidden>
-      <div ref={seatRef} className={styles.seat}>
-        <img src="/world/cockpit-seat.webp" alt="" width={338} height={215} />
-        {SEAT_LIGHTS.map(([x, y, w, h, tone, delay]) => (
+      <div className={styles.desk}>
+        <img src="/world/cockpit-desk.webp" alt="" width={DESK_W} height={DESK_H} />
+        {DESK_LIGHTS.map(([x, y, w, h, tone, delay]) => (
           <span
             key={`${x}-${y}`}
             className={styles[tone]}
-            style={{ left: `${(x / 338) * 100}%`, top: `${(y / 215) * 100}%`, width: `${(w / 338) * 100}%`, height: `${(h / 215) * 100}%`, animationDelay: `${delay}ms` }}
+            style={{ left: `${(x / DESK_W) * 100}%`, top: `${(y / DESK_H) * 100}%`, width: `${(w / DESK_W) * 100}%`, height: `${(h / DESK_H) * 100}%`, animationDelay: `${delay}ms` }}
           />
         ))}
+      </div>
+      <div ref={seatRef} className={styles.seat}>
+        <img src="/world/cockpit-chair.webp" alt="" width={169} height={215} />
       </div>
       <div ref={bodyRef} className={styles.body}>
         <canvas ref={canvasRef} className={styles.sprite} />

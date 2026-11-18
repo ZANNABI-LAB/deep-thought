@@ -73,7 +73,7 @@ function place(list: Span[], value: number) {
   return span.at + value - span.from;
 }
 
-export function WindowFrame({ onLayout }: { onLayout?: (layout: GlassLayout) => void }) {
+export function WindowFrame({ onLayout }: { onLayout: (layout: GlassLayout) => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const onLayoutRef = useRef(onLayout);
   onLayoutRef.current = onLayout;
@@ -158,7 +158,7 @@ export function WindowFrame({ onLayout }: { onLayout?: (layout: GlassLayout) => 
         }
       }
       const dpr = devicePixelRatio;
-      onLayoutRef.current?.({
+      onLayoutRef.current({
         left: (left + place(cols, GLASS.left) * scale) / dpr,
         top: (top + place(rows, GLASS.top) * scale) / dpr,
         right: (w - left - place(cols, GLASS.right) * scale) / dpr,
@@ -188,7 +188,7 @@ export function WindowFrame({ onLayout }: { onLayout?: (layout: GlassLayout) => 
     lights.addEventListener('load', draw);
     window.addEventListener('resize', onResize);
     draw();
-    frameId = requestAnimationFrame(tick);
+    if (!still) frameId = requestAnimationFrame(tick);
     return () => {
       frame.removeEventListener('load', draw);
       lights.removeEventListener('load', draw);

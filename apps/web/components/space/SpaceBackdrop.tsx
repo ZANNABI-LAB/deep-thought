@@ -6,7 +6,7 @@ import styles from './SpaceBackdrop.module.css';
 export const POSTER = '/world/space-loop-poster.webp';
 const VIDEO = '/world/space-loop-4k.mp4';
 
-export function SpaceBackdrop({ onReady }: { onReady?: () => void }) {
+export function SpaceBackdrop({ onReady }: { onReady: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const onReadyRef = useRef(onReady);
   onReadyRef.current = onReady;
@@ -15,10 +15,7 @@ export function SpaceBackdrop({ onReady }: { onReady?: () => void }) {
     let alive = true;
     const poster = new Image();
     poster.src = POSTER;
-    poster
-      .decode()
-      .catch(() => {})
-      .then(() => alive && onReadyRef.current?.());
+    poster.decode().finally(() => alive && onReadyRef.current());
 
     const video = videoRef.current;
     const still = matchMedia('(prefers-reduced-motion: reduce), (max-width: 768px)');

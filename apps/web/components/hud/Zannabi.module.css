@@ -2,7 +2,6 @@
   position: absolute;
   left: 0;
   bottom: calc(var(--glass-bottom) * -0.85);
-  width: 63%;
   height: 27.5cqh;
   pointer-events: none;
 }
@@ -12,10 +11,19 @@
   left: 16cqh;
   bottom: 0.69cqh;
   height: 11.7cqh;
-  aspect-ratio: 338 / 215;
+  aspect-ratio: 169 / 215;
 }
 
-.seat img {
+.desk {
+  position: absolute;
+  left: 28.64cqh;
+  bottom: 2cqh;
+  height: 16.63cqh;
+  aspect-ratio: 554 / 305;
+}
+
+.seat img,
+.desk img {
   display: block;
   width: 100%;
   height: 100%;
