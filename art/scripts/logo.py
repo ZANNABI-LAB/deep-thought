@@ -1,10 +1,6 @@
-"""홈 가운데 로고 GPT 그림 → 픽셀 아트 PNG 세 장 (배경 투명): 바탕·반짝이·토성.
+"""홈 로고 GPT 그림 → 420×202 픽셀 아트 PNG 세 장(바탕·반짝이·토성). 좌표는 HomeLogo.tsx와 맞춘다.
 
-python3 art/scripts/logo.py <원본 .png> <출력 폴더>
-원본은 art/refs/concept/logo-gpt-v1.png (1808×870, 검정 배경). 정확한 도트 격자가 없는 GPT 그림이라
-작은 문구의 획(약 4.3px)이 한 칸이 되도록 420px 폭으로 줄이고, 색을 크림·보라·배경 셋에 맞춘다.
-반짝이와 토성은 따로 움직이도록 바탕에서 빼서 각자 한 장에 담는다. 위치는 출력 JSON을
-components/space/HomeLogo.tsx의 SPARKLES·PLANET으로 옮긴다. 화면에서는 창틀 도트와 같은 크기로 키운다.
+python3 art/scripts/logo.py art/refs/concept/logo-gpt-v1.png apps/web/public/brand
 """
 
 import json
@@ -20,7 +16,7 @@ CREAM = (250, 232, 188)
 PURPLE = (154, 126, 176)
 BACKGROUND = (0, 0, 0)
 
-# 따로 움직일 조각이 들어 있는 상자 [x, y, w, h]. 이 안에 통째로 들어가는 덩어리만 그 조각이 된다
+# 이 상자 안에 통째로 들어가는 덩어리만 그 조각이 된다
 SPARKLE_BOXES = [
     (61, 25, 7, 10),  # 위 문구 왼쪽 마름모
     (353, 25, 7, 10),  # 위 문구 오른쪽 마름모
@@ -31,6 +27,8 @@ SPARKLE_BOXES = [
     (319, 64, 6, 7),  # 토성 옆 작은 별
 ]
 PLANET_BOX = (316, 61, 47, 28)
+# 작은 문구는 늘리면 깨져서 웹 글자로 쓴다
+TEXT_ROWS = [(20, 42), (165, 202)]
 
 
 def pixelate(src: Image.Image) -> np.ndarray:
@@ -87,6 +85,8 @@ def main() -> None:
         for y, x in pixels:
             layer[y, x] = px[y, x]
             base[y, x] = 0
+    for top, bottom in TEXT_ROWS:
+        base[top:bottom] = 0
     for name, layer in (('home-logo', base), ('home-logo-sparkles', sparkles), ('home-logo-planet', planet)):
         Image.fromarray(layer, 'RGBA').save(out_dir / f'{name}.png', optimize=True)
     print(json.dumps({'size': [WIDTH, px.shape[0]], 'sparkles': SPARKLE_BOXES, 'planet': PLANET_BOX}))

@@ -3,13 +3,12 @@
 import { useEffect, useRef } from 'react';
 import styles from './ShootingStars.module.css';
 
-/** 배경 그림 좌표계(1280×720). 화면에는 background-size: cover와 같은 방식으로 맞춘다 */
+/** 배경 그림 좌표(1280×720), 화면에는 cover로 맞춘다 */
 const ART = { w: 1280, h: 720 };
 
 const TOP_PLANET = { x: 1020, y: 75, r: 172 + 24 }; // 대기빛 여유 포함
 const BOTTOM_PLANET = { x: -120, y: 1050, r: 558 + 30 };
 
-/** 별똥별이 앞을 지나가면 안 되는 천체 (중심·반지름) */
 const BODIES = [
   TOP_PLANET,
   BOTTOM_PLANET,
@@ -19,10 +18,7 @@ const BODIES = [
   { x: 275, y: 630, r: 16 },
 ];
 
-/**
- * 두 행성이 마주 보는 축. 별똥별은 이 축을 따라 위 행성 쪽에서 아래 행성 쪽으로 떨어지고,
- * 축 양옆의 빈 통로 안에서만 나온다
- */
+// 두 행성을 잇는 축 양옆 빈 통로에서만 떨어진다
 const AXIS = (() => {
   const vx = BOTTOM_PLANET.x - TOP_PLANET.x;
   const vy = BOTTOM_PLANET.y - TOP_PLANET.y;
@@ -35,21 +31,20 @@ const GAP_MS: [number, number] = [7000, 19000];
 const DEMO_GAP_MS: [number, number] = [500, 1100];
 
 type Meteor = {
-  x: number; // 시작점 (그림 좌표)
+  x: number;
   y: number;
-  dx: number; // 단위 방향
+  dx: number;
   dy: number;
-  travel: number; // 머리가 움직이는 거리
-  tail: number; // 꼬리 최대 길이
+  travel: number;
+  tail: number;
   width: number;
-  peak: number; // 최대 밝기 0..1
+  peak: number;
   duration: number;
   start: number;
 };
 
 const rand = (min: number, max: number) => min + Math.random() * (max - min);
 
-/** 선분 a→b와 원 사이 최단 거리가 반지름보다 작으면 겹친다 */
 function hitsBody(ax: number, ay: number, bx: number, by: number) {
   return BODIES.some(({ x, y, r }) => {
     const vx = bx - ax;
@@ -92,7 +87,7 @@ function spawn(now: number): Meteor | null {
   return null;
 }
 
-/** 창밖 우주 위에 가끔 별똥별을 그린다. 반복 영상에 넣으면 같은 자리에서 반복돼 티가 나서 코드로 둔다 */
+// 반복 영상에 넣으면 같은 자리에서 반복돼 티가 나서 코드로 그린다
 export function ShootingStars() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -127,10 +122,9 @@ export function ShootingStars() {
 
     const draw = (m: Meteor, now: number) => {
       const t = (now - m.start) / m.duration;
-      const ease = 1 - (1 - t) ** 2; // 들어올 때 빠르고 끝에서 살짝 느려진다
+      const ease = 1 - (1 - t) ** 2;
       const hx = m.x + m.dx * m.travel * ease;
       const hy = m.y + m.dy * m.travel * ease;
-      // 꼬리는 처음에 자라고, 사라질 때 머리 쪽으로 줄어든다
       const len = m.tail * Math.min(1, t * 3) * (t > 0.7 ? 1 - (t - 0.7) / 0.3 : 1);
       const alpha = m.peak * Math.min(1, t * 6) * (t > 0.55 ? 1 - (t - 0.55) / 0.45 : 1);
       const tx = hx - m.dx * len;
@@ -167,7 +161,6 @@ export function ShootingStars() {
       frame = meteors.length ? requestAnimationFrame(tick) : 0;
     };
 
-    // 별똥별이 없을 때는 프레임을 돌리지 않는다
     const schedule = () => {
       timer = window.setTimeout(() => {
         if (!document.hidden) {

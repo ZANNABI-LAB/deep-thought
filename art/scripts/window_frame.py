@@ -1,12 +1,6 @@
-"""우주선 창틀 GPT 그림 → 2px 격자 픽셀 아트 PNG + 늘이는 이음 위치.
+"""우주선 창틀 GPT 그림 → 2px 격자 창틀·불빛 PNG + 이음 위치(WindowFrame.tsx의 SEAMS·LIGHTS).
 
-python3 art/scripts/window_frame.py <원본 .png> <창틀 .png> <불빛 .png>
-원본은 art/refs/concept/window-frame-gpt-v2.png (1672×941, 창 안쪽 투명).
-1. 2×2 평균으로 836×470 격자에 맞추고, 반투명 경계는 50%에서 자른다.
-2. GPT가 그린 가짜 글자 판 4곳은 줄마다 어두운 색으로 채워 빈 홈으로 만든다.
-3. 색을 줄인다. 면적이 작은 주황 표시등은 따로 줄여야 회색으로 묻히지 않는다.
-4. 주황 표시등은 창틀에서 꺼진 색으로 바꾸고, 켜진 불빛만 따로 불빛 PNG로 뺀다. 웹에서 깜빡이게 한다.
-5. 화면 비율에 맞춰 늘릴 때 복제할 열 2개·행 2개와 불빛 위치를 출력한다 (WindowFrame.tsx의 SEAMS·LIGHTS).
+python3 art/scripts/window_frame.py art/refs/concept/window-frame-gpt-v2.png <창틀 .png> <불빛 .png>
 """
 
 import json

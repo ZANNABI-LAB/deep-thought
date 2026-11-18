@@ -60,7 +60,7 @@
 | --- | --- | --- | --- |
 | 창밖 | 행성 2개, 바위, 성운, 별 | **실사** | 4K 그림을 시작 프레임으로 Kling 3.0 Omni (Frames) 10초 → 4K 업스케일(Bytedance) → 정방향+역방향 이어 붙인 핑퐁 반복(`public/world/space-loop-4k.mp4`, 8.3MB, 데스크톱만). 포스터는 영상 첫 프레임 |
 | 우주선 | 모서리를 깎은 큰 창틀, 창턱 바닥, 깜빡이는 표시등 6곳 | **픽셀 아트** (던전앤파이터 정도 밀도) | GPT 그림 → `window_frame.py`(2px 격자, 48색, 가짜 글자 제거, 불빛 분리) → `WindowFrame.tsx`가 정수배로 그리고 이음 열·행을 복제해 화면 비율에 맞춘다 |
-| 로고 | "A LITTLE UNIVERSE OF IDEAS" / DEEP THOUGHT / "Still computing the answer." | **픽셀 아트** (크림·보라) | GPT 그림 → `logo.py`(420×202, 반짝이·토성 분리) → `HomeLogo.tsx` |
+| 로고 | "A LITTLE UNIVERSE OF IDEAS" / DEEP THOUGHT / "Still computing the answer." | **픽셀 아트** (크림·보라) | GPT 그림 → `logo.py`(420×202, 반짝이·토성 분리, 위아래 작은 문구는 지움) → `HomeLogo.tsx`가 배율대로 늘리고 위치를 기기 픽셀 경계에 맞춘다. 위아래 문구는 픽셀 글꼴 글자로 다시 쓴다(위 12px, 아래 24px) — 그림째 늘리면 획이 깨져 보였다 (2026-11-18) |
 | UI | 메뉴·검색·패널 | 크림·라벤더, 픽셀 테두리 패널 | 웹 코드 |
 | Zannabi | 콕핏에서 생활하는 마스코트 | **픽셀 아트** | 스프라이트 (기준 그림 `deep-thought-terminal-gpt-v1.png`의 모습으로 다시 그린다) |
 
@@ -93,9 +93,10 @@
 | **Zannabi** | 콕핏에서 생활하는 마스코트 | 창밖 보기·걷기·책 읽기. 멈춰 있는 시간을 길게 |
 | **카피라이트** | `© 2026 Deep Thought. All rights reserved.` | 오른쪽 아래에 작게 |
 
-- **로고 크기:** 시안보다 조금 작게 (1080p 기준 시안 약 730px → 600~650px에서 비교해 정한다)
-- **색:** 로고의 크림·보라(라벤더)만. 패널은 어두운 반투명 바탕 + 라벤더 픽셀 테두리
-- **글꼴:** 한글 본문은 Pretendard 우선 검토, 영문 라벨(MISSION LOG·날짜·카테고리)은 픽셀 또는 고정폭. Mission Log 패널로 비교해 정한다 (§10)
+- **로고 크기:** 창 유리 폭의 약 28%. 420px 그림 도트를 기기 픽셀 기준 2배 미만은 0.25배 단위, 그 위는 정수배로 끊는다 (1080p 1.25배 525px). 1.5배(630px)는 사용자가 조금 크다고 했다. 배율마다 원본에서 윤곽을 다듬어 다시 찍는 안도 만들어 봤지만, 계단이 고른 대신 글자 가장자리의 보라색 디테일이 사라져서 사용자가 420px 그림을 늘려 쓰는 쪽을 골랐다. 315px 격자로 다시 뽑는 안은 작은 문구가 뭉개졌다 (2026-11-18)
+- **배치:** `HomeHud`가 유리 영역을 `1fr | minmax(380px, 31%)` 두 칸으로 나눈다. 오른쪽은 패널, 위 96px은 메뉴 줄 자리 (패널은 Mission Log부터 하나씩 만든다)
+- **색:** 로고의 크림 `#FAE8BC`·라벤더 `#9A7EB0`만. 패널은 어두운 반투명 바탕 + 라벤더 픽셀 테두리(창틀 도트 2개 굵기, 모서리 한 칸 깎음 — box-shadow 4방향으로 시험해 봄)
+- **글꼴:** 영문 메뉴·위젯 제목·날짜는 **Fusion Pixel 12**(픽셀 고정폭, 12px 격자라 12·24px로 쓴다. 패널 제목 24px), 한글 제목·설명은 **Pretendard**. Departure Mono는 너무 투박했고, VGA 9×16 계열·Doto·Bitcount·Geist Pixel·Silkscreen·Pixelify Sans·VT323과도 비교했다 (2026-11-18)
 
 ### 3.4 움직임
 
@@ -153,7 +154,8 @@
 | 역할 | 폰트 |
 | --- | --- |
 | 헤드라인 (영문) | Newsreader (세리프) |
-| 홈 UI | 미정: 한글 Pretendard 우선 검토, 영문 라벨은 픽셀·고정폭 (§10) |
+| 홈 UI (영문) | Fusion Pixel 12 라틴 (`--font-hud`, `app/fonts/`, OFL). 라틴 글자만 넣어서 한글은 Pretendard로 나온다 |
+| 홈 UI (한글) | Pretendard |
 | 본문·UI (글 페이지) | Pretendard |
 | 코드·날짜 | JetBrains Mono |
 
@@ -220,7 +222,7 @@ art/                     기준 그림 (art/README.md)
 | 1. 방향 | **완료** | 콘셉트 그림, 시안 D. 홈을 배경만 남기고 정리 |
 | 2. 창밖 | **완료** | Kling 반복 영상(4K 핑퐁), 포스터, 별똥별. 마우스 시차는 보류 |
 | 3. 우주선 | 진행 중 | 창틀·창턱·표시등 완료. 창밖은 화면 전체에 깔고 창틀을 덮는 지금 구도로 확정 |
-| 4. UI | 진행 중 | 로고 완료(연출 포함). 다음: 바탕 정리(색·글꼴·패널) → 메뉴 → Mission Log → Ask 패널 → Arcade 배너·카피라이트 → Command palette |
+| 4. UI | 진행 중 | 로고 완료(연출 포함). 바탕 정리 완료(색 토큰·Fusion Pixel 12+Pretendard·픽셀 테두리 패널·왼쪽 로고 배치). 다음: 메뉴 → Mission Log → Ask 패널 → Arcade 배너·카피라이트 → Command palette |
 | 5. Zannabi | 예정 | 기준 그림 모습의 픽셀 스프라이트. 창밖 보기·걷기·책 읽기 |
 | 6. 새 홈 완성 | 예정 | 모바일, `main` 병합·배포 |
 | 7. Ask · Arcade | 예정 | Ask 범위 결정, Star Patrol·Moon Breaker |
@@ -232,8 +234,6 @@ art/                     기준 그림 (art/README.md)
 
 | 항목 | 상태 |
 | --- | --- |
-| 한글 글꼴 | Pretendard vs 픽셀 한글 글꼴. Mission Log 패널로 비교 |
-| 로고 크기 | 1080p 600~650px에서 비교 |
 | Ask 범위 | 단순 검색 → RAG 중 결정 |
 | 글 페이지 톤 | 남색 유지 vs HUD 톤 일부 반영 |
 

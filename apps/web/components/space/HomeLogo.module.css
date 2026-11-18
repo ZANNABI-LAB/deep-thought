@@ -1,25 +1,10 @@
-/* 창 유리 가운데에서 조금 위. --glass-*·--px는 SpaceScene이 창틀에 맞춰 넣어 준다 */
-.wrap {
-  position: absolute;
-  top: var(--glass-top);
-  right: var(--glass-right);
-  bottom: var(--glass-bottom);
-  left: var(--glass-left);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-bottom: calc(var(--px) * 60);
-  pointer-events: none;
-}
-
 .art {
   position: relative;
-  width: calc(var(--px) * 420);
-  height: calc(var(--px) * 202);
+  width: calc(var(--logo-px) * 420);
+  height: calc(var(--logo-px) * 202);
   clip-path: inset(0 0 100% 0);
 }
 
-/* 등장: 위에서 아래로 한 줄씩 그려진다 */
 .art[data-shown] {
   animation: draw 900ms steps(34, end) forwards;
 }
@@ -48,7 +33,47 @@
   background-repeat: no-repeat;
 }
 
-/* 반짝이: 픽셀답게 밝기가 단계로 툭툭 바뀐다 */
+/* 글꼴 격자(12px)의 정수배 크기만 또렷하다 */
+.kicker,
+.tagline {
+  position: absolute;
+  right: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  color: var(--cream);
+  font-family: var(--font-hud);
+  white-space: nowrap;
+}
+
+.kicker {
+  top: calc(var(--logo-px) * 20);
+  height: calc(var(--logo-px) * 22);
+  gap: 14px;
+  font-size: 12px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+}
+
+/* 마지막 글자 뒤에 붙는 letter-spacing 상쇄 */
+.kickerText {
+  margin-right: -0.4em;
+}
+
+.tagline {
+  top: calc(var(--logo-px) * 165);
+  height: calc(var(--logo-px) * 32);
+  font-size: 24px;
+  letter-spacing: 0.02em;
+}
+
+.diamond {
+  position: relative;
+  flex: none;
+}
+
 .sparkle {
   animation: twinkle 3s steps(1, end) infinite;
 }
@@ -67,7 +92,6 @@
   }
 }
 
-/* 토성: 1~2도트씩 위아래로 */
 .planet {
   animation: bob 4.2s steps(2, jump-none) infinite;
 }
@@ -78,7 +102,7 @@
     transform: translateY(0);
   }
   50% {
-    transform: translateY(calc(var(--px) * -2));
+    transform: translateY(calc(var(--logo-px) * -2));
   }
 }
 

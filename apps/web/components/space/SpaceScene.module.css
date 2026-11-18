@@ -1,4 +1,3 @@
-/* 전원 켜기 순서: 어두운 창틀 등장 → (전원) 표시등 지지직 → 실내 밝기 → 창밖 → HUD */
 .scene {
   position: absolute;
   inset: 0;

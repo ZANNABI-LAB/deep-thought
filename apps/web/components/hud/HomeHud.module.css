@@ -1,0 +1,20 @@
+/* 오른쪽 칸은 패널 자리, 위 96px은 메뉴 줄 자리 */
+.hud {
+  position: absolute;
+  top: var(--glass-top);
+  right: var(--glass-right);
+  bottom: var(--glass-bottom);
+  left: var(--glass-left);
+  display: grid;
+  grid-template-columns: 1fr minmax(380px, 31%);
+  column-gap: 4%;
+  padding: 96px 5% 72px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 6%;
+  pointer-events: none;
+}

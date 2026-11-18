@@ -6,10 +6,7 @@ import styles from './SpaceBackdrop.module.css';
 export const POSTER = '/world/space-loop-poster.webp';
 const VIDEO = '/world/space-loop-4k.mp4';
 
-/**
- * 창밖 우주. 정지 그림을 먼저 깔고, 움직임을 허용한 데스크톱에서만 반복 영상을 받아 재생한다.
- * 정지 그림을 다 받으면 onReady를 부른다
- */
+// 정지 그림을 먼저 깔고, 움직임을 허용한 데스크톱에서만 반복 영상을 재생한다
 export function SpaceBackdrop({ onReady }: { onReady?: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const onReadyRef = useRef(onReady);
@@ -21,7 +18,7 @@ export function SpaceBackdrop({ onReady }: { onReady?: () => void }) {
     poster.src = POSTER;
     poster
       .decode()
-      .catch(() => {}) // 못 받아도 장면은 띄운다
+      .catch(() => {})
       .then(() => alive && onReadyRef.current?.());
 
     const video = videoRef.current;
