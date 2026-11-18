@@ -1,8 +1,3 @@
-"""우주선 창틀 GPT 그림 → 2px 격자 창틀·불빛 PNG + 이음 위치(WindowFrame.tsx의 SEAMS·LIGHTS).
-
-python3 art/scripts/window_frame.py art/refs/concept/window-frame-gpt-v2.png <창틀 .png> <불빛 .png>
-"""
-
 import json
 import sys
 
@@ -13,9 +8,9 @@ W, H = 836, 470
 FAKE_TEXT = [(201, 3, 245, 11), (592, 3, 635, 11), (206, 429, 247, 438), (586, 429, 632, 437)]
 STEEL_COLORS = 40
 WARM_COLORS = 8
-TOP, BOTTOM, SIDE = 22, 406, 48  # 창 안쪽 경계 (대략)
-LIGHT_GAP = 6  # 이만큼 가까운 주황 픽셀은 같은 표시등
-UNLIT = (0.32, 0.22, 0.2)  # 꺼진 표시등 = 켜진 색에 채널별로 곱한다
+TOP, BOTTOM, SIDE = 22, 406, 48
+LIGHT_GAP = 6
+UNLIT = (0.32, 0.22, 0.2)
 
 
 def downscale(src: Image.Image) -> np.ndarray:
@@ -53,7 +48,6 @@ def quantize(px: np.ndarray) -> None:
 
 
 def flatness(lines: np.ndarray) -> np.ndarray:
-    """이웃 줄과의 차이. 작을수록 그 줄을 복제해도 티가 안 난다"""
     d = np.abs(np.diff(lines.astype(int), axis=0)).sum(axis=(1, 2))
     score = np.full(len(lines), np.inf)
     score[1:-1] = d[:-1] + d[1:]
@@ -62,14 +56,13 @@ def flatness(lines: np.ndarray) -> np.ndarray:
 
 def find_seams(px: np.ndarray) -> dict:
     rgb = px[..., :3]
-    cols = np.concatenate([rgb[:TOP], rgb[BOTTOM:]], axis=0).transpose(1, 0, 2)  # 위·아래 띠의 열
-    rows = np.concatenate([rgb[:, :SIDE], rgb[:, W - SIDE :]], axis=1)  # 좌우 띠의 행
+    cols = np.concatenate([rgb[:TOP], rgb[BOTTOM:]], axis=0).transpose(1, 0, 2)
+    rows = np.concatenate([rgb[:, :SIDE], rgb[:, W - SIDE :]], axis=1)
     cs, rs = flatness(cols), flatness(rows)
 
     def best(score: np.ndarray, lo: int, hi: int) -> int:
         return int(lo + np.argmin(score[lo:hi]))
 
-    # 가운데 패널·모서리·좌우 표시등을 피해 양쪽에 하나씩
     return {
         'x': [best(cs, 120, 330), best(cs, W - 330, W - 120)],
         'y': [best(rs, 70, 150), best(rs, 220, 360)],
@@ -77,13 +70,11 @@ def find_seams(px: np.ndarray) -> dict:
 
 
 def split_lights(px: np.ndarray) -> tuple[np.ndarray, list[list[int]]]:
-    """켜진 불빛만 남긴 그림과 표시등마다 [x, y, w, h]. 창틀의 불빛은 꺼진 색으로 바꾼다"""
     warm = warm_mask(px)
     lights = np.zeros_like(px)
     lights[warm] = px[warm]
     px[warm, :3] = (px[warm, :3] * np.array(UNLIT)).round().astype(np.uint8)
 
-    # 픽셀 하나씩 상자로 시작해, 가까운 상자끼리 더 합칠 게 없을 때까지 합친다
     boxes = [[x, y, x, y] for y, x in zip(*np.where(warm))]
     merged = True
     while merged:

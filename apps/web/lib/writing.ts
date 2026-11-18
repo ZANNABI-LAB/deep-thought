@@ -19,7 +19,6 @@ const frontmatter = z.object({
 
 export type Post = z.infer<typeof frontmatter> & { slug: string };
 
-/** 프런트매터가 틀리면 빌드를 멈춘다. 어느 파일인지 바로 보이게 파일 이름을 붙인다 */
 export function parsePost(fileName: string, source: string): Post {
   const slug = fileName.replace(/\.mdx$/, '');
   if (!SLUG.test(slug)) throw new Error(`${fileName}: 파일 이름은 영문 소문자·숫자·하이픈만 쓴다`);
@@ -28,7 +27,6 @@ export function parsePost(fileName: string, source: string): Post {
   return { ...result.data, slug };
 }
 
-/** 최신 글부터. 초안은 개발 서버에서만 보인다. 이름이 _로 시작하는 파일은 글이 아니다 */
 export function getPosts(): Post[] {
   return readdirSync(WRITING_DIR)
     .filter((name) => name.endsWith('.mdx') && !name.startsWith('_'))

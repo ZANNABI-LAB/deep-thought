@@ -3,22 +3,20 @@
 import { useEffect, useRef } from 'react';
 import styles from './ShootingStars.module.css';
 
-/** 배경 그림 좌표(1280×720), 화면에는 cover로 맞춘다 */
 const ART = { w: 1280, h: 720 };
 
-const TOP_PLANET = { x: 1020, y: 75, r: 172 + 24 }; // 대기빛 여유 포함
+const TOP_PLANET = { x: 1020, y: 75, r: 172 + 24 };
 const BOTTOM_PLANET = { x: -120, y: 1050, r: 558 + 30 };
 
 const BODIES = [
   TOP_PLANET,
   BOTTOM_PLANET,
-  { x: 836, y: 94, r: 30 }, // 위 행성 옆 바위들
+  { x: 836, y: 94, r: 30 },
   { x: 893, y: 128, r: 16 },
-  { x: 110, y: 485, r: 24 }, // 왼쪽 바위
+  { x: 110, y: 485, r: 24 },
   { x: 275, y: 630, r: 16 },
 ];
 
-// 두 행성을 잇는 축 양옆 빈 통로에서만 떨어진다
 const AXIS = (() => {
   const vx = BOTTOM_PLANET.x - TOP_PLANET.x;
   const vy = BOTTOM_PLANET.y - TOP_PLANET.y;
@@ -87,7 +85,6 @@ function spawn(now: number): Meteor | null {
   return null;
 }
 
-// 반복 영상에 넣으면 같은 자리에서 반복돼 티가 나서 코드로 그린다
 export function ShootingStars() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 

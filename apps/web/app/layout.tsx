@@ -2,13 +2,10 @@ import { GoogleAnalytics } from '@next/third-parties/google';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata, Viewport } from 'next';
 import { JetBrains_Mono, Newsreader } from 'next/font/google';
-import localFont from 'next/font/local';
 import { AUTHOR, GA_ID, jsonLdScript, OPEN_GRAPH_BASE, RSS_ALTERNATE, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site';
 import './globals.css';
 
 const jetbrains = JetBrains_Mono({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-jetbrains' });
-// 12px 격자 픽셀 글꼴, 라틴 글자만
-const fusionPixel = localFont({ src: './fonts/FusionPixel12-Mono-latin.woff2', variable: '--font-pixel' });
 const newsreader = Newsreader({ subsets: ['latin'], style: ['normal', 'italic'], axes: ['opsz'], variable: '--font-newsreader' });
 
 export const metadata: Metadata = {
@@ -37,7 +34,7 @@ const siteJsonLd = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className={`${jetbrains.variable} ${fusionPixel.variable} ${newsreader.variable}`}>
+    <html lang="ko" className={`${jetbrains.variable} ${newsreader.variable}`}>
       <body>
         {children}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(siteJsonLd) }} />

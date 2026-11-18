@@ -8,7 +8,6 @@ export const metadata: Metadata = {
   alternates: { canonical: '/', types: RSS_ALTERNATE },
 };
 
-/** 새 홈(우주선 창 + HUD)을 만드는 동안은 창밖 우주 배경만 둔다. 글자는 검색·낭독기용 */
 export default function Home() {
   return (
     <main className={styles.home}>

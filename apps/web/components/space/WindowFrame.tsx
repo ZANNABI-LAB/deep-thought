@@ -3,54 +3,35 @@
 import { useEffect, useRef } from 'react';
 import styles from './WindowFrame.module.css';
 
-// 좌표는 art/scripts/window_frame.py 출력 (원본 픽셀)
 export const FRAME_SRC = '/world/window-frame.png';
 export const LIGHTS_SRC = '/world/window-lights.png';
 const ART = { w: 836, h: 470 };
 const SEAMS = { x: [261, 625], y: [127, 334] };
+const SILL: [number, number] = [457, 6];
 const GLASS = { left: 48, top: 22, right: 788, bottom: 407 };
 
-/** CSS px. right·bottom은 화면 끝에서 잰 거리, px는 창틀 도트 하나 */
 export type GlassLayout = { left: number; top: number; right: number; bottom: number; px: number };
 
 type Rect = readonly [x: number, y: number, w: number, h: number];
 
 const STRIPS: { box: Rect; dots: Rect[]; offset: number }[] = [
-  { box: [88, 4, 18, 4], dots: [[88, 4, 4, 4], [94, 4, 5, 4], [102, 4, 4, 4]], offset: 0 }, // 왼쪽 위
-  { box: [731, 5, 18, 3], dots: [[731, 5, 4, 3], [737, 5, 5, 3], [745, 5, 4, 3]], offset: 1100 }, // 오른쪽 위
-  { box: [82, 430, 18, 4], dots: [[82, 430, 4, 4], [88, 430, 5, 4], [96, 430, 4, 4]], offset: 1900 }, // 왼쪽 아래
-  { box: [737, 430, 17, 4], dots: [[737, 430, 4, 4], [743, 430, 5, 4], [751, 430, 3, 4]], offset: 700 }, // 오른쪽 아래
+  { box: [88, 4, 18, 4], dots: [[88, 4, 4, 4], [94, 4, 5, 4], [102, 4, 4, 4]], offset: 0 },
+  { box: [731, 5, 18, 3], dots: [[731, 5, 4, 3], [737, 5, 5, 3], [745, 5, 4, 3]], offset: 1100 },
+  { box: [82, 430, 18, 4], dots: [[82, 430, 4, 4], [88, 430, 5, 4], [96, 430, 4, 4]], offset: 1900 },
+  { box: [737, 430, 17, 4], dots: [[737, 430, 4, 4], [743, 430, 5, 4], [751, 430, 3, 4]], offset: 700 },
 ];
 const BARS: { box: Rect; cells: Rect[]; offset: number }[] = [
-  { box: [13, 165, 6, 32], cells: [[13, 165, 6, 15], [13, 180, 6, 17]], offset: 0 }, // 왼쪽
-  { box: [817, 165, 6, 32], cells: [[817, 165, 6, 15], [817, 180, 6, 17]], offset: 1800 }, // 오른쪽
+  { box: [13, 165, 6, 32], cells: [[13, 165, 6, 15], [13, 180, 6, 17]], offset: 0 },
+  { box: [817, 165, 6, 32], cells: [[817, 165, 6, 15], [817, 180, 6, 17]], offset: 1800 },
 ];
 
 const OFF = 0.15;
 const DOT_MS = 450;
 const ALL_ON_MS = 1100;
 const BREATH_MS = 3600;
-const GLOW = 4; // 원본 픽셀
+const GLOW = 4;
 const GLOW_BLUR = 2;
 const GLOW_RES = 4;
-
-/** [시각(ms), 밝기] */
-const POWER_ON: [number, number][] = [
-  [0, 0.9],
-  [90, OFF],
-  [180, 1],
-  [260, OFF],
-  [420, 1],
-];
-const POWER_ON_MS = 600;
-const POWER_STAGGER_MS = 80;
-
-function powered(t: number, order: number, pattern: (t: number) => number) {
-  const local = t - order * POWER_STAGGER_MS;
-  if (local < 0) return OFF;
-  if (local >= POWER_ON_MS) return pattern(local - POWER_ON_MS);
-  return POWER_ON.reduce((level, [at, l]) => (local >= at ? l : level), OFF);
-}
 
 function stripLevel(t: number, dot: number) {
   const phase = t % (DOT_MS * 3 + ALL_ON_MS);
@@ -65,15 +46,15 @@ function barLevel(t: number, cell: number) {
 
 type Span = { from: number; size: number; to: number; at: number };
 
-/** 이음 줄을 복제해 원본 길이를 target까지 늘린다 */
-function spans(length: number, seams: number[], target: number): Span[] {
-  const extra = Math.max(0, target - length);
+function spans(length: number, seams: number[], target: number, fixed: [number, number] | null = null): Span[] {
+  const extra = Math.max(0, target - length - (fixed?.[1] ?? 0));
   const share = [Math.floor(extra / 2), extra - Math.floor(extra / 2)];
+  const cuts = [...seams.map((at, i) => [at, share[i] ?? 0] as const), ...(fixed ? [fixed] : [])].sort((a, b) => a[0] - b[0]);
   const out: Omit<Span, 'at'>[] = [];
   let prev = 0;
-  seams.forEach((seam, i) => {
+  cuts.forEach(([seam, amount]) => {
     out.push({ from: prev, size: seam - prev, to: seam - prev });
-    out.push({ from: seam, size: 1, to: share[i] ?? 0 });
+    out.push({ from: seam, size: 1, to: amount });
     prev = seam;
   });
   out.push({ from: prev, size: length - prev, to: length - prev });
@@ -92,21 +73,9 @@ function place(list: Span[], value: number) {
   return span.at + value - span.from;
 }
 
-export function WindowFrame({
-  lit,
-  onReady,
-  onLayout,
-}: {
-  lit: boolean;
-  onReady?: () => void;
-  onLayout?: (layout: GlassLayout) => void;
-}) {
+export function WindowFrame({ onLayout }: { onLayout?: (layout: GlassLayout) => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const litRef = useRef(lit);
-  const onReadyRef = useRef(onReady);
   const onLayoutRef = useRef(onLayout);
-  litRef.current = lit;
-  onReadyRef.current = onReady;
   onLayoutRef.current = onLayout;
 
   useEffect(() => {
@@ -123,7 +92,6 @@ export function WindowFrame({
 
     let scale = 1;
     let toScreen = (r: Rect): Rect => r;
-    // 매 프레임 blur는 5fps까지 떨어져서 번짐은 미리 한 번만 흐려 둔다
     const glows = new Map<Rect, HTMLCanvasElement>();
     const glowOf = (rect: Rect) => {
       let glow = glows.get(rect);
@@ -140,8 +108,6 @@ export function WindowFrame({
       }
       return glow;
     };
-    let start = 0;
-
     const paint = (box: Rect, parts: { rect: Rect; level: number }[]) => {
       const pad: Rect = [box[0] - GLOW, box[1] - GLOW, box[2] + GLOW * 2, box[3] + GLOW * 2];
       const [px, py, pw, ph] = toScreen(pad);
@@ -162,16 +128,12 @@ export function WindowFrame({
       ctx.globalAlpha = 1;
     };
 
-    const shine = (now: number) => {
-      const t = now - start;
-      const on = litRef.current;
-      const level = (order: number, pattern: (t: number) => number) =>
-        !on ? OFF : still ? 1 : powered(t, order, pattern);
-      STRIPS.forEach(({ box, dots, offset }, s) => {
-        paint(box, dots.map((rect, i) => ({ rect, level: level(s, (pt) => stripLevel(pt + offset, i)) })));
+    const shine = (t: number) => {
+      STRIPS.forEach(({ box, dots, offset }) => {
+        paint(box, dots.map((rect, i) => ({ rect, level: still ? 1 : stripLevel(t + offset, i) })));
       });
-      BARS.forEach(({ box, cells, offset }, b) => {
-        paint(box, cells.map((rect, i) => ({ rect, level: level(STRIPS.length + b, (pt) => barLevel(pt + offset, i)) })));
+      BARS.forEach(({ box, cells, offset }) => {
+        paint(box, cells.map((rect, i) => ({ rect, level: still ? 1 : barLevel(t + offset, i) })));
       });
     };
 
@@ -181,11 +143,10 @@ export function WindowFrame({
       const h = Math.round(innerHeight * devicePixelRatio);
       canvas.width = w;
       canvas.height = h;
-      // 1080p 1배, 1440p·레티나·4K 2배
       const fit = Math.max(1, Math.min(Math.floor(w / ART.w), Math.floor(h / ART.h)));
       scale = Math.min(fit, Math.max(1, Math.round(Math.min(w / (ART.w * 2), h / (ART.h * 2)))));
       const cols = spans(ART.w, SEAMS.x, Math.ceil(w / scale));
-      const rows = spans(ART.h, SEAMS.y, Math.ceil(h / scale));
+      const rows = spans(ART.h, SEAMS.y, Math.ceil(h / scale), SILL);
       const left = Math.floor((w - cols.reduce((n, c) => n + c.to, 0) * scale) / 2);
       const top = Math.floor((h - rows.reduce((n, r) => n + r.to, 0) * scale) / 2);
       toScreen = ([x, y, rw, rh]) => [left + place(cols, x) * scale, top + place(rows, y) * scale, rw * scale, rh * scale];
@@ -205,16 +166,11 @@ export function WindowFrame({
         px: scale / dpr,
       });
       shine(performance.now());
-      onReadyRef.current?.();
     };
 
     let frameId = 0;
     let last = 0;
-    let wasLit = false;
     const tick = (now: number) => {
-      if (litRef.current && !wasLit) start = now;
-      wasLit = litRef.current;
-      // 20fps
       if (now - last > 50 && ready()) {
         shine(now);
         last = now;

@@ -12,22 +12,16 @@
 
 .space {
   opacity: 0;
-  transition: opacity 1400ms ease-in-out 700ms;
+  transition: opacity 250ms ease-out;
 }
 
-.frame {
-  opacity: 0;
-  filter: brightness(0.4);
-  transition:
-    opacity 400ms ease-out,
-    filter 700ms ease-out 250ms;
+.scene[data-space] .space {
+  opacity: 1;
 }
 
 .hud {
   position: absolute;
   inset: 0;
-  opacity: 0;
-  transition: opacity 300ms ease-out;
   pointer-events: none;
 }
 
@@ -35,26 +29,8 @@
   pointer-events: auto;
 }
 
-.scene[data-hud] .hud {
-  opacity: 1;
-}
-
-.scene[data-frame] .frame {
-  opacity: 1;
-}
-
-.scene[data-powered] .space {
-  opacity: 1;
-}
-
-.scene[data-powered] .frame {
-  filter: none;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .space,
-  .frame,
-  .hud {
+  .space {
     transition: none;
   }
 }

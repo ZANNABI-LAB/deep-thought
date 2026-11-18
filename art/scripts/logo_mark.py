@@ -1,11 +1,3 @@
-"""
-GPT 흑백 로고 그림(검은 바탕 + 흰 선)을 웹용으로 바꾼다. 필요한 도구: Pillow, potrace.
-바깥 검정만 투명하게 지우고 헬멧 안쪽 검정은 남긴다.
-
-사용:
-  python3 art/scripts/logo_mark.py svg art/refs/logo-mark-gpt-v3.png apps/web/public/brand/zannabi-mark.svg
-  python3 art/scripts/logo_mark.py favicon art/refs/logo-mark-gpt-v2.png apps/web/app/icon.png
-"""
 import re
 import subprocess
 import sys
@@ -15,14 +7,12 @@ from pathlib import Path
 from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 PAD = 0.03
-CLOSE = 41  # 끊긴 헬멧 테두리를 잠시 막는 굵기 (1254px 그림 기준, 홀수)
+CLOSE = 41
 FAVICON = 64
 
 
 def masks(src: str) -> tuple[Image.Image, Image.Image]:
-    """(흰 선, 실루엣). 실루엣 = 바깥 검정을 뺀 전체"""
     white = Image.open(src).convert('L').point(lambda v: 255 if v > 128 else 0)
-    # 테두리 틈으로 안쪽 검정이 바깥과 이어지지 않게 흰 선을 굵혀 채운 뒤 같은 만큼 깎는다
     fill = white.filter(ImageFilter.MaxFilter(CLOSE))
     w, h = fill.size
     for corner in [(0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1)]:
@@ -38,7 +28,6 @@ def square(bbox: tuple[int, int, int, int]) -> tuple[float, float, float]:
 
 
 def trace(mask: Image.Image, work: Path, name: str) -> tuple[str, str]:
-    """(transform, path d)"""
     pbm, svg = work / f'{name}.pbm', work / f'{name}.svg'
     mask.point(lambda v: 0 if v else 255).convert('1').save(pbm)
     subprocess.run(['potrace', str(pbm), '-s', '-o', str(svg), '-t', '8', '-a', '1', '-O', '0.4', '--flat'], check=True)
@@ -61,7 +50,6 @@ def build_svg(src: str, out: str) -> None:
 
 
 def build_favicon(src: str, out: str) -> None:
-    """헬멧 덩어리만 꽉 채운다 (반짝이처럼 떨어진 조각은 뺀다)"""
     white, silhouette = masks(src)
     body = silhouette.copy()
     ImageDraw.floodfill(body, (body.width // 2, body.height // 2), 128)
