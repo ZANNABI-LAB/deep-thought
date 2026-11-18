@@ -21,6 +21,10 @@
   height: 100%;
 }
 
+.seat[data-seated] img {
+  visibility: hidden;
+}
+
 .amber,
 .violet {
   position: absolute;
