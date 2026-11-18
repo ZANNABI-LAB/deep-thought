@@ -1,4 +1,3 @@
-/* 오른쪽 칸은 패널 자리, 위 96px은 메뉴 줄 자리 */
 .hud {
   position: absolute;
   top: var(--glass-top);
@@ -8,14 +7,16 @@
   container-type: size;
   display: grid;
   grid-template-columns: 1fr minmax(380px, 31%);
+  grid-template-rows: 80px 1fr;
   column-gap: 4%;
-  padding: 96px 5% 72px;
+  padding: 0 5% 72px;
 }
 
 .logo {
+  grid-area: 2 / 1;
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
-  padding: 21cqh 0 0 16%;
+  padding: 12cqh 0 0 9%;
   pointer-events: none;
 }

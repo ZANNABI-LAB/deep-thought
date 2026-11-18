@@ -1,5 +1,6 @@
 import { HomeLogo } from '@/components/space/HomeLogo';
 import styles from './HomeHud.module.css';
+import { Zannabi } from './Zannabi';
 
 export function HomeHud() {
   return (
@@ -7,6 +8,7 @@ export function HomeHud() {
       <div className={styles.logo}>
         <HomeLogo />
       </div>
+      <Zannabi />
     </div>
   );
 }

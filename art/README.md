@@ -14,9 +14,12 @@ art/refs/
   space/space-bg-v3-4k.webp        위 그림을 Bytedance Image Upscale로 4096×2304 (무손실 WebP)
   logo-mark-gpt-v3.png             헤더 로고 (GPT 흑백)
   logo-mark-gpt-v2.png             파비콘
+  cockpit/seat-gpt-v1.png          조종석(의자+조종간) 원본 (ChatGPT, 1254×1254, 검정 배경)
+  cockpit/seat-reading-gpt-v1.png  조종석에 앉아 읽는 시안 (ChatGPT). 잔나비 비율이 스프라이트와 달라 자세 기준으로는 쓰지 않음
 art/scripts/
   logo_mark.py                     GPT 흑백 그림 → 웹 SVG(public/brand/)·파비콘(app/icon.png). potrace 필요
   logo.py                          로고 원본 → public/brand/home-logo-{630,1260,1808}.webp (배경 투명)
+  cockpit_seat.py                  조종석 원본 → public/world/cockpit-seat.webp (배경 제거, 의자·조종간을 나눠 0.47배로 줄이고 사이를 44px 더 띄움, 1080p의 2배 해상도)
   window_frame.py                  창틀 원본 → public/world/window-frame.png·window-lights.png + 이음·불빛 위치(JSON 출력을 WindowFrame.tsx에 옮긴다)
 ```
 
