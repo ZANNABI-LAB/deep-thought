@@ -107,6 +107,14 @@
   }
 }
 
+.desk[data-active] .amber {
+  animation-duration: 0.5s;
+}
+
+.desk[data-active] .violet {
+  animation-duration: 0.9s;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .amber,
   .violet {

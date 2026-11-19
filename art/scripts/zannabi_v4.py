@@ -32,6 +32,7 @@ CLIPS = {
     'tilt': ('tilt', EVEN[1:-1]),
     'palm': ('palm2', EVEN[1:-1]),
     'look-up': ('lookup2', EVEN[1:-1]),
+    'console': ('consoleA', EVEN[1:-1]),
 }
 WALKERS = {'walk': None, 'turn': ('walkB', 16), 'turn-stop': ('idleC', 0)}
 
@@ -89,9 +90,11 @@ def advance(seq: list[Image.Image], after: Image.Image | None) -> list[int]:
 
 
 def main() -> None:
-    raw, out = Path(sys.argv[1]), Path(sys.argv[2])
-    meta = {}
+    raw, out, only = Path(sys.argv[1]), Path(sys.argv[2]), set(sys.argv[3:])
+    meta = json.loads((out / 'zannabi-v4.json').read_text()) if only else {}
     for name, (src, idx) in CLIPS.items():
+        if only and name not in only:
+            continue
         seq = [frames(raw / f'{src}.png')[i] for i in idx]
         boxes = [f.getbbox() for f in seq]
         ux0 = (min(b[0] for b in boxes) - X0) / SCALE

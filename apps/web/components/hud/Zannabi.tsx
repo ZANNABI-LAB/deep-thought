@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { HUD_EVENT } from '@/components/space/CockpitHud';
 import styles from './Zannabi.module.css';
 
 type Box = [x: number, y: number, w: number, h: number];
@@ -32,6 +33,7 @@ const CLIPS: Record<Clip, Spec> = {
   tilt: { frames: 26, cols: [26, 26] },
   palm: { frames: 26, cols: [26, 26] },
   'look-up': { frames: 26, cols: [26, 26] },
+  console: { frames: 26, cols: [26, 26] },
 };
 const WALK_ENTRY = 8;
 const sum = (list: number[] = []) => list.reduce((total, d) => total + d, 0);
@@ -44,6 +46,7 @@ const PACE: [number, number] = [0.8, 1.25];
 const READS: Clip[] = ['read', 'read-nod'];
 const HOLO = { frames: 24, fps: 14, w: 296, h: 441, dummy: 21 };
 const SABER_REACH = 240;
+const PILOT_AT = 0.3;
 const DESK_W = 554;
 const DESK_H = 307;
 const DESK_LIGHTS: [number, number, number, number, 'amber' | 'violet', number][] = [
@@ -79,7 +82,8 @@ type Clip =
   | 'read'
   | 'read-nod'
   | 'stand'
-  | 'saber';
+  | 'saber'
+  | 'console';
 type Holo = 'appear' | 'disappear';
 type Step = {
   clip: Clip;
@@ -91,11 +95,13 @@ type Step = {
   cycles?: number;
   scene?: boolean;
   holo?: Holo;
+  hud?: boolean;
 };
 const NEEDS: Record<Behavior, Clip[]> = {
   walk: ['turn', 'walk', 'turn-stop', 'turn-around'],
   read: ['turn', 'walk', 'turn-stop', 'turn-around', 'sit', 'read', 'read-nod', 'stand'],
   saber: ['turn', 'walk', 'turn-stop', 'turn-around', 'saber'],
+  pilot: ['turn', 'walk', 'turn-stop', 'turn-around', 'turn-back', 'console', 'breathe', 'turn-front'],
   gaze: ['turn-back', 'breathe', 'tilt', 'palm', 'look-up', 'turn-front'],
   look: ['look'],
   yawn: ['yawn'],
@@ -103,7 +109,7 @@ const NEEDS: Record<Behavior, Clip[]> = {
   hop: ['hop'],
   wave: ['wave'],
 };
-type Behavior = 'walk' | 'look' | 'yawn' | 'doze' | 'hop' | 'gaze' | 'wave' | 'read' | 'saber';
+type Behavior = 'walk' | 'look' | 'yawn' | 'doze' | 'hop' | 'gaze' | 'wave' | 'read' | 'saber' | 'pilot';
 
 const GAZE_MOMENTS: Clip[] = ['tilt', 'palm', 'look-up'];
 
@@ -125,13 +131,14 @@ function plan(behavior: Behavior): Step[] {
       ];
     }
     default:
-      return [{ clip: behavior }];
+      return [{ clip: behavior as Clip }];
   }
 }
 const WEIGHTS: [Behavior, number][] = [
   ['walk', 40],
   ['read', 10],
   ['saber', 8],
+  ['pilot', 10],
   ['look', 12],
   ['gaze', 12],
   ['yawn', 8],
@@ -152,6 +159,7 @@ function pick(previous: Behavior | null, loaded: Set<Clip>): Behavior {
 export function Zannabi() {
   const laneRef = useRef<HTMLDivElement>(null);
   const seatRef = useRef<HTMLDivElement>(null);
+  const deskRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const hitRef = useRef<HTMLDivElement>(null);
@@ -160,6 +168,7 @@ export function Zannabi() {
   useEffect(() => {
     const lane = laneRef.current!;
     const seat = seatRef.current!;
+    const desk = deskRef.current!;
     const body = bodyRef.current!;
     const canvas = canvasRef.current!;
     const ctx = canvas.getContext('2d')!;
@@ -186,6 +195,7 @@ export function Zannabi() {
     let scale = 1;
     let seatX = 0;
     let saberX = 0;
+    let pilotX = 0;
     let x = 0;
     let target = 0;
     let drawn = '';
@@ -205,6 +215,7 @@ export function Zannabi() {
       width = Math.max(0, lane.clientWidth - margin * 2);
       const stool = getComputedStyle(seat);
       seatX = parseFloat(stool.left) + parseFloat(stool.width) / 2 + STOOL_GAP * scale - margin;
+      pilotX = desk.offsetLeft + desk.offsetWidth * PILOT_AT - margin;
       saberX = holo.offsetLeft + (HOLO.dummy - SABER_REACH) * scale - margin + body.clientWidth / 2;
       x = Math.min(x, width);
       target = Math.min(target, width);
@@ -304,7 +315,7 @@ export function Zannabi() {
       ];
     };
 
-    const scenes: Record<'read' | 'saber', () => Step[]> = {
+    const scenes: Record<'read' | 'saber' | 'pilot', () => Step[]> = {
       read: () => [
         { clip: 'sit', scene: true },
         ...Array.from({ length: count(2, 4) }, (): Step => ({ clip: READS[Math.floor(Math.random() * READS.length)]!, scene: true })),
@@ -315,11 +326,23 @@ export function Zannabi() {
         { clip: 'saber', scene: true },
         { clip: 'idle', holo: 'disappear', scene: true },
       ],
+      pilot: () => [
+        { clip: 'turn-back', scene: true },
+        { clip: 'console', hud: true, scene: true },
+        { clip: 'breathe', repeat: count(1, 2), scene: true },
+        { clip: 'console', scene: true },
+        { clip: 'turn-front', hud: false, scene: true },
+      ],
+    };
+    const spots = { read: () => seatX, saber: () => saberX, pilot: () => pilotX };
+    const signal = (on: boolean) => {
+      desk.toggleAttribute('data-active', on);
+      window.dispatchEvent(new CustomEvent(HUD_EVENT, { detail: on }));
     };
 
     const start = (behavior: Behavior): void => {
-      if (behavior === 'read' || behavior === 'saber') {
-        const trip = walkTo(behavior === 'read' ? seatX : saberX);
+      if (behavior === 'read' || behavior === 'saber' || behavior === 'pilot') {
+        const trip = walkTo(spots[behavior]());
         if (!trip) return start('walk');
         previous = behavior;
         arrived = false;
@@ -346,6 +369,7 @@ export function Zannabi() {
       if (step?.flip) dir = -dir;
       step = queue.shift() ?? null;
       seat.toggleAttribute('data-seated', !!step && !!CLIPS[step.clip].seated);
+      if (step?.hud !== undefined) signal(step.hud);
       if (step?.holo) {
         holoMode = step.holo;
         holoTick = step.holo === 'appear' ? HOLO.frames - 1 : 0;
@@ -393,6 +417,10 @@ export function Zannabi() {
       waveWanted = true;
       if (spec().seated) {
         queue = queue.filter((s) => s.clip === 'stand');
+        return;
+      }
+      if (step?.scene && previous === 'pilot') {
+        queue = queue.filter((s) => s.clip === 'turn-front');
         return;
       }
       if (step?.scene) return;
@@ -459,6 +487,7 @@ export function Zannabi() {
     hit.addEventListener('click', greet);
     return () => {
       alive = false;
+      signal(false);
       cancelAnimationFrame(id);
       observer.disconnect();
       clearTimeout(hover);
@@ -470,7 +499,7 @@ export function Zannabi() {
 
   return (
     <div ref={laneRef} className={styles.lane} aria-hidden>
-      <div className={styles.desk}>
+      <div ref={deskRef} className={styles.desk}>
         <img src="/world/cockpit-desk.webp" alt="" width={DESK_W} height={DESK_H} />
         {DESK_LIGHTS.map(([x, y, w, h, tone, delay]) => (
           <span
