@@ -36,6 +36,7 @@ CLIPS = {
     'look-up': ('RlookupB', EVEN[1:-1]),
     'console': ('RconsoleA', EVEN[1:-1]),
     'console-2': ('RconsoleB', EVEN[1:-1]),
+    'type': ('type2', EVEN[1:26]),
 }
 WALKERS = {'walk': None, 'turn': ('walkB', 16), 'turn-stop': ('idleC', 0)}
 

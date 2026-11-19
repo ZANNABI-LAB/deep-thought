@@ -33,6 +33,7 @@ const CLIPS: Record<Clip, Spec> = {
   breathe: { frames: 28, cols: [28, 28], fps: 7 },
   'look-up': { frames: 26, cols: [26, 26] },
   console: { frames: 26, cols: [26, 26] },
+  type: { frames: 25, cols: [25, 25] },
   'console-2': { frames: 26, cols: [26, 26] },
 };
 const WALK_ENTRY = 8;
@@ -48,6 +49,8 @@ const SHORT_PACE: [number, number] = [0.7, 1];
 const NEAR = 4;
 const READS: Clip[] = ['read', 'read-nod'];
 const HOLO = { frames: 24, fps: 14, w: 296, h: 441, dummy: 21 };
+const DRONE = { w: 200, h: 304, frames: 49, fps: 21, crop: 491, from: 11, to: 36 };
+const DRONE_DY = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 23, 45, 63, 68, 71, 71, 63, 35, 9, -15, -24, -31, -35, -36, -37, -38, -39, -39, -39, -35, -30, -19, -12, -4, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 const GLOBE = { size: 176, spin: 24, off: 25, fps: 21, spinFps: 10.5 };
 const SABER_REACH = 250;
 const PILOT_AT = 0.3;
@@ -64,7 +67,7 @@ const MIN_TRIP = 0.25;
 const HOLD_MS = 900;
 const DONE_MS = 1100;
 const ANSWER_MS = 4500;
-const TERM_GAP = 34;
+const TERM_GAP = 47;
 const DIGITS = '0123456789ABCDEF';
 const SHAKE_MS = 420;
 const IDLE_CUTS = new Set([0, 1, 2, 3, 11, 12, 13, 14, 23, 24, 25, 26, 27]);
@@ -92,6 +95,7 @@ type Clip =
   | 'saber'
   | 'saber-2'
   | 'console'
+  | 'type'
   | 'console-2';
 type Holo = 'appear' | 'disappear';
 type Step = {
@@ -112,7 +116,7 @@ const NEEDS: Record<Behavior, Clip[]> = {
   read: ['turn', 'walk', 'turn-stop', 'turn-around', 'sit', 'read', 'read-nod', 'stand'],
   saber: ['turn', 'walk', 'turn-stop', 'turn-around', 'saber', 'saber-2'],
   pilot: ['turn', 'walk', 'turn-stop', 'turn-around', 'turn-back', 'console', 'console-2', 'breathe', 'turn-front'],
-  ask: ['turn', 'walk', 'turn-stop', 'turn-around', 'look'],
+  ask: ['turn', 'walk', 'turn-stop', 'turn-around', 'type'],
   gaze: ['turn-back', 'breathe', 'look-up', 'turn-front'],
   look: ['look'],
   yawn: ['yawn'],
@@ -203,6 +207,7 @@ export function Zannabi() {
   const projectorRef = useRef<HTMLDivElement>(null);
   const termRef = useRef<HTMLDivElement>(null);
   const readoutRef = useRef<HTMLSpanElement>(null);
+  const droneRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const lane = laneRef.current!;
@@ -216,6 +221,9 @@ export function Zannabi() {
     const projector = projectorRef.current!;
     const terminal = termRef.current!;
     const readout = readoutRef.current!;
+    const drone = droneRef.current!;
+    const droneCtx = drone.getContext('2d')!;
+    const droneBody = drone.parentElement!;
     const holoCtx = holo.getContext('2d')!;
     const globe = globeRef.current!;
     const globeCtx = globe.getContext('2d')!;
@@ -233,6 +241,8 @@ export function Zannabi() {
     };
     const holoImg = new Image();
     holoImg.src = '/world/hologram-dummy.webp';
+    const droneImg = new Image();
+    droneImg.src = '/world/cockpit-drone.webp';
     const globeSpin = new Image();
     const globeOff = new Image();
 
@@ -247,6 +257,7 @@ export function Zannabi() {
     let drawn = '';
     let holoDrawn = -1;
     let globeDrawn = '';
+    let droneDrawn = -1;
     const measure = () => {
       const dpr = devicePixelRatio;
       canvas.width = Math.round(canvas.clientWidth * dpr);
@@ -254,6 +265,9 @@ export function Zannabi() {
       holo.width = Math.round(holo.clientWidth * dpr);
       holo.height = Math.round(holo.clientHeight * dpr);
       globe.width = globe.height = Math.round(globe.clientWidth * dpr);
+      drone.width = Math.round(drone.clientWidth * dpr);
+      drone.height = Math.round(drone.clientHeight * dpr);
+      droneDrawn = -1;
       for (const c of [ctx, holoCtx, globeCtx]) c.imageSmoothingQuality = 'high';
       globeDrawn = '';
       drawn = '';
@@ -289,6 +303,8 @@ export function Zannabi() {
     let globeMode: 'off' | 'appear' | 'on' | 'disappear' = 'off';
     let globeTick = 0;
     let globeAcc = 0;
+    let droneTick = 0;
+    let droneAcc = 0;
 
     const clip = (): Clip => step?.clip ?? 'idle';
     const clamp = (value: number) => Math.min(Math.max(value, 0), width);
@@ -347,6 +363,21 @@ export function Zannabi() {
       if (globeMode === 'off') return;
       const img = globeMode === 'on' ? globeSpin : globeOff;
       globeCtx.drawImage(img, globeTick * GLOBE.size, 0, GLOBE.size, GLOBE.size, 0, 0, globe.width, globe.height);
+    };
+
+    const paintDrone = () => {
+      if (droneTick === droneDrawn || !droneImg.complete) return;
+      droneDrawn = droneTick;
+      droneCtx.clearRect(0, 0, drone.width, drone.height);
+      droneCtx.drawImage(droneImg, droneTick * DRONE.w, 0, DRONE.w, DRONE.h, 0, 0, drone.width, drone.height);
+      const lift = DRONE_DY[droneTick]! / DRONE.crop;
+      droneBody.style.translate = `0 ${lift * 100}%`;
+      terminal.style.setProperty('--lift', `${lift}`);
+    };
+
+    const advanceDrone = () => {
+      if (terminal.dataset.state !== 'idle' && (droneTick < DRONE.from || droneTick > DRONE.to)) return;
+      droneTick = (droneTick + 1) % DRONE.frames;
     };
 
     const advanceGlobe = () => {
@@ -446,7 +477,7 @@ export function Zannabi() {
         at: () => askX,
         face: 1,
         scene: () => [
-          { clip: 'look', term: 'compute', scene: true },
+          { clip: 'type', term: 'compute', scene: true },
           { clip: 'idle', term: 'answer', scene: true },
         ],
       },
@@ -629,6 +660,7 @@ export function Zannabi() {
     let acc = 0;
     let holoLast = 0;
     let globeLast = 0;
+    let droneLast = 0;
     const loop = (now: number) => {
       acc += Math.min(now - last, 250);
       last = now;
@@ -653,6 +685,13 @@ export function Zannabi() {
         }
       }
       globeLast = now;
+      droneAcc += Math.min(now - droneLast, 250);
+      droneLast = now;
+      while (droneAcc >= 1000 / DRONE.fps) {
+        droneAcc -= 1000 / DRONE.fps;
+        advanceDrone();
+      }
+      paintDrone();
       paint();
       paintHolo();
       paintGlobe();
@@ -679,7 +718,7 @@ export function Zannabi() {
         paint();
         return paintHolo();
       }
-      last = holoLast = globeLast = performance.now();
+      last = holoLast = globeLast = droneLast = performance.now();
       id = requestAnimationFrame(loop);
     });
 
@@ -726,8 +765,7 @@ export function Zannabi() {
       <div ref={termRef} className={styles.terminal} data-state="idle">
         <span className={styles.shadow} />
         <span className={styles.drone}>
-          <img src="/world/cockpit-terminal.webp" alt="" width={215} height={300} draggable={false} />
-          <span className={styles.thrust} />
+          <canvas ref={droneRef} className={styles.droneArt} />
           <span className={styles.screen}>
             <span className={styles.idle}>COMPUTING</span>
             <span ref={readoutRef} className={styles.compute} />
