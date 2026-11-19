@@ -67,7 +67,10 @@ const MIN_TRIP = 0.25;
 const HOLD_MS = 900;
 const DONE_MS = 1100;
 const ANSWER_MS = 4500;
-const TERM_GAP = 47;
+const TERM_GAP = 38;
+const DECK = { left: 66, bottom: 3.6 };
+const ROAM = { left: [24, 58], bottom: [26, 40], chance: 0.7 };
+const LANE_CQH = 27.5;
 const DIGITS = '0123456789ABCDEF';
 const SHAKE_MS = 420;
 const IDLE_CUTS = new Set([0, 1, 2, 3, 11, 12, 13, 14, 23, 24, 25, 26, 27]);
@@ -279,7 +282,7 @@ export function Zannabi() {
       const stool = getComputedStyle(seat);
       seatX = parseFloat(stool.left) + parseFloat(stool.width) / 2 + STOOL_GAP * scale - margin;
       pilotX = desk.offsetLeft + desk.offsetWidth * PILOT_AT - margin;
-      askX = terminal.offsetLeft - TERM_GAP * scale - margin;
+      askX = (DECK.left * lane.clientHeight) / LANE_CQH - TERM_GAP * scale - margin;
       saberX = holo.offsetLeft + (HOLO.dummy - SABER_REACH) * scale - margin + body.clientWidth / 2;
       x = Math.min(x, width);
     };
@@ -375,9 +378,17 @@ export function Zannabi() {
       terminal.style.setProperty('--lift', `${lift}`);
     };
 
+    const place = (left: number, bottom: number) => {
+      terminal.style.left = `${left}cqh`;
+      terminal.style.bottom = `${bottom}cqh`;
+    };
+    const roam = () => place(between(ROAM.left as [number, number]), between(ROAM.bottom as [number, number]));
+
     const advanceDrone = () => {
-      if (terminal.dataset.state !== 'idle' && (droneTick < DRONE.from || droneTick > DRONE.to)) return;
+      const state = terminal.dataset.state;
+      if ((state === 'compute' || state === 'answer') && (droneTick < DRONE.from || droneTick > DRONE.to)) return;
       droneTick = (droneTick + 1) % DRONE.frames;
+      if (state === 'idle' && droneTick === DRONE.from && Math.random() < ROAM.chance) roam();
     };
 
     const advanceGlobe = () => {
@@ -484,10 +495,12 @@ export function Zannabi() {
     };
     let computing = 0;
     let answered = 0;
-    const think = (state: 'idle' | 'compute' | 'answer') => {
+    const think = (state: 'idle' | 'call' | 'compute' | 'answer') => {
       clearInterval(computing);
       clearTimeout(answered);
       terminal.dataset.state = state;
+      if (state === 'idle') roam();
+      else place(DECK.left, DECK.bottom);
       if (state === 'compute') {
         computing = window.setInterval(() => {
           readout.textContent = Array.from({ length: 3 }, () =>
@@ -521,6 +534,8 @@ export function Zannabi() {
     };
 
     const start = (behavior: Behavior): void => {
+      if (behavior === 'ask') think('call');
+      else if (terminal.dataset.state === 'call') think('idle');
       if (isPlace(behavior)) {
         const place = places[behavior];
         const trip = route(place.at(), place.face);
@@ -712,6 +727,7 @@ export function Zannabi() {
       if (!alive) return;
       ready = true;
       for (const clip of Object.keys(CLIPS) as Clip[]) if (!images.has(clip)) load(clip);
+      roam();
       globeSpin.src = '/world/cockpit-globe-spin.webp';
       globeOff.src = '/world/cockpit-globe-off.webp';
       if (still) {

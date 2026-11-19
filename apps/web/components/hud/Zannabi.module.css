@@ -394,8 +394,10 @@
 .terminal {
   position: absolute;
   left: 66cqh;
-  bottom: 7cqh;
-  transition: bottom 700ms cubic-bezier(0.3, 1.2, 0.5, 1);
+  bottom: 3.6cqh;
+  transition:
+    left 1.2s cubic-bezier(0.45, 0, 0.3, 1),
+    bottom 1.2s cubic-bezier(0.45, 0, 0.3, 1);
   height: 11.5cqh;
   aspect-ratio: 262 / 361;
 }
@@ -413,23 +415,25 @@
   height: 136%;
 }
 
-.terminal[data-state='compute'],
-.terminal[data-state='answer'] {
-  bottom: 3.9cqh;
+
+.terminal[data-state='call'] {
+  transition:
+    left 1.6s cubic-bezier(0.45, 0, 0.3, 1),
+    bottom 1.6s cubic-bezier(0.3, 1.2, 0.5, 1);
 }
 
 .shadow {
   position: absolute;
   left: 50%;
-  bottom: -6.4cqh;
-  transition: bottom 700ms cubic-bezier(0.3, 1.2, 0.5, 1);
+  bottom: -3cqh;
+  opacity: 0;
+  transition: opacity 400ms ease-out;
   width: 55%;
   height: 0.9cqh;
   translate: -50% 0;
   border-radius: 50%;
   background: radial-gradient(closest-side, rgb(157 116 211 / 0.4), transparent);
   scale: calc(1 + var(--lift, 0) * 1.4);
-  opacity: calc(1 + var(--lift, 0) * 1.6);
 }
 
 .screen {
@@ -512,5 +516,5 @@
 
 .terminal[data-state='compute'] .shadow,
 .terminal[data-state='answer'] .shadow {
-  bottom: -3.3cqh;
+  opacity: calc(1 + var(--lift, 0) * 1.6);
 }
