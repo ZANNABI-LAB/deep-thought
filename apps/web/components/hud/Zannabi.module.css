@@ -2,31 +2,33 @@
   position: absolute;
   left: 0;
   bottom: calc(var(--glass-bottom) * -0.85);
-  height: 27.5cqh;
+  width: min(85.59cqh, calc(100cqw - max(380px, 31cqw)));
+  aspect-ratio: 85.59 / 27.5;
+  container-type: size;
   pointer-events: none;
 }
 
 .seat {
   position: absolute;
-  left: 16.75cqh;
-  bottom: 0.69cqh;
-  height: 7.1cqh;
+  left: 60.91cqh;
+  bottom: 2.51cqh;
+  height: 25.82cqh;
   aspect-ratio: 141 / 130;
 }
 
 .desk {
   position: absolute;
-  left: 28.64cqh;
-  bottom: 1cqh;
-  height: 16.74cqh;
+  left: 104.15cqh;
+  bottom: 3.64cqh;
+  height: 60.87cqh;
   aspect-ratio: 554 / 307;
 }
 
 .holo {
   position: absolute;
-  left: 68.64cqh;
-  bottom: -0.47cqh;
-  height: 25.25cqh;
+  left: 249.6cqh;
+  bottom: -1.71cqh;
+  height: 91.82cqh;
   aspect-ratio: 296 / 441;
 }
 
@@ -55,10 +57,10 @@
 
 .projector {
   position: absolute;
-  left: 72.68cqh;
-  bottom: -0.47cqh;
-  width: 10.36cqh;
-  height: 5.04cqh;
+  left: 264.29cqh;
+  bottom: -1.71cqh;
+  width: 37.67cqh;
+  height: 18.33cqh;
 }
 
 .seat,
@@ -96,12 +98,12 @@
 
 .amber {
   background: rgb(255 196 92 / 0.9);
-  box-shadow: 0 0 0.6cqh 0.2cqh rgb(255 170 60 / 0.6);
+  box-shadow: 0 0 2.18cqh 0.73cqh rgb(255 170 60 / 0.6);
 }
 
 .violet {
   background: rgb(200 160 255 / 0.85);
-  box-shadow: 0 0 0.7cqh 0.25cqh rgb(170 120 240 / 0.6);
+  box-shadow: 0 0 2.55cqh 0.91cqh rgb(170 120 240 / 0.6);
   animation: breathe 3.6s ease-in-out infinite;
 }
 
@@ -177,22 +179,22 @@
   position: absolute;
   z-index: 10;
   left: 50%;
-  bottom: calc(100% + 2.4cqh);
-  width: max(160px, 18cqh);
-  height: max(30px, 3.6cqh);
+  bottom: calc(100% + 8.73cqh);
+  width: max(160px, 65.45cqh);
+  height: max(30px, 13.09cqh);
   overflow: hidden;
   border: 1px solid rgb(185 245 200 / 0.32);
   border-radius: 999px;
   background: #262626;
   color: #b9f5c8;
   font-family: var(--font-sans);
-  font-size: max(12px, 1.4cqh);
+  font-size: max(12px, 5.09cqh);
   font-weight: 500;
   letter-spacing: -0.01em;
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
-  transform: translate(-50%, 0.6cqh) scale(0.96);
+  transform: translate(-50%, 2.18cqh) scale(0.96);
   transition:
     opacity 180ms ease-out,
     transform 260ms cubic-bezier(0.2, 1.4, 0.4, 1),
@@ -207,8 +209,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.6cqh;
-  padding: 0 1.8cqh;
+  gap: 2.18cqh;
+  padding: 0 6.55cqh;
 }
 
 .label svg {
@@ -248,7 +250,7 @@
 }
 
 .hit .tip {
-  transform: translate(-50%, 0.6cqh) scale(0.96) scaleX(var(--dir, 1));
+  transform: translate(-50%, 2.18cqh) scale(0.96) scaleX(var(--dir, 1));
 }
 
 .hit:hover .tip,
@@ -279,7 +281,7 @@
 .body:has(.hit:hover) .sprite,
 .lane:has(.projector:hover) .holo {
   filter: drop-shadow(1px 0 0 #b9f5c8) drop-shadow(-1px 0 0 #b9f5c8) drop-shadow(0 1px 0 #b9f5c8) drop-shadow(0 -1px 0 #b9f5c8)
-    drop-shadow(0 0 0.6cqh rgb(185 245 200 / 0.45));
+    drop-shadow(0 0 2.18cqh rgb(185 245 200 / 0.45));
 }
 
 .label {
@@ -309,7 +311,7 @@
 }
 
 [data-done] .tip {
-  width: max(30px, 3.6cqh);
+  width: max(30px, 13.09cqh);
   background-color: #b9f5c8;
   opacity: 1;
   transform: translate(-50%, 0) scale(1);
@@ -373,7 +375,7 @@
     filter: drop-shadow(0 0 0 #b9f5c8) brightness(1);
   }
   25% {
-    filter: drop-shadow(0 0 1.2cqh #b9f5c8) brightness(1.35);
+    filter: drop-shadow(0 0 4.36cqh #b9f5c8) brightness(1.35);
   }
   100% {
     filter: drop-shadow(0 0 0 #b9f5c8) brightness(1);
@@ -384,21 +386,21 @@
   position: absolute;
   left: 32.7%;
   bottom: 113%;
-  width: 8cqh;
+  width: 29.09cqh;
   aspect-ratio: 1;
   translate: -50% 0;
   pointer-events: none;
-  filter: drop-shadow(0 0 0.35cqh rgb(185 245 200 / 0.55));
+  filter: drop-shadow(0 0 1.27cqh rgb(185 245 200 / 0.55));
 }
 
 .terminal {
   position: absolute;
-  left: 41cqh;
-  bottom: 33cqh;
+  left: 149.09cqh;
+  bottom: 120cqh;
   transition:
     left 1.2s cubic-bezier(0.45, 0, 0.3, 1),
     bottom 1.2s cubic-bezier(0.45, 0, 0.3, 1);
-  height: 11.5cqh;
+  height: 41.82cqh;
   aspect-ratio: 262 / 361;
 }
 
@@ -425,11 +427,11 @@
 .shadow {
   position: absolute;
   left: 50%;
-  bottom: -3cqh;
+  bottom: -10.91cqh;
   opacity: 0;
   transition: opacity 400ms ease-out;
   width: 55%;
-  height: 0.9cqh;
+  height: 3.27cqh;
   translate: -50% 0;
   border-radius: 50%;
   background: radial-gradient(closest-side, rgb(157 116 211 / 0.4), transparent);
@@ -451,7 +453,7 @@
   line-height: 1.15;
   text-align: center;
   white-space: pre;
-  text-shadow: 0 0 0.4cqh rgb(159 232 180 / 0.7);
+  text-shadow: 0 0 1.45cqh rgb(159 232 180 / 0.7);
   pointer-events: none;
 }
 
@@ -461,7 +463,7 @@
 }
 
 .idle {
-  font-size: 0.66cqh;
+  font-size: 2.4cqh;
   letter-spacing: 0.04em;
 }
 
@@ -471,13 +473,13 @@
 }
 
 .compute {
-  font-size: 0.75cqh;
+  font-size: 2.73cqh;
   letter-spacing: 0.1em;
   opacity: 0.8;
 }
 
 .answer {
-  font-size: 2.6cqh;
+  font-size: 9.45cqh;
 }
 
 .terminal[data-state='idle'] .idle,

@@ -5,7 +5,7 @@ import { Zannabi } from './Zannabi';
 export function HomeHud() {
   return (
     <div className={styles.hud}>
-      <div className={styles.logo} data-zannabi-anchor>
+      <div className={styles.logo}>
         <HomeLogo />
       </div>
       <Zannabi />

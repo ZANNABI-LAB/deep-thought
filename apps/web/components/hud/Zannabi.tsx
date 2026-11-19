@@ -57,9 +57,8 @@ const NOTICE = { reach: 1.8, cooldown: 25000 };
 const DONE_MS = 1100;
 const ANSWER_MS = 4500;
 const TERM_GAP = 17;
-const DECK = { left: 62, bottom: 4.8 };
-const ROAM: { left: [number, number]; bottom: [number, number]; chance: number } = { left: [24, 58], bottom: [26, 40], chance: 0.7 };
-const LANE_CQH = 27.5;
+const DECK = { left: 225.45, bottom: 17.45 };
+const ROAM: { left: [number, number]; bottom: [number, number]; chance: number } = { left: [87.27, 210.91], bottom: [94.55, 145.45], chance: 0.7 };
 const DIGITS = '0123456789ABCDEF';
 const SHAKE_MS = 420;
 
@@ -118,8 +117,6 @@ export function Zannabi() {
     const holoCtx = holo.getContext('2d')!;
     const globe = globeRef.current!;
     const globeCtx = globe.getContext('2d')!;
-    const hud = lane.parentElement!;
-    const logo = hud.querySelector<HTMLElement>('[data-zannabi-anchor] img')!;
 
     const R = devicePixelRatio > 1.25 ? 2 : 1;
     const images = new Map<Clip, HTMLImageElement>();
@@ -163,14 +160,13 @@ export function Zannabi() {
       globeDrawn = '';
       drawn = '';
       holoDrawn = -1;
-      lane.style.width = `${(logo.offsetLeft + logo.offsetWidth / 2) * 2}px`;
       scale = body.clientHeight / CELL[3];
       margin = BODY_HALF * scale;
       width = Math.max(0, Math.min(lane.clientWidth, holo.offsetLeft, projector.offsetLeft) - margin * 2);
       const stool = getComputedStyle(seat);
       seatX = parseFloat(stool.left) + parseFloat(stool.width) / 2 + STOOL_GAP * scale - margin;
       pilotX = desk.offsetLeft + desk.offsetWidth * PILOT_AT - margin;
-      askX = (DECK.left * lane.clientHeight) / LANE_CQH - TERM_GAP * scale - margin;
+      askX = (DECK.left * lane.clientHeight) / 100 - TERM_GAP * scale - margin;
       saberX = holo.offsetLeft + (HOLO.dummy - SABER_REACH) * scale - margin + body.clientWidth / 2;
       x = Math.min(x, width);
     };
@@ -343,7 +339,7 @@ export function Zannabi() {
     };
 
     const clearSpot = () => {
-      const unit = lane.clientHeight / LANE_CQH;
+      const unit = lane.clientHeight / 100;
       const blocks = [seat, desk, holo]
         .map((el): [number, number] => [el.offsetLeft - margin, el.offsetLeft + el.offsetWidth - margin])
         .concat([[DECK.left * unit - margin, DECK.left * unit + terminal.offsetWidth - margin]])
@@ -680,8 +676,7 @@ export function Zannabi() {
         paintHolo();
       }
     });
-    observer.observe(hud);
-    observer.observe(logo);
+    observer.observe(lane);
     Promise.all([...FIRST.map(load), holoImg.decode()]).then(() => {
       if (!alive) return;
       ready = true;
