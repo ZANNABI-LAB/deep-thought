@@ -18,11 +18,11 @@
 | 그림 | 쓰임 |
 | --- | --- |
 | `art/refs/concept/home-gpt-v3.png` | **홈 시안 (2026-11-17 확정 방향)**: 왼쪽 로고, 오른쪽 패널(Mission Log·Ask·Arcade), 위 메뉴·검색. 이 그림의 Zannabi 모습은 기준과 다르다 (자세·행동 아이디어만 쓴다) |
-| `art/refs/concept/logo-gpt-v2.png` | **홈 로고 원본** (1808×870, 2026-11-18 v1을 더 깔끔하게 다시 뽑음. 3px 격자를 요청했지만 GPT는 약 4.3px 가짜 격자로 그렸다). `art/scripts/logo.py`로 배경만 투명하게 뺀 WebP(630·1260·1808px) |
-| `art/refs/concept/window-frame-gpt-v2.png` | **창틀 원본** (1672×941, 창 안쪽 투명). `art/scripts/window_frame.py`로 2px 격자 정리 |
+| `art/refs/concept/logo-gpt-v2.png` | **홈 로고 원본** (1808×870, 2026-11-18 v1을 더 깔끔하게 다시 뽑음. 3px 격자를 요청했지만 GPT는 약 4.3px 가짜 격자로 그렸다). 배경만 투명하게 뺀 WebP(630·1260·1808px) |
+| `art/refs/concept/window-frame-gpt-v2.png` | **창틀 원본** (1672×941, 창 안쪽 투명). 2px 격자로 정리해 씀 |
 | `art/refs/zannabi-gpt-style-v1.png` | **Zannabi 모습 기준** (v4, 유리 헬멧, 옆 원반, 선글라스, 크림색 우주복) |
 | `art/refs/space/space-bg-v3-4k.webp` | **창밖 우주 원본** (4096×2304, ChatGPT 원본 1672×940을 Bytedance로 업스케일) |
-| `art/refs/logo-mark-gpt-v3.png` | 헤더 로고 원본 (`art/scripts/logo_mark.py`) |
+| `art/refs/logo-mark-gpt-v3.png` | 헤더 로고 원본 (potrace로 SVG) |
 | `art/refs/favicon-zannabi.png` | **파비콘** (2026-11-19): 잔나비 v4 기준 그림(`zannabi-gpt-style-v1.png`)에서 헬멧 쓴 얼굴만 잘라 검정 배경을 투명하게. `app/icon.png`는 64px로 줄인 것. 42 단말기 픽셀 아이콘도 만들어 봤지만 잔나비 얼굴로 정함 |
 | `docs/assets/zannabi-original-logo.png` | 브랜드 출발점 (흑백 우주 원숭이) |
 
@@ -59,8 +59,8 @@
 | 층 | 내용 | 화풍 | 만드는 법 |
 | --- | --- | --- | --- |
 | 창밖 | 행성 2개, 바위, 성운, 별 | **실사** | 4K 그림을 시작 프레임으로 Kling 3.0 Omni (Frames) 10초 → 4K 업스케일(Bytedance) → 정방향+역방향 이어 붙인 핑퐁 반복(`public/world/space-loop-4k.mp4`, 8.3MB, 데스크톱만). 포스터는 영상 첫 프레임 |
-| 우주선 | 모서리를 깎은 큰 창틀, 창턱 바닥, 깜빡이는 표시등 6곳 | **픽셀 아트** (던전앤파이터 정도 밀도) | GPT 그림 → `window_frame.py`(2px 격자, 48색, 가짜 글자 제거, 불빛 분리) → `WindowFrame.tsx`가 정수배로 그리고 이음 열·행을 복제해 화면 비율에 맞춘다 |
-| 로고 | "A LITTLE UNIVERSE OF IDEAS" / DEEP THOUGHT / "Still computing the answer." | **픽셀 아트** (크림·라벤더) | GPT 그림을 그대로 쓴다: `logo.py`가 검정 배경을 알파로 빼고 색을 두 잉크로 고정해 폭별 무손실 WebP로 → `HomeLogo.tsx`가 srcSet으로 고른다. 정지 그림 |
+| 우주선 | 모서리를 깎은 큰 창틀, 창턱 바닥, 깜빡이는 표시등 6곳 | **픽셀 아트** (던전앤파이터 정도 밀도) | GPT 그림 → 2px 격자, 48색, 가짜 글자 제거, 불빛 분리) → `WindowFrame.tsx`가 정수배로 그리고 이음 열·행을 복제해 화면 비율에 맞춘다 |
+| 로고 | "A LITTLE UNIVERSE OF IDEAS" / DEEP THOUGHT / "Still computing the answer." | **픽셀 아트** (크림·라벤더) | GPT 그림을 그대로 쓴다: 검정 배경을 알파로 빼고 색을 두 잉크로 고정해 폭별 무손실 WebP로 → `HomeLogo.tsx`가 srcSet으로 고른다. 정지 그림 |
 | UI | 메뉴·검색·패널 | 크림·라벤더, 픽셀 테두리 패널 | 웹 코드 |
 | Zannabi | 콕핏에서 생활하는 마스코트 | **픽셀 아트** | 스프라이트 (기준 그림 `zannabi-gpt-style-v1.png`) |
 
@@ -113,14 +113,14 @@
 
 ### 3.6 Zannabi와 조종석
 
-코드: `components/hud/Zannabi.tsx`(장면·소품·입력), `components/hud/zannabi-motion.ts`(클립·행동·가중치·걷기 상수), `components/space/CockpitHud.tsx`(창 유리 조준 문구). 클립 빌드: `art/scripts/zannabi_v4.py`.
+코드: `components/hud/Zannabi.tsx`(장면·소품·입력), `components/hud/zannabi-motion.ts`(클립·행동·가중치·걷기 상수), `components/space/CockpitHud.tsx`(창 유리 조준 문구).
 
 **활동 구역.** L(왼쪽 창틀 안쪽 모서리)부터 R = C + (C − L)까지(C는 렌더된 로고의 가로 중심, 2026-11-19 사용자 지정). R부터 오른쪽 창틀까지는 위젯 영역이고 경계선은 그리지 않는다. 레인 폭은 로고 `offsetLeft`로 재고 화면·로고 크기가 바뀌면 다시 잰다. 이동 범위는 보이는 몸의 반폭 64u 기준(칸 200×240u, 밑창 234u).
 
 **그림과 클립 만들기.**
 - v4 그림체: 의자·데스크와 같은 ChatGPT 그림체. 기준 그림은 `art/refs/zannabi-gpt-style-v1.png`(대기). 걷기 옆모습·뒷모습 기준 그림도 받아 썼는데(뒷모습은 v1이 머리는 오른쪽·몸은 왼쪽이라 비틀려 보여 v2로), 자세가 AutoSprite 캐릭터에 저장돼 있어 2026-11-19에 레포에서 지웠다.
 - AutoSprite 캐릭터 `zannabi-v4`에 자세를 640 캔버스(1.743배, 중심 320, 밑창 544, 헬멧 중심 맞춤)로 올려 모든 클립의 시작·끝을 고정하고, 768px 원본으로 생성한다. 자세: V4 Idle Padded, V4 Idle Mirror, V4 Walk Padded, V4 Back Right Padded, V4 Idle Small 0.8(광선검처럼 칸 밖으로 나가는 동작용).
-- `zannabi_v4.py`가 한 번 정한 변환(2.08배, 176, 164, 클립별 배율 fit)으로 칸에 옮기고, 가장자리 회색 번짐을 외곽선색으로 바꾸고, 원본 가장자리 12px를 지워(AI가 그리는 세로 막대 부스러기) 1배·2배 WebP 띠를 만든다. 그리기 범위(box)는 -60~360u, 위로 -60u까지. 원본 시트는 저장소 밖 `Downloads/zannabi-v4/raw`, 후보·채택 시트 id는 같은 폴더 `jobs.txt`.
+- 한 번 정한 변환(2.08배, 176, 164, 클립별 배율 fit)으로 칸에 옮기고, 가장자리 회색 번짐을 외곽선색으로 바꾸고, 원본 가장자리 12px를 지워(AI가 그리는 세로 막대 부스러기) 1배·2배 WebP 띠를 만든다. 그리기 범위(box)는 -60~360u, 위로 -60u까지. 생성 스크립트와 원본 시트는 2026-11-19에 결과를 확정하며 지웠다(git 기록에는 스크립트가 남아 있다).
 - 픽셀 합성은 하지 않는다. 화면 밀도(dpr>1.25)에 맞는 한 벌만 받고, 대기·걷기 계열을 먼저 받은 뒤 나머지는 뒤에서 받는다. 아직 못 받은 클립이 필요한 행동은 고르지 않는다. 동작 줄이기면 대기 첫 프레임만.
 
 **클립(31개).**
