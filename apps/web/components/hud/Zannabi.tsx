@@ -16,7 +16,7 @@ const CLIPS: Record<Clip, Spec> = {
   walk: { frames: 14, cols: [14, 14], advance: [0, 6, 7, 8, 10, 6, 12, 3, 7, 8, 11, 8, 6, 9] },
   turn: { frames: 16, cols: [16, 16], advance: [2, 4, 7, 6, 7, 3, 2, 0, 5, 7, 6, 6, 7, 5, 2, 1] },
   'turn-stop': { frames: 8, cols: [8, 8], advance: [12, 13, 0, 0, 0, 0, 0, 0] },
-  'turn-around': { frames: 26, cols: [26, 26], start: 1, fps: 20 },
+  'turn-around': { frames: 20, cols: [20, 20], fps: 18 },
   wave: { frames: 22, cols: [22, 22] },
   look: { frames: 26, cols: [26, 26] },
   yawn: { frames: 26, cols: [26, 26] },

@@ -18,7 +18,7 @@ CLIPS = {
     'walk': ('walkB', list(range(0, 28, 2))),
     'turn': ('turnA', list(range(4, 36, 2))),
     'turn-stop': ('stopA', list(range(30, 46, 2))),
-    'turn-around': ('aroundB', EVEN[1:-1]),
+    'turn-around': ('uturn2', EVEN[1:21]),
     'wave': ('waveVB', EVEN[1:23]),
     'look': ('lookA', EVEN[1:-1]),
     'yawn': ('yawnA', EVEN[1:-1]),
