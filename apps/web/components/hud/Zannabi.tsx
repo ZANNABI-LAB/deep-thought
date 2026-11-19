@@ -590,6 +590,11 @@ export function Zannabi() {
       el.setAttribute(name, '');
       window.setTimeout(() => el.removeAttribute(name), ms);
     };
+    const lift = () => {
+      const poked = held === hit && hit.hasAttribute('data-holding');
+      release();
+      if (poked && !step && !waveWanted && !wanted && loaded.has('notice')) start('notice');
+    };
     const release = () => {
       clearTimeout(holdTimer);
       if (held?.hasAttribute('data-holding')) flag(held, 'data-shake', SHAKE_MS);
@@ -695,7 +700,7 @@ export function Zannabi() {
       el.addEventListener('pointerdown', press);
       el.addEventListener('pointerleave', release);
     }
-    window.addEventListener('pointerup', release);
+    window.addEventListener('pointerup', lift);
     let noticedAt = -Infinity;
     const approach = (event: PointerEvent) => {
       if (step || waveWanted || wanted || performance.now() - noticedAt < NOTICE.cooldown || !loaded.has('notice')) return;
@@ -719,7 +724,7 @@ export function Zannabi() {
         el.removeEventListener('pointerdown', press);
         el.removeEventListener('pointerleave', release);
       }
-      window.removeEventListener('pointerup', release);
+      window.removeEventListener('pointerup', lift);
       window.removeEventListener('pointermove', approach);
       window.removeEventListener('pointercancel', release);
     };
