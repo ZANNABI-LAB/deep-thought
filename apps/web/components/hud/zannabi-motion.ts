@@ -28,7 +28,7 @@ const SPECS = {
   thumbs: { frames: 23, cols: [23, 23] },
   notice: { frames: 22, cols: [22, 22] },
   music: { frames: 25, cols: [25, 25] },
-  dance: { frames: 26, cols: [26, 26], box: [-21, 0, 242, 240] },
+  dance: { frames: 26, cols: [26, 26], box: [-21, 0, 221, 240] },
   moonjump: { frames: 28, cols: [28, 28], box: [0, -43, 200, 283] },
   stretch: { frames: 26, cols: [26, 26] },
   sitdeck: { frames: 25, cols: [25, 25], box: [0, 0, 200, 243] },
