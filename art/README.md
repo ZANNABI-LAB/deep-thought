@@ -14,7 +14,7 @@ art/refs/
   space/space-bg-v3-4k.webp        위 그림을 Bytedance Image Upscale로 4096×2304 (무손실 WebP)
   logo-mark-gpt-v3.png             헤더 로고 (GPT 흑백)
   logo-mark-gpt-v2.png             옛 파비콘 (2026-11-19까지)
-  favicon-terminal-42.png          파비콘 (32px 직접 찍은 단말기, 화면에 42). app/icon.png는 이걸 2배 최근접 확대
+  favicon-zannabi.png              파비콘 원본 (256px, zannabi-gpt-style-v1.png 얼굴을 잘라 검정 배경만 투명하게). app/icon.png는 64px로 줄인 것
   cockpit/stool-gpt-v1.png         등받이 없는 의자 원본 (ChatGPT, 검정 배경)
   cockpit/desk-gpt-v3.png          조종 데스크 원본, 오른쪽 끝에 책 더미·메모 (ChatGPT, 1484×1060, 검정 배경)
   cockpit/hologram-dummy-gpt-v1.png 수련용 홀로그램 더미와 투사기 (ChatGPT, 1484×1060, 검정 배경)
