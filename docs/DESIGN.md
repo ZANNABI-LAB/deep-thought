@@ -20,9 +20,8 @@
 | `art/refs/concept/home-gpt-v3.png` | **홈 시안 (2026-11-17 확정 방향)**: 왼쪽 로고, 오른쪽 패널(Mission Log·Ask·Arcade), 위 메뉴·검색. 이 그림의 Zannabi 모습은 기준과 다르다 (자세·행동 아이디어만 쓴다) |
 | `art/refs/concept/logo-gpt-v2.png` | **홈 로고 원본** (1808×870, 2026-11-18 v1을 더 깔끔하게 다시 뽑음. 3px 격자를 요청했지만 GPT는 약 4.3px 가짜 격자로 그렸다). `art/scripts/logo.py`로 배경만 투명하게 뺀 WebP(630·1260·1808px) |
 | `art/refs/concept/window-frame-gpt-v2.png` | **창틀 원본** (1672×941, 창 안쪽 투명). `art/scripts/window_frame.py`로 2px 격자 정리 |
-| `art/refs/deep-thought-terminal-gpt-v1.png` | **Zannabi 모습 기준** (유리 헬멧, 옆 원반, 선글라스, 크림색 우주복) |
-| `art/refs/zannabi-v5-views/`, `zannabi-v5-turnaround.png` | Zannabi 4방향 (헬멧 없는 몸 디자인) |
-| `art/refs/space/space-bg-v3-4k.webp` | **창밖 우주 원본** (4096×2304, `space-bg-v3.png`를 Bytedance로 업스케일) |
+| `art/refs/zannabi-gpt-style-v1.png` | **Zannabi 모습 기준** (v4, 유리 헬멧, 옆 원반, 선글라스, 크림색 우주복) |
+| `art/refs/space/space-bg-v3-4k.webp` | **창밖 우주 원본** (4096×2304, ChatGPT 원본 1672×940을 Bytedance로 업스케일) |
 | `art/refs/logo-mark-gpt-v3.png` | 헤더 로고 원본 (`art/scripts/logo_mark.py`) |
 | `art/refs/favicon-zannabi.png` | **파비콘** (2026-11-19): 잔나비 v4 기준 그림(`zannabi-gpt-style-v1.png`)에서 헬멧 쓴 얼굴만 잘라 검정 배경을 투명하게. `app/icon.png`는 64px로 줄인 것. 42 단말기 픽셀 아이콘도 만들어 봤지만 잔나비 얼굴로 정함 |
 | `docs/assets/zannabi-original-logo.png` | 브랜드 출발점 (흑백 우주 원숭이) |
@@ -63,7 +62,7 @@
 | 우주선 | 모서리를 깎은 큰 창틀, 창턱 바닥, 깜빡이는 표시등 6곳 | **픽셀 아트** (던전앤파이터 정도 밀도) | GPT 그림 → `window_frame.py`(2px 격자, 48색, 가짜 글자 제거, 불빛 분리) → `WindowFrame.tsx`가 정수배로 그리고 이음 열·행을 복제해 화면 비율에 맞춘다 |
 | 로고 | "A LITTLE UNIVERSE OF IDEAS" / DEEP THOUGHT / "Still computing the answer." | **픽셀 아트** (크림·라벤더) | GPT 그림을 그대로 쓴다: `logo.py`가 검정 배경을 알파로 빼고 색을 두 잉크로 고정해 폭별 무손실 WebP로 → `HomeLogo.tsx`가 srcSet으로 고른다. 정지 그림 |
 | UI | 메뉴·검색·패널 | 크림·라벤더, 픽셀 테두리 패널 | 웹 코드 |
-| Zannabi | 콕핏에서 생활하는 마스코트 | **픽셀 아트** | 스프라이트 (기준 그림 `deep-thought-terminal-gpt-v1.png`의 모습으로 다시 그린다) |
+| Zannabi | 콕핏에서 생활하는 마스코트 | **픽셀 아트** | 스프라이트 (기준 그림 `zannabi-gpt-style-v1.png`) |
 
 ### 3.2 배치
 
@@ -119,7 +118,7 @@
 **활동 구역.** L(왼쪽 창틀 안쪽 모서리)부터 R = C + (C − L)까지(C는 렌더된 로고의 가로 중심, 2026-11-19 사용자 지정). R부터 오른쪽 창틀까지는 위젯 영역이고 경계선은 그리지 않는다. 레인 폭은 로고 `offsetLeft`로 재고 화면·로고 크기가 바뀌면 다시 잰다. 이동 범위는 보이는 몸의 반폭 64u 기준(칸 200×240u, 밑창 234u).
 
 **그림과 클립 만들기.**
-- v4 그림체: 의자·데스크와 같은 ChatGPT 그림체. 기준 그림은 `art/refs/zannabi-gpt-style-v1.png`(대기), `zannabi-gpt-walk-v1.png`(걷기), `zannabi-gpt-back-v2.png`(오른쪽 보는 뒷모습. v1은 머리는 오른쪽·몸은 왼쪽이라 비틀려 보였다).
+- v4 그림체: 의자·데스크와 같은 ChatGPT 그림체. 기준 그림은 `art/refs/zannabi-gpt-style-v1.png`(대기). 걷기 옆모습·뒷모습 기준 그림도 받아 썼는데(뒷모습은 v1이 머리는 오른쪽·몸은 왼쪽이라 비틀려 보여 v2로), 자세가 AutoSprite 캐릭터에 저장돼 있어 2026-11-19에 레포에서 지웠다.
 - AutoSprite 캐릭터 `zannabi-v4`에 자세를 640 캔버스(1.743배, 중심 320, 밑창 544, 헬멧 중심 맞춤)로 올려 모든 클립의 시작·끝을 고정하고, 768px 원본으로 생성한다. 자세: V4 Idle Padded, V4 Idle Mirror, V4 Walk Padded, V4 Back Right Padded, V4 Idle Small 0.8(광선검처럼 칸 밖으로 나가는 동작용).
 - `zannabi_v4.py`가 한 번 정한 변환(2.08배, 176, 164, 클립별 배율 fit)으로 칸에 옮기고, 가장자리 회색 번짐을 외곽선색으로 바꾸고, 원본 가장자리 12px를 지워(AI가 그리는 세로 막대 부스러기) 1배·2배 WebP 띠를 만든다. 그리기 범위(box)는 -60~360u, 위로 -60u까지. 원본 시트는 저장소 밖 `Downloads/zannabi-v4/raw`, 후보·채택 시트 id는 같은 폴더 `jobs.txt`.
 - 픽셀 합성은 하지 않는다. 화면 밀도(dpr>1.25)에 맞는 한 벌만 받고, 대기·걷기 계열을 먼저 받은 뒤 나머지는 뒤에서 받는다. 아직 못 받은 클립이 필요한 행동은 고르지 않는다. 동작 줄이기면 대기 첫 프레임만.
@@ -146,7 +145,7 @@
 - 등받이 없는 의자(`cockpit-stool.webp`, left 16.75cqh, 높이 7.1cqh, 앉는 클립 중엔 숨김)와 데스크(`cockpit-desk.webp`, 책 더미·메모, left 28.64cqh, bottom 1cqh, 높이 16.74cqh, 조종간 보라 버튼·주황 불빛 CSS 깜빡임).
 - 조종: 데스크 30% 지점에서 뒤돌아 콘솔 조작 2번. 그동안 데스크 불빛이 빨라지고, 레이더 위에 지구본 홀로그램(`cockpit-globe-spin/off.webp`, AutoSprite 돌기 24장 10.5fps, 사라지기 25장을 거꾸로 = 나타나기 21fps)이 뜬다. 창 유리에는 우측 상단 행성 왼쪽 위(930,140)에 [+] 조준 괄호(반지름 11, 선 2.2)·연결선(1.5)·문구 한 줄(TARGET: KEPLER-442b · 4.2 AU, 1080p 약 13px)이 스크램블로 나타나고 5초마다 지지직. 1280×720 SVG(slice)라 화면 크기와 상관없이 행성에 맞는다. 큰 조준선·행성 격자 스캔은 과해서 뺐다.
 - 수련: 드론 데크 자리 오른쪽의 홀로그램 투사기(활동 구역 오른쪽 끝에서 13cqh 안쪽, 혼자 떨어져 보여 2026-11-19 당김)(`hologram-dummy.webp`, AutoSprite h2를 거꾸로 = 빛기둥이 내려와 차오름)에서 더미가 나타나고, 칼끝이 닿는 프레임에 번쩍이고 흔들린다. 수련 뒤 더미에게 인사.
-- Deep Thought 드론(`art/refs/cockpit/terminal-drone-gpt-v1.png`): AutoSprite C안(눌렸다 솟구치며 라벤더 불꽃, 49장 21fps). 화면 글자를 겹치려고 프레임마다 화면 중심을 고정한 띠(`cockpit-drone.webp`)로 만들고 원래 오르내림은 `DRONE_DY`로 되살린다. 평소엔 로고 아래 하늘(left 24~58cqh, bottom 26~40cqh, 처음엔 41·33cqh에서 시작)을 통통 뛸 때마다 70% 확률로 새 자리로 1.2초 날아다닌다. 단말기 행동이 시작되면 데크 자리(left 62cqh, bottom 4.8cqh, 뒷모습 손이 키보드에 닿는 높이, 화면 캡처로 맞춤)로 1.6초 날아와 앉고 그림자가 생긴다. 화면은 코드로 그린다: 평소 COMPUTING_, 두드리는 동안 16진수, 정면 복귀하며 42(4.5초) → 엄지 척 → 다시 날아오른다. 나중에 Ask Zannabi 입구.
+- Deep Thought 드론(ChatGPT 그림 → AutoSprite, 원본은 2026-11-19 정리 때 지움): AutoSprite C안(눌렸다 솟구치며 라벤더 불꽃, 49장 21fps). 화면 글자를 겹치려고 프레임마다 화면 중심을 고정한 띠(`cockpit-drone.webp`)로 만들고 원래 오르내림은 `DRONE_DY`로 되살린다. 평소엔 로고 아래 하늘(left 24~58cqh, bottom 26~40cqh, 처음엔 41·33cqh에서 시작)을 통통 뛸 때마다 70% 확률로 새 자리로 1.2초 날아다닌다. 단말기 행동이 시작되면 데크 자리(left 62cqh, bottom 4.8cqh, 뒷모습 손이 키보드에 닿는 높이, 화면 캡처로 맞춤)로 1.6초 날아와 앉고 그림자가 생긴다. 화면은 코드로 그린다: 평소 COMPUTING_, 두드리는 동안 16진수, 정면 복귀하며 42(4.5초) → 엄지 척 → 다시 날아오른다. 나중에 Ask Zannabi 입구.
 
 **시행착오.** 프롬프트에 window·stars를 쓰면 배경에 그려진다. 뒷모습 클립에서 '돌아본다'고 쓰면 얼굴을 이쪽으로 돌린다. AutoSprite 정지 소품은 그림체가 달라 쓰지 않는다. `animate_asset`은 소품을 매 프레임 다시 그리므로 글자·가는 선은 코드로 그린다. 배경 없는 칸에 소품을 올리면 AI가 조종석 배경을 지어내니 소품만 꽉 차게 잘라 올린다. 버린 후보: 헬멧 닦기·재채기·무전(말풍선 글자), 아케이드 기계(앉아서 게임은 식상).
 
