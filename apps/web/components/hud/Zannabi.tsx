@@ -120,16 +120,17 @@ const NEEDS: Record<Behavior, Clip[]> = {
   saber: ['turn', 'walk', 'turn-stop', 'turn-around', 'saber', 'saber-2'],
   pilot: ['turn', 'walk', 'turn-stop', 'turn-around', 'turn-back', 'console', 'console-2', 'breathe', 'turn-front'],
   ask: ['turn', 'walk', 'turn-stop', 'turn-around', 'type'],
-  gaze: ['turn-back', 'breathe', 'look-up', 'turn-front'],
+  gaze: ['turn', 'walk', 'turn-stop', 'turn-around', 'turn-back', 'breathe', 'look-up', 'turn-front'],
   look: ['look'],
   yawn: ['yawn'],
   doze: ['doze'],
   hop: ['hop'],
   wave: ['wave'],
 };
-type Place = 'read' | 'saber' | 'pilot' | 'ask';
-type Behavior = 'walk' | 'look' | 'yawn' | 'doze' | 'hop' | 'gaze' | 'wave' | Place;
-const isPlace = (b: Behavior): b is Place => b === 'read' || b === 'saber' || b === 'pilot' || b === 'ask';
+type Place = 'read' | 'saber' | 'pilot' | 'ask' | 'gaze';
+type Behavior = 'walk' | 'look' | 'yawn' | 'doze' | 'hop' | 'wave' | Place;
+const PLACES: Behavior[] = ['read', 'saber', 'pilot', 'ask', 'gaze'];
+const isPlace = (b: Behavior): b is Place => PLACES.includes(b);
 
 const GAZE_MOMENTS: Clip[] = ['look-up'];
 
@@ -139,15 +140,6 @@ const shuffle = <T,>(list: T[]) => [...list].sort(() => Math.random() - 0.5);
 
 function plan(behavior: Behavior): Step[] {
   switch (behavior) {
-    case 'gaze': {
-      const moments = shuffle(GAZE_MOMENTS).slice(0, count(1, 3));
-      return [
-        { clip: 'turn-back' },
-        ...moments.flatMap((clip): Step[] => [{ clip: 'breathe', repeat: count(1, 2) }, { clip }]),
-        { clip: 'breathe' },
-        { clip: 'turn-front' },
-      ];
-    }
     default:
       return [{ clip: behavior as Clip }];
   }
@@ -454,6 +446,21 @@ export function Zannabi() {
       return face && face !== end ? [...steps, { clip: 'turn-around', flip: true }] : steps;
     };
 
+    const clearSpot = () => {
+      const unit = lane.clientHeight / LANE_CQH;
+      const blocks = [seat, desk, holo]
+        .map((el): [number, number] => [el.offsetLeft - margin, el.offsetLeft + el.offsetWidth - margin])
+        .concat([[DECK.left * unit - margin, DECK.left * unit + terminal.offsetWidth - margin]])
+        .map(([a, b]): [number, number] => [a - BODY_HALF * scale, b + BODY_HALF * scale])
+        .sort((a, b) => a[0] - b[0]);
+      let best: [number, number] = [0, 0];
+      let edge = 0;
+      for (const [a, b] of [...blocks, [width, width] as [number, number]]) {
+        if (Math.min(a, width) - edge > best[1] - best[0]) best = [edge, Math.min(a, width)];
+        edge = Math.max(edge, b);
+      }
+      return (best[0] + best[1]) / 2;
+    };
     const places: Record<Place, { at: () => number; face?: number; scene: () => Step[] }> = {
       read: {
         at: () => seatX,
@@ -482,6 +489,21 @@ export function Zannabi() {
           { clip: 'breathe', repeat: count(1, 2), scene: true },
           { clip: 'console-2', scene: true },
           { clip: 'turn-front', hud: false, scene: true },
+        ],
+      },
+      gaze: {
+        at: clearSpot,
+        face: 1,
+        scene: () => [
+          { clip: 'turn-back', scene: true },
+          ...shuffle(GAZE_MOMENTS)
+            .slice(0, count(1, 2))
+            .flatMap((clip): Step[] => [
+              { clip: 'breathe', repeat: count(1, 2), scene: true },
+              { clip, scene: true },
+            ]),
+          { clip: 'breathe', scene: true },
+          { clip: 'turn-front', scene: true },
         ],
       },
       ask: {
@@ -614,8 +636,7 @@ export function Zannabi() {
         queue = queue.filter((s) => s.clip === clip);
       };
       if (spec().seated) return keep('stand');
-      if (step?.scene) return previous === 'pilot' && keep('turn-front');
-      if (previous === 'gaze') return keep('turn-front');
+      if (step?.scene) return (previous === 'pilot' || previous === 'gaze') && keep('turn-front');
       const scene = queue.findIndex((s) => s.scene);
       if (scene >= 0) queue = queue.slice(0, scene);
       if (step?.walk) arrived = true;
@@ -627,8 +648,35 @@ export function Zannabi() {
       wrapUp();
     };
 
+    const redirect = (place: Place) => {
+      if (!step?.walk || waveWanted) return false;
+      const { at, face, scene } = places[place];
+      const rest = sum(CLIPS.walk.advance?.slice(tick)) * scale * pace();
+      const length = ((at() - x) * dir - rest) / scale;
+      if (length <= 0) return false;
+      const even = Math.max(0, (length - STOP) / STRIDE);
+      for (const cycles of [Math.round(even), Math.floor(even), Math.ceil(even)]) {
+        const k = length / (cycles * STRIDE + STOP);
+        if (k < PACE[0] || k > PACE[1]) continue;
+        step.cycles = loops;
+        queue = [
+          ...(cycles > 0 ? [{ clip: 'walk', walk: true, pace: k, cycles: cycles - 1 } as Step] : []),
+          { clip: 'turn-stop', pace: k },
+          ...(face && face !== dir ? [{ clip: 'turn-around', flip: true } as Step] : []),
+          ...scene(),
+        ];
+        if (previous === 'ask' && place !== 'ask') think('idle');
+        previous = place;
+        wanted = null;
+        if (place === 'ask') think('call');
+        return true;
+      }
+      return false;
+    };
+
     const go = (place: Place) => {
       if ((previous === place && queue.some((s) => s.scene)) || !NEEDS[place].every((c) => loaded.has(c))) return;
+      if (redirect(place)) return;
       wanted = place;
       wrapUp();
     };
