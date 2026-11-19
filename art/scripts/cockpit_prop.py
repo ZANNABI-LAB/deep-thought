@@ -6,7 +6,6 @@ import numpy as np
 from PIL import Image
 
 TOLERANCE = 30
-SCALE = 0.42 * 1.12
 
 
 def cutout(img: Image.Image) -> Image.Image:
@@ -28,21 +27,13 @@ def cutout(img: Image.Image) -> Image.Image:
     return Image.fromarray(a.astype(np.uint8))
 
 
-def split(img: Image.Image) -> tuple[Image.Image, Image.Image]:
-    empty = np.where(~(np.asarray(img)[..., 3] > 40).any(0))[0]
-    middle = empty[(empty > img.width * 0.3) & (empty < img.width * 0.8)]
-    cut = int(middle[len(middle) // 2])
-    chair, console = img.crop((0, 0, cut, img.height)), img.crop((cut, 0, img.width, img.height))
-    return chair.crop(chair.getbbox()), console.crop(console.getbbox())
-
-
 def main() -> None:
-    src, out = Path(sys.argv[1]), Path(sys.argv[2])
-    seat = cutout(Image.open(src))
-    chair, _ = split(seat.crop(seat.getbbox()))
-    chair = chair.resize((round(chair.width * SCALE), round(chair.height * SCALE)), Image.LANCZOS)
-    chair.save(out, lossless=True, method=6)
-    print(out.name, chair.size)
+    src, out, width = Path(sys.argv[1]), Path(sys.argv[2]), int(sys.argv[3])
+    prop = cutout(Image.open(src))
+    prop = prop.crop(prop.getbbox())
+    prop = prop.resize((width, round(prop.height * width / prop.width)), Image.LANCZOS)
+    prop.save(out, lossless=True, method=6)
+    print(out.name, prop.size)
 
 
 if __name__ == '__main__':

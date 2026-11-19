@@ -14,14 +14,18 @@ art/refs/
   space/space-bg-v3-4k.webp        위 그림을 Bytedance Image Upscale로 4096×2304 (무손실 WebP)
   logo-mark-gpt-v3.png             헤더 로고 (GPT 흑백)
   logo-mark-gpt-v2.png             파비콘
-  cockpit/seat-gpt-v1.png          조종석(의자+조종간) 원본 (ChatGPT, 1254×1254, 검정 배경). 지금은 의자만 쓴다
-  cockpit/desk-gpt-v2.png          조종 데스크 원본 (ChatGPT, 1484×1060, 검정 배경)
-  cockpit/seat-reading-gpt-v1.png  조종석에 앉아 읽는 시안 (ChatGPT). 잔나비 비율이 스프라이트와 달라 자세 기준으로는 쓰지 않음
+  cockpit/stool-gpt-v1.png         등받이 없는 의자 원본 (ChatGPT, 검정 배경)
+  cockpit/desk-gpt-v3.png          조종 데스크 원본, 오른쪽 끝에 책 더미·메모 (ChatGPT, 1484×1060, 검정 배경)
+  cockpit/hologram-dummy-gpt-v1.png 수련용 홀로그램 더미와 투사기 (ChatGPT, 1484×1060, 검정 배경)
+  zannabi-gpt-style-v1.png         잔나비 v4 대기 기준 (ChatGPT, 데스크와 같은 그림체)
+  zannabi-gpt-walk-v1.png          잔나비 v4 걷기 기준 (옆모습)
+  zannabi-gpt-back-v1.png          잔나비 v4 뒷모습 기준
 art/scripts/
   logo_mark.py                     GPT 흑백 그림 → 웹 SVG(public/brand/)·파비콘(app/icon.png). potrace 필요
   logo.py                          로고 원본 → public/brand/home-logo-{630,1260,1808}.webp (배경 투명)
-  cockpit_seat.py                  조종석 원본 → public/world/cockpit-chair.webp (배경 제거, 의자만 잘라 0.47배, 1080p의 2배 해상도)
-  cockpit_desk.py                  데스크 원본 → public/world/cockpit-desk.webp (배경 제거, 폭 554px = 1080p의 2배 해상도)
+  cockpit_prop.py                  소품 원본 → public/world/ (배경 제거 후 폭 지정. 데스크 554, 의자 141 = 1080p의 2배 해상도)
+  zannabi_v4.py                    AutoSprite 원본 시트 폴더 → public/world/zannabi-*.webp·@2x (칸 변환·번짐 제거·이동량 측정)
+  hologram.py                      홀로그램 애니메이션 시트 → public/world/hologram-dummy.webp
   window_frame.py                  창틀 원본 → public/world/window-frame.png·window-lights.png + 이음·불빛 위치(JSON 출력을 WindowFrame.tsx에 옮긴다)
 ```
 

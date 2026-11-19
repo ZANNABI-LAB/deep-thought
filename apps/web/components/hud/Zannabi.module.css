@@ -8,18 +8,49 @@
 
 .seat {
   position: absolute;
-  left: 16cqh;
+  left: 16.75cqh;
   bottom: 0.69cqh;
-  height: 11.7cqh;
-  aspect-ratio: 169 / 215;
+  height: 7.1cqh;
+  aspect-ratio: 141 / 130;
 }
 
 .desk {
   position: absolute;
   left: 28.64cqh;
-  bottom: 2cqh;
-  height: 16.63cqh;
-  aspect-ratio: 554 / 305;
+  bottom: 1cqh;
+  height: 16.74cqh;
+  aspect-ratio: 554 / 307;
+}
+
+.holo {
+  position: absolute;
+  right: 0;
+  bottom: -0.47cqh;
+  height: 25.25cqh;
+  aspect-ratio: 296 / 441;
+}
+
+.holo[data-on] {
+  animation: flicker 2.8s steps(1, end) infinite;
+}
+
+@keyframes flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  41% {
+    opacity: 0.72;
+  }
+  43% {
+    opacity: 1;
+  }
+  77% {
+    opacity: 0.85;
+  }
+  78% {
+    opacity: 1;
+  }
 }
 
 .seat img,
@@ -95,9 +126,16 @@
 
 .sprite {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  left: -26%;
+  top: -7.5%;
+  width: 158.5%;
+  height: 113.333%;
+  pointer-events: none;
+}
+
+.hit {
+  position: absolute;
+  inset: 30% 28% 2%;
   pointer-events: auto;
   cursor: pointer;
 }
