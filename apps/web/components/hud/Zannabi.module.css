@@ -393,8 +393,8 @@
 
 .terminal {
   position: absolute;
-  left: 66cqh;
-  bottom: 3.6cqh;
+  left: 41cqh;
+  bottom: 33cqh;
   transition:
     left 1.2s cubic-bezier(0.45, 0, 0.3, 1),
     bottom 1.2s cubic-bezier(0.45, 0, 0.3, 1);

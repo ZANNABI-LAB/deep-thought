@@ -681,7 +681,6 @@ export function Zannabi() {
       if (!alive) return;
       ready = true;
       for (const clip of Object.keys(CLIPS) as Clip[]) if (!images.has(clip)) load(clip);
-      roam();
       globeSpin.src = '/world/cockpit-globe-spin.webp';
       globeOff.src = '/world/cockpit-globe-off.webp';
       if (still) {
