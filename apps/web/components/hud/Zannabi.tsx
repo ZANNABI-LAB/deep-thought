@@ -166,7 +166,7 @@ export function Zannabi() {
       lane.style.width = `${(logo.offsetLeft + logo.offsetWidth / 2) * 2}px`;
       scale = body.clientHeight / CELL[3];
       margin = BODY_HALF * scale;
-      width = Math.max(0, lane.clientWidth - margin * 2);
+      width = Math.max(0, Math.min(lane.clientWidth, holo.offsetLeft, projector.offsetLeft) - margin * 2);
       const stool = getComputedStyle(seat);
       seatX = parseFloat(stool.left) + parseFloat(stool.width) / 2 + STOOL_GAP * scale - margin;
       pilotX = desk.offsetLeft + desk.offsetWidth * PILOT_AT - margin;
