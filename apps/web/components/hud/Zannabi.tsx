@@ -3,60 +3,42 @@
 import { useEffect, useRef } from 'react';
 import { HUD_EVENT } from '@/components/space/CockpitHud';
 import styles from './Zannabi.module.css';
-
-type Box = [x: number, y: number, w: number, h: number];
-type Spec = { frames: number; start?: number; cols: [number, number]; fps?: number; advance?: number[]; box?: Box; seated?: boolean; hits?: number[] };
+import {
+  type Behavior,
+  type Box,
+  type Clip,
+  type Holo,
+  type Place,
+  type Spec,
+  type Step,
+  CLIPS,
+  FIRST,
+  FPS,
+  IDLE_CUTS,
+  MIN_TRIP,
+  NEAR,
+  NEEDS,
+  PACE,
+  READS,
+  REST_MS,
+  SHORT,
+  SHORT_PACE,
+  STILL_MS,
+  STOP,
+  STRIDE,
+  TRIP,
+  WALK_ENTRY,
+  between,
+  count,
+  isPlace,
+  pick,
+  sum,
+} from './zannabi-motion';
 
 const CELL: Box = [0, 0, 200, 240];
 const CANVAS: Box = [-60, -60, 420, 314];
-const FPS = 14;
 const BODY_HALF = 64;
-const CLIPS: Record<Clip, Spec> = {
-  idle: { frames: 28, cols: [28, 28], fps: 7 },
-  walk: { frames: 14, cols: [14, 14], advance: [0, 6, 7, 8, 10, 6, 12, 3, 7, 8, 11, 8, 6, 9] },
-  turn: { frames: 16, cols: [16, 16], advance: [2, 4, 7, 6, 7, 3, 2, 0, 5, 7, 6, 6, 7, 5, 2, 1] },
-  'turn-stop': { frames: 8, cols: [8, 8], advance: [12, 13, 0, 0, 0, 0, 0, 0] },
-  'turn-around': { frames: 20, cols: [20, 20], fps: 18 },
-  wave: { frames: 22, cols: [22, 22] },
-  look: { frames: 26, cols: [26, 26] },
-  yawn: { frames: 26, cols: [26, 26] },
-  doze: { frames: 26, cols: [26, 26] },
-  hop: { frames: 26, cols: [26, 26], box: [0, -18, 200, 258] },
-  saber: { frames: 26, cols: [26, 20], box: [-60, -60, 393, 314], hits: [5, 14] },
-  'saber-2': { frames: 26, cols: [26, 20], box: [-60, -60, 393, 314], hits: [3, 8, 12, 15] },
-  sit: { frames: 27, cols: [27, 27], seated: true },
-  read: { frames: 27, cols: [27, 27], seated: true },
-  'read-nod': { frames: 27, cols: [27, 27], seated: true },
-  stand: { frames: 26, cols: [26, 26], seated: true },
-  'turn-back': { frames: 17, cols: [17, 17], fps: 16 },
-  'turn-front': { frames: 21, cols: [21, 21], fps: 16 },
-  breathe: { frames: 28, cols: [28, 28], fps: 7 },
-  'look-up': { frames: 26, cols: [26, 26] },
-  console: { frames: 26, cols: [26, 26] },
-  type: { frames: 25, cols: [25, 25] },
-  thumbs: { frames: 23, cols: [23, 23] },
-  notice: { frames: 22, cols: [22, 22] },
-  music: { frames: 25, cols: [25, 25] },
-  dance: { frames: 26, cols: [26, 26], box: [-21, 0, 242, 240] },
-  moonjump: { frames: 28, cols: [28, 28], box: [0, -43, 200, 283] },
-  stretch: { frames: 26, cols: [26, 26] },
-  sitdeck: { frames: 25, cols: [25, 25], box: [0, 0, 200, 243] },
-  wobble: { frames: 24, cols: [24, 24] },
-  bow: { frames: 23, cols: [23, 23] },
-  'console-2': { frames: 26, cols: [26, 26] },
-};
-const WALK_ENTRY = 8;
-const sum = (list: number[] = []) => list.reduce((total, d) => total + d, 0);
-const travel = (clip: Clip) => sum(CLIPS[clip].advance);
-const STRIDE = travel('walk');
-const STOP = travel('turn-stop');
-const TRIP = travel('turn') + sum(CLIPS.walk.advance?.slice(WALK_ENTRY)) + STOP;
 const STOOL_GAP = 22;
-const SHORT = travel('turn') + STOP;
-const PACE: [number, number] = [0.7, 1.3];
-const SHORT_PACE: [number, number] = [0.7, 1];
-const NEAR = 4;
-const READS: Clip[] = ['read', 'read-nod'];
 const HOLO = { frames: 24, fps: 14, w: 296, h: 441, dummy: 21 };
 const DRONE = { w: 200, h: 304, frames: 49, fps: 21, crop: 491, from: 11, to: 36 };
 const DRONE_DY = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 23, 45, 63, 68, 71, 71, 63, 35, 9, -15, -24, -31, -35, -36, -37, -38, -39, -39, -39, -35, -30, -19, -12, -4, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -70,134 +52,16 @@ const DESK_LIGHTS: [number, number, number, number, 'amber' | 'violet', number][
   [249, 118, 21, 14, 'amber', 0],
   [281, 118, 20, 14, 'amber', 1200],
 ];
-const REST_MS: [number, number] = [3000, 8000];
-const STILL_MS: [number, number] = [1000, 3000];
-const MIN_TRIP = 0.25;
 const HOLD_MS = 900;
 const NOTICE = { reach: 1.8, cooldown: 25000 };
 const DONE_MS = 1100;
 const ANSWER_MS = 4500;
 const TERM_GAP = 28;
 const DECK = { left: 66, bottom: 8 };
-const ROAM = { left: [24, 58], bottom: [26, 40], chance: 0.7 };
+const ROAM: { left: [number, number]; bottom: [number, number]; chance: number } = { left: [24, 58], bottom: [26, 40], chance: 0.7 };
 const LANE_CQH = 27.5;
 const DIGITS = '0123456789ABCDEF';
 const SHAKE_MS = 420;
-const IDLE_CUTS = new Set([0, 1, 2, 3, 11, 12, 13, 14, 23, 24, 25, 26, 27]);
-const FIRST: Clip[] = ['idle', 'turn', 'walk', 'turn-stop', 'turn-around', 'wave'];
-
-type Clip =
-  | 'idle'
-  | 'turn'
-  | 'turn-stop'
-  | 'turn-around'
-  | 'walk'
-  | 'wave'
-  | 'look'
-  | 'yawn'
-  | 'doze'
-  | 'hop'
-  | 'turn-back'
-  | 'turn-front'
-  | 'breathe'
-  | 'look-up'
-  | 'sit'
-  | 'read'
-  | 'read-nod'
-  | 'stand'
-  | 'saber'
-  | 'saber-2'
-  | 'console'
-  | 'type'
-  | 'thumbs'
-  | 'notice'
-  | 'music'
-  | 'dance'
-  | 'moonjump'
-  | 'stretch'
-  | 'sitdeck'
-  | 'wobble'
-  | 'bow'
-  | 'console-2';
-type Holo = 'appear' | 'disappear';
-type Step = {
-  clip: Clip;
-  repeat?: number;
-  walk?: boolean;
-  flip?: boolean;
-  from?: number;
-  pace?: number;
-  cycles?: number;
-  scene?: boolean;
-  holo?: Holo;
-  hud?: boolean;
-  term?: 'compute' | 'answer';
-};
-const NEEDS: Record<Behavior, Clip[]> = {
-  walk: ['turn', 'walk', 'turn-stop', 'turn-around'],
-  read: ['turn', 'walk', 'turn-stop', 'turn-around', 'sit', 'read', 'read-nod', 'stand'],
-  saber: ['turn', 'walk', 'turn-stop', 'turn-around', 'saber', 'saber-2', 'bow'],
-  pilot: ['turn', 'walk', 'turn-stop', 'turn-around', 'turn-back', 'console', 'console-2', 'breathe', 'turn-front'],
-  ask: ['turn', 'walk', 'turn-stop', 'turn-around', 'turn-back', 'type', 'turn-front', 'thumbs'],
-  gaze: ['turn', 'walk', 'turn-stop', 'turn-around', 'turn-back', 'breathe', 'look-up', 'turn-front'],
-  look: ['look'],
-  yawn: ['yawn'],
-  doze: ['doze'],
-  hop: ['hop'],
-  wave: ['wave'],
-  notice: ['notice'],
-  music: ['music'],
-  dance: ['dance'],
-  moonjump: ['moonjump'],
-  stretch: ['stretch'],
-  sitdeck: ['sitdeck'],
-  wobble: ['wobble'],
-};
-type Place = 'read' | 'saber' | 'pilot' | 'ask' | 'gaze';
-type Behavior = 'walk' | 'look' | 'yawn' | 'doze' | 'hop' | 'wave' | 'notice' | 'music' | 'dance' | 'moonjump' | 'stretch' | 'sitdeck' | 'wobble' | Place;
-const PLACES: Behavior[] = ['read', 'saber', 'pilot', 'ask', 'gaze'];
-const isPlace = (b: Behavior): b is Place => PLACES.includes(b);
-
-const GAZE_MOMENTS: Clip[] = ['look-up'];
-
-const between = ([min, max]: [number, number]) => min + Math.random() * (max - min);
-const count = (min: number, max: number) => min + Math.floor(Math.random() * (max - min + 1));
-const shuffle = <T,>(list: T[]) => [...list].sort(() => Math.random() - 0.5);
-
-function plan(behavior: Behavior): Step[] {
-  switch (behavior) {
-    default:
-      return [{ clip: behavior as Clip }];
-  }
-}
-const WEIGHTS: [Behavior, number][] = [
-  ['walk', 40],
-  ['read', 10],
-  ['saber', 8],
-  ['pilot', 10],
-  ['ask', 6],
-  ['look', 12],
-  ['gaze', 12],
-  ['yawn', 8],
-  ['doze', 6],
-  ['hop', 6],
-  ['music', 6],
-  ['dance', 5],
-  ['moonjump', 5],
-  ['stretch', 5],
-  ['sitdeck', 4],
-  ['wobble', 3],
-];
-
-function pick(previous: Behavior | null, loaded: Set<Clip>): Behavior {
-  const options = WEIGHTS.filter(([b]) => (b === 'walk' || b !== previous) && NEEDS[b].every((c) => loaded.has(c)));
-  let roll = Math.random() * options.reduce((sum, [, w]) => sum + w, 0);
-  for (const [behavior, weight] of options) {
-    roll -= weight;
-    if (roll < 0) return behavior;
-  }
-  return 'walk';
-}
 
 function Tip({ children }: { children: string }) {
   const label = (
@@ -402,11 +266,11 @@ export function Zannabi() {
       terminal.style.setProperty('--lift', `${lift}`);
     };
 
-    const place = (left: number, bottom: number) => {
+    const park = (left: number, bottom: number) => {
       terminal.style.left = `${left}cqh`;
       terminal.style.bottom = `${bottom}cqh`;
     };
-    const roam = () => place(between(ROAM.left as [number, number]), between(ROAM.bottom as [number, number]));
+    const roam = () => park(between(ROAM.left), between(ROAM.bottom));
 
     const advanceDrone = () => {
       const state = terminal.dataset.state;
@@ -529,12 +393,8 @@ export function Zannabi() {
         face: 1,
         scene: () => [
           { clip: 'turn-back', scene: true },
-          ...shuffle(GAZE_MOMENTS)
-            .slice(0, count(1, 2))
-            .flatMap((clip): Step[] => [
-              { clip: 'breathe', repeat: count(1, 2), scene: true },
-              { clip, scene: true },
-            ]),
+          { clip: 'breathe', repeat: count(1, 2), scene: true },
+          { clip: 'look-up', scene: true },
           { clip: 'breathe', scene: true },
           { clip: 'turn-front', scene: true },
         ],
@@ -557,7 +417,7 @@ export function Zannabi() {
       clearTimeout(answered);
       terminal.dataset.state = state;
       if (state === 'idle') roam();
-      else place(DECK.left, DECK.bottom);
+      else park(DECK.left, DECK.bottom);
       if (state === 'compute') {
         computing = window.setInterval(() => {
           readout.textContent = Array.from({ length: 3 }, () =>
@@ -607,7 +467,7 @@ export function Zannabi() {
       if (behavior === 'wave') {
         waveWanted = false;
       }
-      queue = (behavior === 'walk' ? wander() : plan(behavior)) ?? [];
+      queue = (behavior === 'walk' ? wander() : [{ clip: behavior as Clip }]) ?? [];
       next();
     };
 
