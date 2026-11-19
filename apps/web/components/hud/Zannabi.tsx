@@ -42,7 +42,10 @@ const STRIDE = travel('walk');
 const STOP = travel('turn-stop');
 const TRIP = travel('turn') + sum(CLIPS.walk.advance?.slice(WALK_ENTRY)) + STOP;
 const STOOL_GAP = 22;
-const PACE: [number, number] = [0.8, 1.25];
+const SHORT = travel('turn') + STOP;
+const PACE: [number, number] = [0.7, 1.3];
+const SHORT_PACE: [number, number] = [0.7, 1];
+const NEAR = 4;
 const READS: Clip[] = ['read', 'read-nod'];
 const HOLO = { frames: 24, fps: 14, w: 296, h: 441, dummy: 21 };
 const SABER_REACH = 240;
@@ -109,7 +112,9 @@ const NEEDS: Record<Behavior, Clip[]> = {
   hop: ['hop'],
   wave: ['wave'],
 };
-type Behavior = 'walk' | 'look' | 'yawn' | 'doze' | 'hop' | 'gaze' | 'wave' | 'read' | 'saber' | 'pilot';
+type Place = 'read' | 'saber' | 'pilot';
+type Behavior = 'walk' | 'look' | 'yawn' | 'doze' | 'hop' | 'gaze' | 'wave' | Place;
+const isPlace = (b: Behavior): b is Place => b === 'read' || b === 'saber' || b === 'pilot';
 
 const GAZE_MOMENTS: Clip[] = ['tilt', 'palm', 'look-up'];
 
@@ -119,8 +124,6 @@ const shuffle = <T,>(list: T[]) => [...list].sort(() => Math.random() - 0.5);
 
 function plan(behavior: Behavior): Step[] {
   switch (behavior) {
-    case 'walk':
-      return [{ clip: 'turn' }, { clip: 'walk', walk: true, from: WALK_ENTRY }, { clip: 'turn-stop' }];
     case 'gaze': {
       const moments = shuffle(GAZE_MOMENTS).slice(0, count(1, 3));
       return [
@@ -197,7 +200,6 @@ export function Zannabi() {
     let saberX = 0;
     let pilotX = 0;
     let x = 0;
-    let target = 0;
     let drawn = '';
     let holoDrawn = -1;
     const measure = () => {
@@ -218,12 +220,10 @@ export function Zannabi() {
       pilotX = desk.offsetLeft + desk.offsetWidth * PILOT_AT - margin;
       saberX = holo.offsetLeft + (HOLO.dummy - SABER_REACH) * scale - margin + body.clientWidth / 2;
       x = Math.min(x, width);
-      target = Math.min(target, width);
     };
     measure();
 
     x = width * 0.55;
-    target = x;
     let dir = 1;
     let queue: Step[] = [];
     let step: Step | null = null;
@@ -297,71 +297,107 @@ export function Zannabi() {
         { duration: 260, easing: 'ease-out' },
       );
 
-    const walkTo = (spot: number, facing = true): Step[] | null => {
-      const d = (spot - x) / scale;
-      const toward = d > 0 ? 1 : -1;
-      const before = toward !== dir;
-      const after = facing && toward !== 1;
-      const length = Math.abs(d);
-      const cycles = Math.max(0, Math.round((length - TRIP) / STRIDE));
-      const k = length / (TRIP + cycles * STRIDE);
-      if (k < PACE[0] || k > PACE[1]) return null;
-      return [
-        ...(before ? [{ clip: 'turn-around', flip: true } as Step] : []),
-        { clip: 'turn', pace: k },
-        { clip: 'walk', walk: true, from: WALK_ENTRY, pace: k, cycles },
-        { clip: 'turn-stop', pace: k },
-        ...(after ? [{ clip: 'turn-around', flip: true } as Step] : []),
-      ];
+    const leg = (from: number, facing: number, spot: number): Step[] | null => {
+      const length = Math.abs(spot - from) / scale;
+      const turn: Step[] = (spot > from ? 1 : -1) !== facing ? [{ clip: 'turn-around', flip: true }] : [];
+      const even = Math.max(0, (length - TRIP) / STRIDE);
+      for (const cycles of [Math.round(even), Math.floor(even), Math.ceil(even)]) {
+        const k = length / (TRIP + cycles * STRIDE);
+        if (k >= PACE[0] && k <= PACE[1])
+          return [...turn, { clip: 'turn', pace: k }, { clip: 'walk', walk: true, from: WALK_ENTRY, pace: k, cycles }, { clip: 'turn-stop', pace: k }];
+      }
+      const short = length / SHORT;
+      if (short >= SHORT_PACE[0] && short <= SHORT_PACE[1]) return [...turn, { clip: 'turn', pace: short }, { clip: 'turn-stop', pace: short }];
+      return null;
     };
 
-    const scenes: Record<'read' | 'saber' | 'pilot', () => Step[]> = {
-      read: () => [
-        { clip: 'sit', scene: true },
-        ...Array.from({ length: count(2, 4) }, (): Step => ({ clip: READS[Math.floor(Math.random() * READS.length)]!, scene: true })),
-        { clip: 'stand', scene: true },
-      ],
-      saber: () => [
-        { clip: 'idle', holo: 'appear', scene: true },
-        { clip: 'saber', scene: true },
-        { clip: 'idle', holo: 'disappear', scene: true },
-      ],
-      pilot: () => [
-        { clip: 'turn-back', scene: true },
-        { clip: 'console', hud: true, scene: true },
-        { clip: 'breathe', repeat: count(1, 2), scene: true },
-        { clip: 'console', scene: true },
-        { clip: 'turn-front', hud: false, scene: true },
-      ],
+    const route = (spot: number, face?: number): Step[] | null => {
+      let steps: Step[] | null = [];
+      let end = dir;
+      if (Math.abs(spot - x) / scale > NEAR) {
+        end = spot > x ? 1 : -1;
+        steps = leg(x, dir, spot);
+        for (const side of [-end, end]) {
+          if (steps) break;
+          for (const reach of [1, 1.5]) {
+            const via = spot + side * TRIP * reach * scale;
+            if (via < 0 || via > width) continue;
+            const out = leg(x, dir, via);
+            const back = out && leg(via, via > x ? 1 : -1, spot);
+            if (back) {
+              steps = [...out!, ...back];
+              break;
+            }
+          }
+        }
+      }
+      if (!steps) return null;
+      return face && face !== end ? [...steps, { clip: 'turn-around', flip: true }] : steps;
     };
-    const spots = { read: () => seatX, saber: () => saberX, pilot: () => pilotX };
+
+    const places: Record<Place, { at: () => number; face?: number; scene: () => Step[] }> = {
+      read: {
+        at: () => seatX,
+        face: 1,
+        scene: () => [
+          { clip: 'sit', scene: true },
+          ...Array.from({ length: count(2, 4) }, (): Step => ({ clip: READS[Math.floor(Math.random() * READS.length)]!, scene: true })),
+          { clip: 'stand', scene: true },
+        ],
+      },
+      saber: {
+        at: () => saberX,
+        face: 1,
+        scene: () => [
+          { clip: 'idle', holo: 'appear', scene: true },
+          { clip: 'saber', scene: true },
+          { clip: 'idle', holo: 'disappear', scene: true },
+        ],
+      },
+      pilot: {
+        at: () => pilotX,
+        scene: () => [
+          { clip: 'turn-back', scene: true },
+          { clip: 'console', hud: true, scene: true },
+          { clip: 'breathe', repeat: count(1, 2), scene: true },
+          { clip: 'console', scene: true },
+          { clip: 'turn-front', hud: false, scene: true },
+        ],
+      },
+    };
     const signal = (on: boolean) => {
       desk.toggleAttribute('data-active', on);
       window.dispatchEvent(new CustomEvent(HUD_EVENT, { detail: on }));
     };
 
+    const wander = (): Step[] | null => {
+      const edge = Math.min(STRIDE * scale, width / 4);
+      for (let tries = 0; tries < 8; tries += 1) {
+        const spot = edge + Math.random() * (width - edge * 2);
+        if (Math.abs(spot - x) < width * MIN_TRIP) continue;
+        const steps = route(spot);
+        if (steps) return steps;
+      }
+      return null;
+    };
+
     const start = (behavior: Behavior): void => {
-      if (behavior === 'read' || behavior === 'saber' || behavior === 'pilot') {
-        const trip = walkTo(spots[behavior](), behavior !== 'pilot');
+      if (isPlace(behavior)) {
+        const place = places[behavior];
+        const trip = route(place.at(), place.face);
         if (!trip) return start('walk');
         previous = behavior;
         arrived = false;
-        queue = [...trip, ...scenes[behavior]()];
+        queue = [...trip, ...place.scene()];
         return next();
       }
       previous = behavior;
+      arrived = false;
       if (behavior === 'wave') {
         waveWanted = false;
         wavedAt = performance.now();
       }
-      if (behavior === 'walk') {
-        const edge = Math.min(STRIDE * scale, width / 4);
-        do target = edge + Math.random() * (width - edge * 2);
-        while (width > 0 && Math.abs(target - x) < width * MIN_TRIP);
-        arrived = false;
-      }
-      queue = plan(behavior);
-      if (behavior === 'walk' && (target > x ? 1 : -1) !== dir) queue.unshift({ clip: 'turn-around', flip: true });
+      queue = (behavior === 'walk' ? wander() : plan(behavior)) ?? [];
       next();
     };
 
@@ -395,10 +431,9 @@ export function Zannabi() {
       const steps = spec().advance;
       if (steps) x = clamp(x + dir * (steps[tick] ?? 0) * scale * pace());
       if (step.walk) {
-        if (step.cycles === undefined && (target - x) * dir <= STOP * scale) arrived = true;
         tick = (tick + 1) % spec().frames;
         if (tick === 0) loops += 1;
-        if (tick === 0 && (arrived || loops > (step.cycles ?? Infinity))) next();
+        if (tick === 0 && (arrived || loops > (step.cycles ?? 0))) next();
         return;
       }
       tick += 1;
