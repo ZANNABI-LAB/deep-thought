@@ -53,6 +53,7 @@
 }
 
 .hud[data-on] .reticle,
+.hud[data-on] .leader,
 .hud[data-on] .text {
   animation: glitch 5s steps(1, end) 1.4s infinite;
 }
@@ -84,6 +85,7 @@
   }
 
   .hud[data-on] .reticle,
+  .hud[data-on] .leader,
   .hud[data-on] .text {
     animation: none;
   }
