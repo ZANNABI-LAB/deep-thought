@@ -486,7 +486,7 @@ export function Zannabi() {
       loops = 0;
       if (step) return;
       if (asked()) return answer();
-      restUntil = performance.now() + between(REST_MS);
+      restUntil = performance.now() + (demo.length ? 1200 : between(REST_MS));
     };
 
     const advance = (now: number) => {
@@ -496,7 +496,7 @@ export function Zannabi() {
         tick = (tick + 1) % CLIPS.idle.frames;
         if (tick !== 0) return;
         stillUntil = now + between(STILL_MS);
-        if (now >= restUntil) start(pick(previous, loaded));
+        if (now >= restUntil) start(rehearse() ?? pick(previous, loaded));
         return;
       }
       const steps = spec().advance;
@@ -611,6 +611,17 @@ export function Zannabi() {
       };
       return [el, press] as const;
     });
+
+    const demo =
+      process.env.NODE_ENV !== 'production'
+        ? (new URLSearchParams(location.search).get('zannabi') ?? '').split(',').filter((b): b is Behavior => b in NEEDS)
+        : [];
+    let demoAt = 0;
+    const rehearse = (): Behavior | null => {
+      const behavior = demo[demoAt++ % demo.length];
+      if (!behavior || !NEEDS[behavior].every((c) => loaded.has(c))) return null;
+      return behavior;
+    };
 
     const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
     let id = 0;
