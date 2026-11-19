@@ -36,7 +36,16 @@ CLIPS = {
     'look-up': ('RlookupB', EVEN[1:-1]),
     'console': ('RconsoleA', EVEN[1:-1]),
     'console-2': ('RconsoleB', EVEN[1:-1]),
-    'type': ('type2', EVEN[1:26]),
+    'type': ('RtypeB', EVEN[1:26]),
+    'thumbs': ('thumbsB', EVEN[1:24]),
+    'notice': ('noticeB', EVEN[1:23]),
+    'music': ('musicB', EVEN[1:26]),
+    'dance': ('danceA', EVEN[:26]),
+    'moonjump': ('moonjumpA', EVEN[1:] + [55]),
+    'stretch': ('stretchA', EVEN[:26]),
+    'sitdeck': ('sitdeckA', EVEN[1:26]),
+    'wobble': ('wobbleA', EVEN[1:25]),
+    'bow': ('bowB', EVEN[:23]),
 }
 WALKERS = {'walk': None, 'turn': ('walkB', 16), 'turn-stop': ('idleC', 0)}
 

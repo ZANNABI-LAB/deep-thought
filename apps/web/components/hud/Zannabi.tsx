@@ -34,6 +34,15 @@ const CLIPS: Record<Clip, Spec> = {
   'look-up': { frames: 26, cols: [26, 26] },
   console: { frames: 26, cols: [26, 26] },
   type: { frames: 25, cols: [25, 25] },
+  thumbs: { frames: 23, cols: [23, 23] },
+  notice: { frames: 22, cols: [22, 22] },
+  music: { frames: 25, cols: [25, 25] },
+  dance: { frames: 26, cols: [26, 26], box: [-21, 0, 242, 240] },
+  moonjump: { frames: 28, cols: [28, 28], box: [0, -43, 200, 283] },
+  stretch: { frames: 26, cols: [26, 26] },
+  sitdeck: { frames: 25, cols: [25, 25], box: [0, 0, 200, 243] },
+  wobble: { frames: 24, cols: [24, 24] },
+  bow: { frames: 23, cols: [23, 23] },
   'console-2': { frames: 26, cols: [26, 26] },
 };
 const WALK_ENTRY = 8;
@@ -65,10 +74,11 @@ const REST_MS: [number, number] = [3000, 8000];
 const STILL_MS: [number, number] = [1000, 3000];
 const MIN_TRIP = 0.25;
 const HOLD_MS = 900;
+const NOTICE = { reach: 1.8, cooldown: 25000 };
 const DONE_MS = 1100;
 const ANSWER_MS = 4500;
-const TERM_GAP = 38;
-const DECK = { left: 66, bottom: 3.6 };
+const TERM_GAP = 28;
+const DECK = { left: 66, bottom: 8 };
 const ROAM = { left: [24, 58], bottom: [26, 40], chance: 0.7 };
 const LANE_CQH = 27.5;
 const DIGITS = '0123456789ABCDEF';
@@ -99,6 +109,15 @@ type Clip =
   | 'saber-2'
   | 'console'
   | 'type'
+  | 'thumbs'
+  | 'notice'
+  | 'music'
+  | 'dance'
+  | 'moonjump'
+  | 'stretch'
+  | 'sitdeck'
+  | 'wobble'
+  | 'bow'
   | 'console-2';
 type Holo = 'appear' | 'disappear';
 type Step = {
@@ -117,18 +136,25 @@ type Step = {
 const NEEDS: Record<Behavior, Clip[]> = {
   walk: ['turn', 'walk', 'turn-stop', 'turn-around'],
   read: ['turn', 'walk', 'turn-stop', 'turn-around', 'sit', 'read', 'read-nod', 'stand'],
-  saber: ['turn', 'walk', 'turn-stop', 'turn-around', 'saber', 'saber-2'],
+  saber: ['turn', 'walk', 'turn-stop', 'turn-around', 'saber', 'saber-2', 'bow'],
   pilot: ['turn', 'walk', 'turn-stop', 'turn-around', 'turn-back', 'console', 'console-2', 'breathe', 'turn-front'],
-  ask: ['turn', 'walk', 'turn-stop', 'turn-around', 'type'],
+  ask: ['turn', 'walk', 'turn-stop', 'turn-around', 'turn-back', 'type', 'turn-front', 'thumbs'],
   gaze: ['turn', 'walk', 'turn-stop', 'turn-around', 'turn-back', 'breathe', 'look-up', 'turn-front'],
   look: ['look'],
   yawn: ['yawn'],
   doze: ['doze'],
   hop: ['hop'],
   wave: ['wave'],
+  notice: ['notice'],
+  music: ['music'],
+  dance: ['dance'],
+  moonjump: ['moonjump'],
+  stretch: ['stretch'],
+  sitdeck: ['sitdeck'],
+  wobble: ['wobble'],
 };
 type Place = 'read' | 'saber' | 'pilot' | 'ask' | 'gaze';
-type Behavior = 'walk' | 'look' | 'yawn' | 'doze' | 'hop' | 'wave' | Place;
+type Behavior = 'walk' | 'look' | 'yawn' | 'doze' | 'hop' | 'wave' | 'notice' | 'music' | 'dance' | 'moonjump' | 'stretch' | 'sitdeck' | 'wobble' | Place;
 const PLACES: Behavior[] = ['read', 'saber', 'pilot', 'ask', 'gaze'];
 const isPlace = (b: Behavior): b is Place => PLACES.includes(b);
 
@@ -155,6 +181,12 @@ const WEIGHTS: [Behavior, number][] = [
   ['yawn', 8],
   ['doze', 6],
   ['hop', 6],
+  ['music', 6],
+  ['dance', 5],
+  ['moonjump', 5],
+  ['stretch', 5],
+  ['sitdeck', 4],
+  ['wobble', 3],
 ];
 
 function pick(previous: Behavior | null, loaded: Set<Clip>): Behavior {
@@ -477,6 +509,7 @@ export function Zannabi() {
         scene: () => [
           { clip: 'idle', holo: 'appear', scene: true },
           { clip: Math.random() < 0.5 ? 'saber' : 'saber-2', scene: true },
+          { clip: 'bow', scene: true },
           { clip: 'idle', holo: 'disappear', scene: true },
         ],
       },
@@ -510,8 +543,10 @@ export function Zannabi() {
         at: () => askX,
         face: 1,
         scene: () => [
-          { clip: 'type', term: 'compute', scene: true },
-          { clip: 'idle', term: 'answer', scene: true },
+          { clip: 'turn-back', scene: true },
+          { clip: 'type', term: 'compute', repeat: 2, scene: true },
+          { clip: 'turn-front', term: 'answer', scene: true },
+          { clip: 'thumbs', scene: true },
         ],
       },
     };
@@ -791,6 +826,17 @@ export function Zannabi() {
       el.addEventListener('pointerleave', release);
     }
     window.addEventListener('pointerup', release);
+    let noticedAt = -Infinity;
+    const approach = (event: PointerEvent) => {
+      if (step || waveWanted || wanted || performance.now() - noticedAt < NOTICE.cooldown || !loaded.has('notice')) return;
+      const box = body.getBoundingClientRect();
+      const dx = event.clientX - (box.left + box.width / 2);
+      const dy = event.clientY - (box.top + box.height / 2);
+      if (Math.hypot(dx, dy) > box.width * NOTICE.reach || hit.contains(event.target as Node)) return;
+      noticedAt = performance.now();
+      start('notice');
+    };
+    window.addEventListener('pointermove', approach);
     window.addEventListener('pointercancel', release);
     return () => {
       alive = false;
@@ -804,6 +850,7 @@ export function Zannabi() {
         el.removeEventListener('pointerleave', release);
       }
       window.removeEventListener('pointerup', release);
+      window.removeEventListener('pointermove', approach);
       window.removeEventListener('pointercancel', release);
     };
   }, []);
