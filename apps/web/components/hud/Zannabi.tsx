@@ -5,7 +5,7 @@ import { HUD_EVENT } from '@/components/space/CockpitHud';
 import styles from './Zannabi.module.css';
 
 type Box = [x: number, y: number, w: number, h: number];
-type Spec = { frames: number; cols: [number, number]; fps?: number; advance?: number[]; box?: Box; seated?: boolean; hits?: number[] };
+type Spec = { frames: number; start?: number; cols: [number, number]; fps?: number; advance?: number[]; box?: Box; seated?: boolean; hits?: number[] };
 
 const CELL: Box = [0, 0, 200, 240];
 const CANVAS: Box = [-52, -18, 317, 272];
@@ -16,8 +16,8 @@ const CLIPS: Record<Clip, Spec> = {
   walk: { frames: 14, cols: [14, 14], advance: [0, 6, 7, 8, 10, 6, 12, 3, 7, 8, 11, 8, 6, 9] },
   turn: { frames: 16, cols: [16, 16], advance: [2, 4, 7, 6, 7, 3, 2, 0, 5, 7, 6, 6, 7, 5, 2, 1] },
   'turn-stop': { frames: 8, cols: [8, 8], advance: [12, 13, 0, 0, 0, 0, 0, 0] },
-  'turn-around': { frames: 26, cols: [26, 26] },
-  wave: { frames: 26, cols: [26, 26] },
+  'turn-around': { frames: 26, cols: [26, 26], start: 1, fps: 20 },
+  wave: { frames: 22, cols: [22, 22] },
   look: { frames: 26, cols: [26, 26] },
   yawn: { frames: 26, cols: [26, 26] },
   doze: { frames: 26, cols: [26, 26] },
@@ -27,8 +27,8 @@ const CLIPS: Record<Clip, Spec> = {
   read: { frames: 27, cols: [27, 27], seated: true },
   'read-nod': { frames: 27, cols: [27, 27], seated: true },
   stand: { frames: 26, cols: [26, 26], seated: true },
-  'turn-back': { frames: 26, cols: [26, 26] },
-  'turn-front': { frames: 26, cols: [26, 26] },
+  'turn-back': { frames: 16, cols: [16, 16], fps: 16 },
+  'turn-front': { frames: 18, cols: [18, 18], fps: 16 },
   breathe: { frames: 28, cols: [28, 28], fps: 7 },
   tilt: { frames: 26, cols: [26, 26] },
   palm: { frames: 26, cols: [26, 26] },
@@ -297,11 +297,11 @@ export function Zannabi() {
         { duration: 260, easing: 'ease-out' },
       );
 
-    const walkTo = (spot: number): Step[] | null => {
+    const walkTo = (spot: number, facing = true): Step[] | null => {
       const d = (spot - x) / scale;
       const toward = d > 0 ? 1 : -1;
       const before = toward !== dir;
-      const after = toward !== 1;
+      const after = facing && toward !== 1;
       const length = Math.abs(d);
       const cycles = Math.max(0, Math.round((length - TRIP) / STRIDE));
       const k = length / (TRIP + cycles * STRIDE);
@@ -342,7 +342,7 @@ export function Zannabi() {
 
     const start = (behavior: Behavior): void => {
       if (behavior === 'read' || behavior === 'saber' || behavior === 'pilot') {
-        const trip = walkTo(spots[behavior]());
+        const trip = walkTo(spots[behavior](), behavior !== 'pilot');
         if (!trip) return start('walk');
         previous = behavior;
         arrived = false;
@@ -375,7 +375,7 @@ export function Zannabi() {
         holoTick = step.holo === 'appear' ? HOLO.frames - 1 : 0;
         holoAcc = 0;
       }
-      tick = step?.from ?? 0;
+      tick = step?.from ?? (step ? (CLIPS[step.clip].start ?? 0) : 0);
       loops = 0;
       if (step) return;
       if (waveWanted) return start('wave');
@@ -406,7 +406,7 @@ export function Zannabi() {
       if (tick < spec().frames) return;
       loops += 1;
       if (loops < (step.repeat ?? 1)) {
-        tick = 0;
+        tick = spec().start ?? 0;
         return;
       }
       next();
