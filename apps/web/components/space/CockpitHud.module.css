@@ -48,8 +48,8 @@
 .text {
   fill: var(--hud);
   font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.08em;
+  font-size: 8.5px;
+  letter-spacing: 0.06em;
   white-space: pre;
 }
 
