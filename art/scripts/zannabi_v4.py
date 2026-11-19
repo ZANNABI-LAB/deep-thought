@@ -9,6 +9,7 @@ SCALE, X0, Y0 = 2.08, 176, 164
 PIVOT = (384, 652.8)
 FRAME = 768
 LIMIT = (-60, -60, 360, 254)
+EDGE = 12
 OUTLINE = (40, 26, 38)
 MAX_W = 16000
 EVEN = list(range(0, 56, 2))
@@ -66,6 +67,10 @@ def fit(s: float) -> tuple[float, float, float]:
 
 def to_cell(frame: Image.Image, r: int, box: list[int], s: float = 1) -> Image.Image:
     scale, x0, y0 = fit(s)
+    frame = frame.copy()
+    a = np.asarray(frame).copy()
+    a[:EDGE, :, 3] = a[-EDGE:, :, 3] = a[:, :EDGE, 3] = a[:, -EDGE:, 3] = 0
+    frame = Image.fromarray(a)
     bx, by, bw, bh = box
     k = r / scale
     size = round(FRAME * k)
