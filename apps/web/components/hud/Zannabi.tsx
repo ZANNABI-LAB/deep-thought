@@ -724,11 +724,15 @@ export function Zannabi() {
         <Tip>Read a book</Tip>
       </div>
       <div ref={termRef} className={styles.terminal} data-state="idle">
-        <img src="/world/cockpit-terminal.webp" alt="" width={219} height={320} draggable={false} />
-        <span className={styles.screen}>
-          <span className={styles.idle}>COMPUTING</span>
-          <span ref={readoutRef} className={styles.compute} />
-          <span className={styles.answer}>42</span>
+        <span className={styles.shadow} />
+        <span className={styles.drone}>
+          <img src="/world/cockpit-terminal.webp" alt="" width={215} height={300} draggable={false} />
+          <span className={styles.thrust} />
+          <span className={styles.screen}>
+            <span className={styles.idle}>COMPUTING</span>
+            <span ref={readoutRef} className={styles.compute} />
+            <span className={styles.answer}>42</span>
+          </span>
         </span>
         <Tip>Ask Deep Thought</Tip>
       </div>

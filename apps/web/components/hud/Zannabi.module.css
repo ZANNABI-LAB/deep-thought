@@ -275,7 +275,7 @@
 
 .seat:hover img,
 .desk:hover img,
-.terminal:hover img,
+.terminal:hover .drone img,
 .body:has(.hit:hover) .sprite,
 .lane:has(.projector:hover) .holo {
   filter: drop-shadow(1px 0 0 #b9f5c8) drop-shadow(-1px 0 0 #b9f5c8) drop-shadow(0 1px 0 #b9f5c8) drop-shadow(0 -1px 0 #b9f5c8)
@@ -343,7 +343,7 @@
 
 .seat[data-done] img,
 .desk[data-done] img,
-.terminal[data-done] img,
+.terminal[data-done] .drone img,
 .body:has(.hit[data-done]) .sprite,
 .lane:has(.projector[data-done]) .holo {
   animation: pop 700ms ease-out;
@@ -394,17 +394,87 @@
 .terminal {
   position: absolute;
   left: 66cqh;
-  bottom: 0.69cqh;
-  height: 14cqh;
-  aspect-ratio: 219 / 320;
+  bottom: 3.2cqh;
+  height: 11.5cqh;
+  aspect-ratio: 215 / 300;
+}
+
+.drone {
+  position: absolute;
+  inset: 0;
+  animation: hover 3.2s ease-in-out infinite;
+}
+
+.drone img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.thrust {
+  position: absolute;
+  left: 49.2%;
+  top: 96%;
+  width: 22%;
+  aspect-ratio: 1.6;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(200 170 255 / 0.85), rgb(157 116 211 / 0.35) 55%, transparent);
+  filter: blur(0.15cqh);
+  animation: thrust 0.35s steps(2, end) infinite alternate;
+}
+
+.shadow {
+  position: absolute;
+  left: 50%;
+  bottom: -2.6cqh;
+  width: 55%;
+  height: 0.9cqh;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(157 116 211 / 0.4), transparent);
+  animation: shadow 3.2s ease-in-out infinite;
+}
+
+@keyframes hover {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -0.7cqh;
+  }
+}
+
+@keyframes shadow {
+  0%,
+  100% {
+    scale: 1;
+    opacity: 1;
+  }
+  50% {
+    scale: 0.82;
+    opacity: 0.65;
+  }
+}
+
+@keyframes thrust {
+  from {
+    opacity: 0.7;
+    scale: 0.9;
+  }
+  to {
+    opacity: 1;
+    scale: 1.1;
+  }
 }
 
 .screen {
   position: absolute;
   left: 21.3%;
-  top: 25.7%;
-  width: 51.3%;
-  height: 26.8%;
+  top: 26.8%;
+  width: 51.5%;
+  height: 28.1%;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -468,5 +538,13 @@
   }
   100% {
     opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drone,
+  .shadow,
+  .thrust {
+    animation: none;
   }
 }
