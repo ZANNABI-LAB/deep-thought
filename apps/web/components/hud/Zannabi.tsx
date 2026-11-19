@@ -573,6 +573,7 @@ export function Zannabi() {
     const presses = holds.map(([el, act]) => {
       const press = (event: PointerEvent) => {
         if (event.button !== 0 || el.hasAttribute('data-done')) return;
+        event.preventDefault();
         release();
         held = el;
         el.setAttribute('data-holding', '');
@@ -669,7 +670,7 @@ export function Zannabi() {
   return (
     <div ref={laneRef} className={styles.lane} aria-hidden>
       <div ref={deskRef} className={styles.desk}>
-        <img src="/world/cockpit-desk.webp" alt="" width={DESK_W} height={DESK_H} />
+        <img src="/world/cockpit-desk.webp" alt="" width={DESK_W} height={DESK_H} draggable={false} />
         <Tip>Pilot the ship</Tip>
         {DESK_LIGHTS.map(([x, y, w, h, tone, delay]) => (
           <span
@@ -681,7 +682,7 @@ export function Zannabi() {
         <canvas ref={globeRef} className={styles.globe} />
       </div>
       <div ref={seatRef} className={styles.seat}>
-        <img src="/world/cockpit-stool.webp" alt="" width={141} height={130} />
+        <img src="/world/cockpit-stool.webp" alt="" width={141} height={130} draggable={false} />
         <Tip>Read a book</Tip>
       </div>
       <canvas ref={holoRef} className={styles.holo} />
