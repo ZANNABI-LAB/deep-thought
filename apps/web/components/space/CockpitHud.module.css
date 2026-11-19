@@ -34,6 +34,7 @@
 }
 
 .leader {
+  stroke-width: 1.5;
   opacity: 0.8;
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
