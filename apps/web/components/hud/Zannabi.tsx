@@ -1,14 +1,13 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { HUD_EVENT } from '@/components/space/CockpitHud';
 import styles from './Zannabi.module.css';
 
 type Box = [x: number, y: number, w: number, h: number];
 type Spec = { frames: number; start?: number; cols: [number, number]; fps?: number; advance?: number[]; box?: Box; seated?: boolean; hits?: number[] };
 
 const CELL: Box = [0, 0, 200, 240];
-const CANVAS: Box = [-52, -18, 317, 272];
+const CANVAS: Box = [-60, -60, 420, 314];
 const FPS = 14;
 const BODY_HALF = 64;
 const CLIPS: Record<Clip, Spec> = {
@@ -22,18 +21,18 @@ const CLIPS: Record<Clip, Spec> = {
   yawn: { frames: 26, cols: [26, 26] },
   doze: { frames: 26, cols: [26, 26] },
   hop: { frames: 26, cols: [26, 26], box: [0, -18, 200, 258] },
-  saber: { frames: 26, cols: [26, 25], box: [-52, 0, 317, 254], hits: [6, 15] },
+  saber: { frames: 26, cols: [26, 20], box: [-60, -60, 393, 314], hits: [5, 14] },
+  'saber-2': { frames: 26, cols: [26, 20], box: [-60, -60, 393, 314], hits: [3, 8, 12, 15] },
   sit: { frames: 27, cols: [27, 27], seated: true },
   read: { frames: 27, cols: [27, 27], seated: true },
   'read-nod': { frames: 27, cols: [27, 27], seated: true },
   stand: { frames: 26, cols: [26, 26], seated: true },
-  'turn-back': { frames: 16, cols: [16, 16], fps: 16 },
-  'turn-front': { frames: 18, cols: [18, 18], fps: 16 },
+  'turn-back': { frames: 17, cols: [17, 17], fps: 16 },
+  'turn-front': { frames: 21, cols: [21, 21], fps: 16 },
   breathe: { frames: 28, cols: [28, 28], fps: 7 },
-  tilt: { frames: 26, cols: [26, 26] },
-  palm: { frames: 26, cols: [26, 26] },
   'look-up': { frames: 26, cols: [26, 26] },
   console: { frames: 26, cols: [26, 26] },
+  'console-2': { frames: 26, cols: [26, 26] },
 };
 const WALK_ENTRY = 8;
 const sum = (list: number[] = []) => list.reduce((total, d) => total + d, 0);
@@ -48,7 +47,7 @@ const SHORT_PACE: [number, number] = [0.7, 1];
 const NEAR = 4;
 const READS: Clip[] = ['read', 'read-nod'];
 const HOLO = { frames: 24, fps: 14, w: 296, h: 441, dummy: 21 };
-const SABER_REACH = 240;
+const SABER_REACH = 250;
 const PILOT_AT = 0.3;
 const DESK_W = 554;
 const DESK_H = 307;
@@ -60,8 +59,10 @@ const DESK_LIGHTS: [number, number, number, number, 'amber' | 'violet', number][
 const REST_MS: [number, number] = [3000, 8000];
 const STILL_MS: [number, number] = [1000, 3000];
 const MIN_TRIP = 0.25;
-const WAVE_COOLDOWN_MS = 20000;
-const HOVER_MS = 900;
+const HOLD_MS = 900;
+const DONE_MS = 1100;
+const SHAKE_MS = 420;
+const IDLE_CUTS = new Set([0, 1, 2, 3, 11, 12, 13, 14, 23, 24, 25, 26, 27]);
 const FIRST: Clip[] = ['idle', 'turn', 'walk', 'turn-stop', 'turn-around', 'wave'];
 
 type Clip =
@@ -78,15 +79,15 @@ type Clip =
   | 'turn-back'
   | 'turn-front'
   | 'breathe'
-  | 'tilt'
-  | 'palm'
   | 'look-up'
   | 'sit'
   | 'read'
   | 'read-nod'
   | 'stand'
   | 'saber'
-  | 'console';
+  | 'saber-2'
+  | 'console'
+  | 'console-2';
 type Holo = 'appear' | 'disappear';
 type Step = {
   clip: Clip;
@@ -103,9 +104,9 @@ type Step = {
 const NEEDS: Record<Behavior, Clip[]> = {
   walk: ['turn', 'walk', 'turn-stop', 'turn-around'],
   read: ['turn', 'walk', 'turn-stop', 'turn-around', 'sit', 'read', 'read-nod', 'stand'],
-  saber: ['turn', 'walk', 'turn-stop', 'turn-around', 'saber'],
-  pilot: ['turn', 'walk', 'turn-stop', 'turn-around', 'turn-back', 'console', 'breathe', 'turn-front'],
-  gaze: ['turn-back', 'breathe', 'tilt', 'palm', 'look-up', 'turn-front'],
+  saber: ['turn', 'walk', 'turn-stop', 'turn-around', 'saber', 'saber-2'],
+  pilot: ['turn', 'walk', 'turn-stop', 'turn-around', 'turn-back', 'console', 'console-2', 'breathe', 'turn-front'],
+  gaze: ['turn-back', 'breathe', 'look-up', 'turn-front'],
   look: ['look'],
   yawn: ['yawn'],
   doze: ['doze'],
@@ -116,7 +117,7 @@ type Place = 'read' | 'saber' | 'pilot';
 type Behavior = 'walk' | 'look' | 'yawn' | 'doze' | 'hop' | 'gaze' | 'wave' | Place;
 const isPlace = (b: Behavior): b is Place => b === 'read' || b === 'saber' || b === 'pilot';
 
-const GAZE_MOMENTS: Clip[] = ['tilt', 'palm', 'look-up'];
+const GAZE_MOMENTS: Clip[] = ['look-up'];
 
 const between = ([min, max]: [number, number]) => min + Math.random() * (max - min);
 const count = (min: number, max: number) => min + Math.floor(Math.random() * (max - min + 1));
@@ -159,6 +160,29 @@ function pick(previous: Behavior | null, loaded: Set<Clip>): Behavior {
   return 'walk';
 }
 
+function Tip({ children }: { children: string }) {
+  const label = (
+    <>
+      {children}
+      <svg viewBox="0 0 24 24" aria-hidden>
+        <path d="M5 12h14M13 6l6 6-6 6" />
+      </svg>
+    </>
+  );
+  return (
+    <span className={styles.tip}>
+      <span className={styles.label}>{label}</span>
+      <span className={styles.fill} />
+      <span className={`${styles.label} ${styles.over}`} aria-hidden>
+        {label}
+      </span>
+      <svg className={styles.check} viewBox="0 0 24 24" aria-hidden>
+        <path d="M5 12.5l4.5 4.5L19 7.5" />
+      </svg>
+    </span>
+  );
+}
+
 export function Zannabi() {
   const laneRef = useRef<HTMLDivElement>(null);
   const seatRef = useRef<HTMLDivElement>(null);
@@ -167,6 +191,7 @@ export function Zannabi() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const hitRef = useRef<HTMLDivElement>(null);
   const holoRef = useRef<HTMLCanvasElement>(null);
+  const projectorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const lane = laneRef.current!;
@@ -177,6 +202,7 @@ export function Zannabi() {
     const ctx = canvas.getContext('2d')!;
     const hit = hitRef.current!;
     const holo = holoRef.current!;
+    const projector = projectorRef.current!;
     const holoCtx = holo.getContext('2d')!;
     const hud = lane.parentElement!;
     const logo = hud.querySelector<HTMLElement>('[data-zannabi-anchor] img')!;
@@ -233,7 +259,7 @@ export function Zannabi() {
     let stillUntil = 0;
     let previous: Behavior | null = null;
     let waveWanted = false;
-    let wavedAt = -Infinity;
+    let wanted: Place | null = null;
     let arrived = false;
     let holoMode: Holo | 'on' | 'off' = 'off';
     let holoTick = HOLO.frames - 1;
@@ -251,6 +277,7 @@ export function Zannabi() {
       if (key === drawn) return;
       drawn = key;
       body.style.transform = `translateX(${left}px) scaleX(${dir})`;
+      body.style.setProperty('--dir', `${dir}`);
       const { box = CELL, cols } = spec();
       const [bx, by, bw, bh] = box;
       const k = canvas.width / CANVAS[2];
@@ -350,24 +377,24 @@ export function Zannabi() {
         face: 1,
         scene: () => [
           { clip: 'idle', holo: 'appear', scene: true },
-          { clip: 'saber', scene: true },
+          { clip: Math.random() < 0.5 ? 'saber' : 'saber-2', scene: true },
           { clip: 'idle', holo: 'disappear', scene: true },
         ],
       },
       pilot: {
         at: () => pilotX,
+        face: 1,
         scene: () => [
           { clip: 'turn-back', scene: true },
           { clip: 'console', hud: true, scene: true },
           { clip: 'breathe', repeat: count(1, 2), scene: true },
-          { clip: 'console', scene: true },
+          { clip: 'console-2', scene: true },
           { clip: 'turn-front', hud: false, scene: true },
         ],
       },
     };
     const signal = (on: boolean) => {
       desk.toggleAttribute('data-active', on);
-      window.dispatchEvent(new CustomEvent(HUD_EVENT, { detail: on }));
     };
 
     const wander = (): Step[] | null => {
@@ -395,7 +422,6 @@ export function Zannabi() {
       arrived = false;
       if (behavior === 'wave') {
         waveWanted = false;
-        wavedAt = performance.now();
       }
       queue = (behavior === 'walk' ? wander() : plan(behavior)) ?? [];
       next();
@@ -414,18 +440,18 @@ export function Zannabi() {
       tick = step?.from ?? (step ? (CLIPS[step.clip].start ?? 0) : 0);
       loops = 0;
       if (step) return;
-      if (waveWanted) return start('wave');
+      if (asked()) return answer();
       restUntil = performance.now() + between(REST_MS);
     };
 
     const advance = (now: number) => {
       if (!step) {
-        if (tick === 0 && now < stillUntil && !waveWanted) return;
+        if (asked() && IDLE_CUTS.has(tick)) return answer();
+        if (tick === 0 && now < stillUntil) return;
         tick = (tick + 1) % CLIPS.idle.frames;
         if (tick !== 0) return;
         stillUntil = now + between(STILL_MS);
-        if (waveWanted) start('wave');
-        else if (now >= restUntil) start(pick(previous, loaded));
+        if (now >= restUntil) start(pick(previous, loaded));
         return;
       }
       const steps = spec().advance;
@@ -447,22 +473,71 @@ export function Zannabi() {
       next();
     };
 
-    const greet = () => {
-      if (performance.now() - wavedAt < WAVE_COOLDOWN_MS || (previous === 'wave' && step)) return;
-      waveWanted = true;
-      if (spec().seated) {
-        queue = queue.filter((s) => s.clip === 'stand');
-        return;
-      }
-      if (step?.scene && previous === 'pilot') {
-        queue = queue.filter((s) => s.clip === 'turn-front');
-        return;
-      }
-      if (step?.scene) return;
+    const asked = () => waveWanted || wanted !== null;
+    const answer = () => {
+      if (waveWanted) return start('wave');
+      const place = wanted!;
+      wanted = null;
+      start(place);
+    };
+
+    const wrapUp = () => {
+      const keep = (clip: Clip) => {
+        queue = queue.filter((s) => s.clip === clip);
+      };
+      if (spec().seated) return keep('stand');
+      if (step?.scene) return previous === 'pilot' && keep('turn-front');
+      if (previous === 'gaze') return keep('turn-front');
       const scene = queue.findIndex((s) => s.scene);
       if (scene >= 0) queue = queue.slice(0, scene);
       if (step?.walk) arrived = true;
     };
+
+    const greet = () => {
+      if (previous === 'wave' && step) return;
+      waveWanted = true;
+      wrapUp();
+    };
+
+    const go = (place: Place) => {
+      if ((previous === place && queue.some((s) => s.scene)) || !NEEDS[place].every((c) => loaded.has(c))) return;
+      wanted = place;
+      wrapUp();
+    };
+    const holds: [HTMLElement, () => void][] = [
+      [seat, () => go('read')],
+      [desk, () => go('pilot')],
+      [projector, () => go('saber')],
+      [hit, greet],
+    ];
+    let held: HTMLElement | null = null;
+    let holdTimer = 0;
+    const flag = (el: HTMLElement, name: string, ms: number) => {
+      el.removeAttribute(name);
+      void el.offsetWidth;
+      el.setAttribute(name, '');
+      window.setTimeout(() => el.removeAttribute(name), ms);
+    };
+    const release = () => {
+      clearTimeout(holdTimer);
+      if (held?.hasAttribute('data-holding')) flag(held, 'data-shake', SHAKE_MS);
+      held?.removeAttribute('data-holding');
+      held = null;
+    };
+    const presses = holds.map(([el, act]) => {
+      const press = (event: PointerEvent) => {
+        if (event.button !== 0 || el.hasAttribute('data-done')) return;
+        release();
+        held = el;
+        el.setAttribute('data-holding', '');
+        holdTimer = window.setTimeout(() => {
+          el.removeAttribute('data-holding');
+          flag(el, 'data-done', DONE_MS);
+          act();
+        }, HOLD_MS);
+      };
+      return [el, press] as const;
+    });
 
     const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
     let id = 0;
@@ -511,24 +586,24 @@ export function Zannabi() {
       id = requestAnimationFrame(loop);
     });
 
-    let hover = 0;
-    const enter = () => {
-      clearTimeout(hover);
-      hover = window.setTimeout(greet, HOVER_MS);
-    };
-    const leave = () => clearTimeout(hover);
-    hit.addEventListener('pointerenter', enter);
-    hit.addEventListener('pointerleave', leave);
-    hit.addEventListener('click', greet);
+    for (const [el, press] of presses) {
+      el.addEventListener('pointerdown', press);
+      el.addEventListener('pointerleave', release);
+    }
+    window.addEventListener('pointerup', release);
+    window.addEventListener('pointercancel', release);
     return () => {
       alive = false;
       signal(false);
       cancelAnimationFrame(id);
       observer.disconnect();
-      clearTimeout(hover);
-      hit.removeEventListener('pointerenter', enter);
-      hit.removeEventListener('pointerleave', leave);
-      hit.removeEventListener('click', greet);
+      release();
+      for (const [el, press] of presses) {
+        el.removeEventListener('pointerdown', press);
+        el.removeEventListener('pointerleave', release);
+      }
+      window.removeEventListener('pointerup', release);
+      window.removeEventListener('pointercancel', release);
     };
   }, []);
 
@@ -536,6 +611,7 @@ export function Zannabi() {
     <div ref={laneRef} className={styles.lane} aria-hidden>
       <div ref={deskRef} className={styles.desk}>
         <img src="/world/cockpit-desk.webp" alt="" width={DESK_W} height={DESK_H} />
+        <Tip>Pilot the ship</Tip>
         {DESK_LIGHTS.map(([x, y, w, h, tone, delay]) => (
           <span
             key={`${x}-${y}`}
@@ -546,11 +622,17 @@ export function Zannabi() {
       </div>
       <div ref={seatRef} className={styles.seat}>
         <img src="/world/cockpit-stool.webp" alt="" width={141} height={130} />
+        <Tip>Read a book</Tip>
       </div>
       <canvas ref={holoRef} className={styles.holo} />
+      <div ref={projectorRef} className={styles.projector}>
+        <Tip>Saber training</Tip>
+      </div>
       <div ref={bodyRef} className={styles.body}>
         <canvas ref={canvasRef} className={styles.sprite} />
-        <div ref={hitRef} className={styles.hit} />
+        <div ref={hitRef} className={styles.hit}>
+          <Tip>Say hi</Tip>
+        </div>
       </div>
     </div>
   );

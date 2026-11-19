@@ -3,7 +3,6 @@
 import { useCallback, useState } from 'react';
 import { preload } from 'react-dom';
 import { HomeHud } from '@/components/hud/HomeHud';
-import { CockpitHud } from './CockpitHud';
 import { ShootingStars } from './ShootingStars';
 import { POSTER, SpaceBackdrop } from './SpaceBackdrop';
 import styles from './SpaceScene.module.css';
@@ -35,7 +34,6 @@ export function SpaceScene() {
       <div className={styles.space}>
         <SpaceBackdrop onReady={onSpaceReady} />
         <ShootingStars />
-        <CockpitHud />
       </div>
       <div className={styles.frame}>
         <WindowFrame onLayout={setGlass} />

@@ -6,7 +6,9 @@ import numpy as np
 from PIL import Image, ImageFilter
 
 SCALE, X0, Y0 = 2.08, 176, 164
+PIVOT = (384, 652.8)
 FRAME = 768
+LIMIT = (-60, -60, 360, 254)
 OUTLINE = (40, 26, 38)
 MAX_W = 16000
 EVEN = list(range(0, 56, 2))
@@ -21,18 +23,18 @@ CLIPS = {
     'yawn': ('yawnA', EVEN[1:-1]),
     'doze': ('dozeA', EVEN[1:-1]),
     'hop': ('hopA', EVEN[1:-1]),
-    'saber': ('saberA', EVEN[1:-1]),
+    'saber': ('saberS1', EVEN[1:-1], 0.8),
+    'saber-2': ('saberS3', EVEN[1:-1], 0.8),
     'sit': ('stoolB', EVEN[1:]),
     'read': ('loopPage', EVEN[1:]),
     'read-nod': ('loopNod', EVEN[1:]),
     'stand': ('standA', EVEN[1:-1]),
-    'turn-back': ('pivotA', [1] + EVEN[1:16]),
-    'turn-front': ('pfrontC', EVEN[1:19]),
-    'breathe': ('breathe', EVEN),
-    'tilt': ('tilt', EVEN[1:-1]),
-    'palm': ('palm2', EVEN[1:-1]),
-    'look-up': ('lookup2', EVEN[1:-1]),
-    'console': ('consoleA', EVEN[1:-1]),
+    'turn-back': ('RbackB', EVEN[:17]),
+    'turn-front': ('RfrontA', EVEN[2:23]),
+    'breathe': ('RbreatheA', EVEN),
+    'look-up': ('RlookupB', EVEN[1:-1]),
+    'console': ('RconsoleA', EVEN[1:-1]),
+    'console-2': ('RconsoleB', EVEN[1:-1]),
 }
 WALKERS = {'walk': None, 'turn': ('walkB', 16), 'turn-stop': ('idleC', 0)}
 
@@ -58,13 +60,18 @@ def defringe(img: Image.Image) -> Image.Image:
     return Image.fromarray(a)
 
 
-def to_cell(frame: Image.Image, r: int, box: list[int]) -> Image.Image:
+def fit(s: float) -> tuple[float, float, float]:
+    return SCALE * s, PIVOT[0] - (PIVOT[0] - X0) * s, PIVOT[1] - (PIVOT[1] - Y0) * s
+
+
+def to_cell(frame: Image.Image, r: int, box: list[int], s: float = 1) -> Image.Image:
+    scale, x0, y0 = fit(s)
     bx, by, bw, bh = box
-    k = r / SCALE
+    k = r / scale
     size = round(FRAME * k)
     im = frame.resize((size, size), Image.LANCZOS)
     out = Image.new('RGBA', (bw * r, bh * r))
-    px, py = round(-bx * r - X0 * k), round(-by * r - Y0 * k)
+    px, py = round(-bx * r - x0 * k), round(-by * r - y0 * k)
     out.alpha_composite(im.crop((max(0, -px), max(0, -py), size, size)), (max(0, px), max(0, py)))
     return defringe(out)
 
@@ -92,23 +99,25 @@ def advance(seq: list[Image.Image], after: Image.Image | None) -> list[int]:
 def main() -> None:
     raw, out, only = Path(sys.argv[1]), Path(sys.argv[2]), set(sys.argv[3:])
     meta = json.loads((out / 'zannabi-v4.json').read_text()) if only else {}
-    for name, (src, idx) in CLIPS.items():
+    for name, (src, idx, *rest) in CLIPS.items():
+        s = rest[0] if rest else 1
+        scale, x0, y0 = fit(s)
         if only and name not in only:
             continue
         seq = [frames(raw / f'{src}.png')[i] for i in idx]
         boxes = [f.getbbox() for f in seq]
-        ux0 = (min(b[0] for b in boxes) - X0) / SCALE
-        uy0 = (min(b[1] for b in boxes) - Y0) / SCALE
-        ux1 = (max(b[2] for b in boxes) - X0) / SCALE
-        uy1 = (max(b[3] for b in boxes) - Y0) / SCALE
-        bx, by = min(0, int(np.floor(ux0)) - 2), min(0, int(np.floor(uy0)) - 2)
-        box = [bx, by, max(200, int(np.ceil(ux1)) + 2) - bx, max(240, int(np.ceil(uy1)) + 2) - by]
+        ux0 = (min(b[0] for b in boxes) - x0) / scale
+        uy0 = (min(b[1] for b in boxes) - y0) / scale
+        ux1 = (max(b[2] for b in boxes) - x0) / scale
+        uy1 = (max(b[3] for b in boxes) - y0) / scale
+        bx, by = max(LIMIT[0], min(0, int(np.floor(ux0)) - 2)), max(LIMIT[1], min(0, int(np.floor(uy0)) - 2))
+        box = [bx, by, min(LIMIT[2], max(200, int(np.ceil(ux1)) + 2)) - bx, min(LIMIT[3], max(240, int(np.ceil(uy1)) + 2)) - by]
         entry = {'frames': len(seq), 'box': box, 'cols': []}
         if name in WALKERS:
             after = WALKERS[name] and frames(raw / f'{WALKERS[name][0]}.png')[WALKERS[name][1]]
             entry['advance'] = advance(seq, after)
         for r in (1, 2):
-            cells = [to_cell(f, r, box) for f in seq]
+            cells = [to_cell(f, r, box, s) for f in seq]
             fw, fh = box[2] * r, box[3] * r
             cols = max(1, min(len(cells), MAX_W // fw))
             sheet = Image.new('RGBA', (fw * cols, fh * -(-len(cells) // cols)))
