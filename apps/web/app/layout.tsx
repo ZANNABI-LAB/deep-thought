@@ -10,7 +10,7 @@ const newsreader = Newsreader({ subsets: ['latin'], style: ['normal', 'italic'],
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: { default: `${SITE_NAME} — A little universe of ideas`, template: `%s · ${SITE_NAME}` },
+  title: { default: `${SITE_NAME} - A little universe of ideas`, template: `%s · ${SITE_NAME}` },
   description: SITE_DESCRIPTION,
   authors: [{ name: AUTHOR.name }],
   alternates: { types: RSS_ALTERNATE },

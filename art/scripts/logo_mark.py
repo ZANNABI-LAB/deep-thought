@@ -8,7 +8,6 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 PAD = 0.03
 CLOSE = 41
-FAVICON = 64
 
 
 def masks(src: str) -> tuple[Image.Image, Image.Image]:
@@ -49,18 +48,6 @@ def build_svg(src: str, out: str) -> None:
     )
 
 
-def build_favicon(src: str, out: str) -> None:
-    white, silhouette = masks(src)
-    body = silhouette.copy()
-    ImageDraw.floodfill(body, (body.width // 2, body.height // 2), 128)
-    body = body.point(lambda v: 255 if v == 128 else 0)
-    image = Image.new('RGBA', body.size, (0, 0, 0, 0))
-    image.paste((0, 0, 0, 255), mask=body)
-    image.paste((255, 255, 255, 255), mask=ImageChops.multiply(white, body))
-    x, y, side = square(body.getbbox())
-    image.crop((round(x), round(y), round(x + side), round(y + side))).resize((FAVICON, FAVICON), Image.LANCZOS).save(out, optimize=True)
-
-
 if __name__ == '__main__':
     command, src, out = sys.argv[1:4]
-    {'svg': build_svg, 'favicon': build_favicon}[command](src, out)
+    {'svg': build_svg}[command](src, out)

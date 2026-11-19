@@ -9,7 +9,7 @@ export function HomeLogo() {
       sizes="28vw"
       width={1808}
       height={870}
-      alt="Deep Thought — A little universe of ideas. Still computing the answer."
+      alt="Deep Thought - A little universe of ideas. Still computing the answer."
     />
   );
 }

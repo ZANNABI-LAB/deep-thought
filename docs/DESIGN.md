@@ -23,7 +23,8 @@
 | `art/refs/deep-thought-terminal-gpt-v1.png` | **Zannabi 모습 기준** (유리 헬멧, 옆 원반, 선글라스, 크림색 우주복) |
 | `art/refs/zannabi-v5-views/`, `zannabi-v5-turnaround.png` | Zannabi 4방향 (헬멧 없는 몸 디자인) |
 | `art/refs/space/space-bg-v3-4k.webp` | **창밖 우주 원본** (4096×2304, `space-bg-v3.png`를 Bytedance로 업스케일) |
-| `art/refs/logo-mark-gpt-v3.png`, `-v2.png` | 헤더 로고, 파비콘 원본 (`art/scripts/logo_mark.py`) |
+| `art/refs/logo-mark-gpt-v3.png` | 헤더 로고 원본 (`art/scripts/logo_mark.py`) |
+| `art/refs/favicon-terminal-42.png` | **파비콘** (2026-11-19): 32px에 직접 찍은 크림색 단말기, 초록 화면에 '42'. Deep Thought 드론이 42를 돌려주는 홈과 이어진다. `app/icon.png`는 2배 최근접 확대 |
 | `docs/assets/zannabi-original-logo.png` | 브랜드 출발점 (흑백 우주 원숭이) |
 
 ---
