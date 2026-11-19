@@ -48,6 +48,7 @@ const SHORT_PACE: [number, number] = [0.7, 1];
 const NEAR = 4;
 const READS: Clip[] = ['read', 'read-nod'];
 const HOLO = { frames: 24, fps: 14, w: 296, h: 441, dummy: 21 };
+const GLOBE = { size: 176, spin: 24, off: 25, fps: 21, spinFps: 10.5 };
 const SABER_REACH = 250;
 const PILOT_AT = 0.3;
 const DESK_W = 554;
@@ -192,6 +193,7 @@ export function Zannabi() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const hitRef = useRef<HTMLDivElement>(null);
   const holoRef = useRef<HTMLCanvasElement>(null);
+  const globeRef = useRef<HTMLCanvasElement>(null);
   const projectorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -205,6 +207,8 @@ export function Zannabi() {
     const holo = holoRef.current!;
     const projector = projectorRef.current!;
     const holoCtx = holo.getContext('2d')!;
+    const globe = globeRef.current!;
+    const globeCtx = globe.getContext('2d')!;
     const hud = lane.parentElement!;
     const logo = hud.querySelector<HTMLElement>('[data-zannabi-anchor] img')!;
 
@@ -219,6 +223,8 @@ export function Zannabi() {
     };
     const holoImg = new Image();
     holoImg.src = '/world/hologram-dummy.webp';
+    const globeSpin = new Image();
+    const globeOff = new Image();
 
     let width = 0;
     let margin = 0;
@@ -229,13 +235,16 @@ export function Zannabi() {
     let x = 0;
     let drawn = '';
     let holoDrawn = -1;
+    let globeDrawn = '';
     const measure = () => {
       const dpr = devicePixelRatio;
       canvas.width = Math.round(canvas.clientWidth * dpr);
       canvas.height = Math.round(canvas.clientHeight * dpr);
       holo.width = Math.round(holo.clientWidth * dpr);
       holo.height = Math.round(holo.clientHeight * dpr);
-      for (const c of [ctx, holoCtx]) c.imageSmoothingQuality = 'high';
+      globe.width = globe.height = Math.round(globe.clientWidth * dpr);
+      for (const c of [ctx, holoCtx, globeCtx]) c.imageSmoothingQuality = 'high';
+      globeDrawn = '';
       drawn = '';
       holoDrawn = -1;
       lane.style.width = `${(logo.offsetLeft + logo.offsetWidth / 2) * 2}px`;
@@ -265,6 +274,9 @@ export function Zannabi() {
     let holoMode: Holo | 'on' | 'off' = 'off';
     let holoTick = HOLO.frames - 1;
     let holoAcc = 0;
+    let globeMode: 'off' | 'appear' | 'on' | 'disappear' = 'off';
+    let globeTick = 0;
+    let globeAcc = 0;
 
     const clip = (): Clip => step?.clip ?? 'idle';
     const clamp = (value: number) => Math.min(Math.max(value, 0), width);
@@ -313,6 +325,31 @@ export function Zannabi() {
         if (holoTick === HOLO.frames - 1) holoMode = 'off';
       }
       holo.toggleAttribute('data-on', holoMode === 'on');
+    };
+
+    const paintGlobe = () => {
+      const key = `${globeMode} ${globeTick}`;
+      if (key === globeDrawn) return;
+      globeDrawn = key;
+      globeCtx.clearRect(0, 0, globe.width, globe.height);
+      if (globeMode === 'off') return;
+      const img = globeMode === 'on' ? globeSpin : globeOff;
+      globeCtx.drawImage(img, globeTick * GLOBE.size, 0, GLOBE.size, GLOBE.size, 0, 0, globe.width, globe.height);
+    };
+
+    const advanceGlobe = () => {
+      if (globeMode === 'appear') {
+        globeTick -= 1;
+        if (globeTick <= 0) {
+          globeMode = 'on';
+          globeTick = 0;
+        }
+      } else if (globeMode === 'on') {
+        globeTick = (globeTick + 1) % GLOBE.spin;
+      } else if (globeMode === 'disappear') {
+        globeTick += 1;
+        if (globeTick >= GLOBE.off - 1) globeMode = 'off';
+      }
     };
 
     const flash = () =>
@@ -396,6 +433,13 @@ export function Zannabi() {
     };
     const signal = (on: boolean) => {
       desk.toggleAttribute('data-active', on);
+      if (on && (globeMode === 'off' || globeMode === 'disappear')) {
+        if (globeMode === 'off') globeTick = GLOBE.off - 1;
+        globeMode = 'appear';
+      } else if (!on && (globeMode === 'on' || globeMode === 'appear')) {
+        if (globeMode === 'on') globeTick = 0;
+        globeMode = 'disappear';
+      }
       window.dispatchEvent(new CustomEvent(HUD_EVENT, { detail: on }));
     };
 
@@ -546,6 +590,7 @@ export function Zannabi() {
     let last = 0;
     let acc = 0;
     let holoLast = 0;
+    let globeLast = 0;
     const loop = (now: number) => {
       acc += Math.min(now - last, 250);
       last = now;
@@ -561,8 +606,18 @@ export function Zannabi() {
         }
       }
       holoLast = now;
+      if (globeMode !== 'off') {
+        globeAcc += Math.min(now - globeLast, 250);
+        const rate = 1000 / (globeMode === 'on' ? GLOBE.spinFps : GLOBE.fps);
+        while (globeAcc >= rate) {
+          globeAcc -= rate;
+          advanceGlobe();
+        }
+      }
+      globeLast = now;
       paint();
       paintHolo();
+      paintGlobe();
       id = requestAnimationFrame(loop);
     };
     let alive = true;
@@ -580,11 +635,13 @@ export function Zannabi() {
       if (!alive) return;
       ready = true;
       for (const clip of Object.keys(CLIPS) as Clip[]) if (!images.has(clip)) load(clip);
+      globeSpin.src = '/world/cockpit-globe-spin.webp';
+      globeOff.src = '/world/cockpit-globe-off.webp';
       if (still) {
         paint();
         return paintHolo();
       }
-      last = holoLast = performance.now();
+      last = holoLast = globeLast = performance.now();
       id = requestAnimationFrame(loop);
     });
 
@@ -621,6 +678,7 @@ export function Zannabi() {
             style={{ left: `${(x / DESK_W) * 100}%`, top: `${(y / DESK_H) * 100}%`, width: `${(w / DESK_W) * 100}%`, height: `${(h / DESK_H) * 100}%`, animationDelay: `${delay}ms` }}
           />
         ))}
+        <canvas ref={globeRef} className={styles.globe} />
       </div>
       <div ref={seatRef} className={styles.seat}>
         <img src="/world/cockpit-stool.webp" alt="" width={141} height={130} />
