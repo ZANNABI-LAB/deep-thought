@@ -63,6 +63,9 @@ const STILL_MS: [number, number] = [1000, 3000];
 const MIN_TRIP = 0.25;
 const HOLD_MS = 900;
 const DONE_MS = 1100;
+const ANSWER_MS = 4500;
+const TERM_GAP = 34;
+const DIGITS = '0123456789ABCDEF';
 const SHAKE_MS = 420;
 const IDLE_CUTS = new Set([0, 1, 2, 3, 11, 12, 13, 14, 23, 24, 25, 26, 27]);
 const FIRST: Clip[] = ['idle', 'turn', 'walk', 'turn-stop', 'turn-around', 'wave'];
@@ -102,12 +105,14 @@ type Step = {
   scene?: boolean;
   holo?: Holo;
   hud?: boolean;
+  term?: 'compute' | 'answer';
 };
 const NEEDS: Record<Behavior, Clip[]> = {
   walk: ['turn', 'walk', 'turn-stop', 'turn-around'],
   read: ['turn', 'walk', 'turn-stop', 'turn-around', 'sit', 'read', 'read-nod', 'stand'],
   saber: ['turn', 'walk', 'turn-stop', 'turn-around', 'saber', 'saber-2'],
   pilot: ['turn', 'walk', 'turn-stop', 'turn-around', 'turn-back', 'console', 'console-2', 'breathe', 'turn-front'],
+  ask: ['turn', 'walk', 'turn-stop', 'turn-around', 'look'],
   gaze: ['turn-back', 'breathe', 'look-up', 'turn-front'],
   look: ['look'],
   yawn: ['yawn'],
@@ -115,9 +120,9 @@ const NEEDS: Record<Behavior, Clip[]> = {
   hop: ['hop'],
   wave: ['wave'],
 };
-type Place = 'read' | 'saber' | 'pilot';
+type Place = 'read' | 'saber' | 'pilot' | 'ask';
 type Behavior = 'walk' | 'look' | 'yawn' | 'doze' | 'hop' | 'gaze' | 'wave' | Place;
-const isPlace = (b: Behavior): b is Place => b === 'read' || b === 'saber' || b === 'pilot';
+const isPlace = (b: Behavior): b is Place => b === 'read' || b === 'saber' || b === 'pilot' || b === 'ask';
 
 const GAZE_MOMENTS: Clip[] = ['look-up'];
 
@@ -145,6 +150,7 @@ const WEIGHTS: [Behavior, number][] = [
   ['read', 10],
   ['saber', 8],
   ['pilot', 10],
+  ['ask', 6],
   ['look', 12],
   ['gaze', 12],
   ['yawn', 8],
@@ -195,6 +201,8 @@ export function Zannabi() {
   const holoRef = useRef<HTMLCanvasElement>(null);
   const globeRef = useRef<HTMLCanvasElement>(null);
   const projectorRef = useRef<HTMLDivElement>(null);
+  const termRef = useRef<HTMLDivElement>(null);
+  const readoutRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     const lane = laneRef.current!;
@@ -206,6 +214,8 @@ export function Zannabi() {
     const hit = hitRef.current!;
     const holo = holoRef.current!;
     const projector = projectorRef.current!;
+    const terminal = termRef.current!;
+    const readout = readoutRef.current!;
     const holoCtx = holo.getContext('2d')!;
     const globe = globeRef.current!;
     const globeCtx = globe.getContext('2d')!;
@@ -232,6 +242,7 @@ export function Zannabi() {
     let seatX = 0;
     let saberX = 0;
     let pilotX = 0;
+    let askX = 0;
     let x = 0;
     let drawn = '';
     let holoDrawn = -1;
@@ -254,6 +265,7 @@ export function Zannabi() {
       const stool = getComputedStyle(seat);
       seatX = parseFloat(stool.left) + parseFloat(stool.width) / 2 + STOOL_GAP * scale - margin;
       pilotX = desk.offsetLeft + desk.offsetWidth * PILOT_AT - margin;
+      askX = terminal.offsetLeft - TERM_GAP * scale - margin;
       saberX = holo.offsetLeft + (HOLO.dummy - SABER_REACH) * scale - margin + body.clientWidth / 2;
       x = Math.min(x, width);
     };
@@ -430,6 +442,29 @@ export function Zannabi() {
           { clip: 'turn-front', hud: false, scene: true },
         ],
       },
+      ask: {
+        at: () => askX,
+        face: 1,
+        scene: () => [
+          { clip: 'look', term: 'compute', scene: true },
+          { clip: 'idle', term: 'answer', scene: true },
+        ],
+      },
+    };
+    let computing = 0;
+    let answered = 0;
+    const think = (state: 'idle' | 'compute' | 'answer') => {
+      clearInterval(computing);
+      clearTimeout(answered);
+      terminal.dataset.state = state;
+      if (state === 'compute') {
+        computing = window.setInterval(() => {
+          readout.textContent = Array.from({ length: 3 }, () =>
+            Array.from({ length: 6 }, () => DIGITS[Math.floor(Math.random() * DIGITS.length)]).join(''),
+          ).join('\n');
+        }, 70);
+      }
+      if (state === 'answer') answered = window.setTimeout(() => think('idle'), ANSWER_MS);
     };
     const signal = (on: boolean) => {
       desk.toggleAttribute('data-active', on);
@@ -478,6 +513,7 @@ export function Zannabi() {
       step = queue.shift() ?? null;
       seat.toggleAttribute('data-seated', !!step && !!CLIPS[step.clip].seated);
       if (step?.hud !== undefined) signal(step.hud);
+      if (step?.term) think(step.term);
       if (step?.holo) {
         holoMode = step.holo;
         holoTick = step.holo === 'appear' ? HOLO.frames - 1 : 0;
@@ -554,6 +590,7 @@ export function Zannabi() {
       [seat, () => go('read')],
       [desk, () => go('pilot')],
       [projector, () => go('saber')],
+      [terminal, () => go('ask')],
       [hit, greet],
     ];
     let held: HTMLElement | null = null;
@@ -658,6 +695,7 @@ export function Zannabi() {
       cancelAnimationFrame(id);
       observer.disconnect();
       release();
+      think('idle');
       for (const [el, press] of presses) {
         el.removeEventListener('pointerdown', press);
         el.removeEventListener('pointerleave', release);
@@ -684,6 +722,15 @@ export function Zannabi() {
       <div ref={seatRef} className={styles.seat}>
         <img src="/world/cockpit-stool.webp" alt="" width={141} height={130} draggable={false} />
         <Tip>Read a book</Tip>
+      </div>
+      <div ref={termRef} className={styles.terminal} data-state="idle">
+        <img src="/world/cockpit-terminal.webp" alt="" width={219} height={320} draggable={false} />
+        <span className={styles.screen}>
+          <span className={styles.idle}>COMPUTING</span>
+          <span ref={readoutRef} className={styles.compute} />
+          <span className={styles.answer}>42</span>
+        </span>
+        <Tip>Ask Deep Thought</Tip>
       </div>
       <canvas ref={holoRef} className={styles.holo} />
       <div ref={projectorRef} className={styles.projector}>

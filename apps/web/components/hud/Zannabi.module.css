@@ -63,7 +63,8 @@
 
 .seat,
 .desk,
-.projector {
+.projector,
+.terminal {
   pointer-events: auto;
   cursor: pointer;
   touch-action: none;
@@ -72,7 +73,8 @@
 }
 
 .seat img,
-.desk img {
+.desk img,
+.terminal img {
   -webkit-user-drag: none;
   display: block;
   width: 100%;
@@ -238,6 +240,7 @@
 .seat:hover .tip,
 .desk:hover .tip,
 .projector:hover .tip,
+.terminal:hover .tip,
 .hit:hover .tip,
 [data-holding] .tip {
   opacity: 1;
@@ -272,6 +275,7 @@
 
 .seat:hover img,
 .desk:hover img,
+.terminal:hover img,
 .body:has(.hit:hover) .sprite,
 .lane:has(.projector:hover) .holo {
   filter: drop-shadow(1px 0 0 #b9f5c8) drop-shadow(-1px 0 0 #b9f5c8) drop-shadow(0 1px 0 #b9f5c8) drop-shadow(0 -1px 0 #b9f5c8)
@@ -339,6 +343,7 @@
 
 .seat[data-done] img,
 .desk[data-done] img,
+.terminal[data-done] img,
 .body:has(.hit[data-done]) .sprite,
 .lane:has(.projector[data-done]) .holo {
   animation: pop 700ms ease-out;
@@ -384,4 +389,84 @@
   translate: -50% 0;
   pointer-events: none;
   filter: drop-shadow(0 0 0.35cqh rgb(185 245 200 / 0.55));
+}
+
+.terminal {
+  position: absolute;
+  left: 66cqh;
+  bottom: 0.69cqh;
+  height: 14cqh;
+  aspect-ratio: 219 / 320;
+}
+
+.screen {
+  position: absolute;
+  left: 21.3%;
+  top: 25.7%;
+  width: 51.3%;
+  height: 26.8%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 12%;
+  color: #9fe8b4;
+  font-family: var(--font-mono);
+  line-height: 1.15;
+  text-align: center;
+  white-space: pre;
+  text-shadow: 0 0 0.4cqh rgb(159 232 180 / 0.7);
+  pointer-events: none;
+}
+
+.screen > span {
+  grid-area: 1 / 1;
+  opacity: 0;
+}
+
+.idle {
+  font-size: 0.66cqh;
+  letter-spacing: 0.04em;
+}
+
+.idle::after {
+  content: '_';
+  animation: cursor 1s steps(1, end) infinite;
+}
+
+.compute {
+  font-size: 0.75cqh;
+  letter-spacing: 0.1em;
+  opacity: 0.8;
+}
+
+.answer {
+  font-size: 2.6cqh;
+}
+
+.terminal[data-state='idle'] .idle,
+.terminal[data-state='compute'] .compute,
+.terminal[data-state='answer'] .answer {
+  opacity: 1;
+}
+
+.terminal[data-state='answer'] .answer {
+  animation: reveal 600ms steps(4, end);
+}
+
+@keyframes cursor {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes reveal {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 1;
+  }
 }
