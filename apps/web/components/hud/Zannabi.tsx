@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { HUD_EVENT } from '@/components/space/CockpitHud';
 import styles from './Zannabi.module.css';
 
 type Box = [x: number, y: number, w: number, h: number];
@@ -395,6 +396,7 @@ export function Zannabi() {
     };
     const signal = (on: boolean) => {
       desk.toggleAttribute('data-active', on);
+      window.dispatchEvent(new CustomEvent(HUD_EVENT, { detail: on }));
     };
 
     const wander = (): Step[] | null => {
