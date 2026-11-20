@@ -84,7 +84,7 @@
 
 | 요소 | 역할·콘텐츠 | 동작 |
 | --- | --- | --- |
-| **상단 메뉴** | Home · Writing · Portfolio · Lab(잠김) · Arcade · About me | `HomeNav`, 로고 가로 중심에 맞춰 유리 위 3.5cqh. 2026-11-20 컨셉 시안의 알약(크림 테두리 + 초록 모서리 괄호)으로 만들었다가 사용자가 '메뉴 자체가 별로'라고 해서 **테두리 없이 글자만**으로 바꿨다: IBM Plex Mono 대문자·자간 0.14em, 평소 62% 밝기, 지금 페이지와 호버 항목은 밝게 + 뒤에 깜빡이는 블록 커서(호버하면 커서가 옮겨 감), 호버·포커스 때 스크램블(`lib/scramble.ts`). Writing 말고는 준비 중 페이지로 간다(`components/Pending.tsx`: Portfolio·Arcade·About me는 초록 COMING SOON, Lab은 자물쇠 + 주황 ACCESS DENIED, 스크램블로 타이핑되고 블록 커서, noindex, 사이트맵 제외). 알약용 공용 틀(`Frame.module.css`)은 카드에 쓴다 |
+| **상단 메뉴** | Home · Writing · Portfolio · Lab(잠김) · Arcade · About me | `HomeNav`, 로고 가로 중심에 맞춰 유리 위 3.5cqh. 2026-11-20 컨셉 시안의 알약(크림 테두리 + 초록 모서리 괄호)으로 만들었다가 사용자가 '메뉴 자체가 별로'라고 해서 **테두리 없이 글자만**으로 바꿨다: IBM Plex Mono 대문자, max(13px, 2cqh)·자간 0.18em(후보 비교에서 사용자 선택), 평소 78% 밝기, 지금 페이지와 호버 항목은 밝게 + 뒤에 깜빡이는 블록 커서(호버하면 커서가 옮겨 감), 호버·포커스 때 스크램블(`lib/scramble.ts`). Writing 말고는 준비 중 페이지로 간다(`components/Pending.tsx`: Portfolio·Arcade·About me는 초록 COMING SOON, Lab은 자물쇠 + 주황 ACCESS DENIED, 스크램블로 타이핑되고 블록 커서, noindex, 사이트맵 제외). 알약용 공용 틀(`Frame.module.css`)은 카드에 쓴다 |
 | **Command palette** | 공개 글 검색, 프로젝트 검색, 페이지 바로가기 | 클릭 또는 `Ctrl K` / Mac `⌘ K`. 방향키로 고르고 Enter로 이동. 검색 기능이 없으니 실제 공개 페이지 빠른 이동만 (가짜 결과 금지) |
 | **메인 로고** | 사이트 정체성과 두 줄 슬로건 | 정지 그림 (HUD와 함께 나타남). 내부 페이지에서는 홈 링크 |
 | **Mission Log** | 최신 공개 글 3개: 제목·카테고리·발행일 | 행 전체가 글 링크. '전체 글'은 Writing으로. 글이 없으면 빈 상태 |

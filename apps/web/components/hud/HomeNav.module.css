@@ -4,8 +4,8 @@
   left: 50%;
   translate: -50% 0;
   font-family: var(--font-hud);
-  font-size: max(12px, 1.75cqh);
-  letter-spacing: 0.14em;
+  font-size: max(13px, 2cqh);
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   white-space: nowrap;
   pointer-events: auto;
@@ -25,7 +25,7 @@
   align-items: center;
   gap: 0.4em;
   padding: 0.5em 0;
-  color: rgb(239 228 203 / 0.62);
+  color: rgb(239 228 203 / 0.78);
   text-decoration: none;
   text-shadow: 0 0 10px rgb(239 228 203 / 0.15);
   transition: color 160ms ease-out;
@@ -59,7 +59,7 @@
 }
 
 .list:hover .item[aria-current='page']:not(:hover) {
-  color: rgb(239 228 203 / 0.62);
+  color: rgb(239 228 203 / 0.78);
 }
 
 .item:hover::after,
