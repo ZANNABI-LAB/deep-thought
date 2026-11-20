@@ -1,7 +1,8 @@
 .nav {
   position: absolute;
-  top: 12.5cqh;
-  left: 3.7cqw;
+  top: calc(3.5cqh - 80px - 19cqh);
+  left: 50%;
+  translate: -50% 0;
   width: 52cqw;
   min-width: 560px;
   height: max(38px, 5.2cqh);
@@ -40,10 +41,10 @@
   left: -0.5em;
   right: -0.5em;
   bottom: 0;
-  height: 3px;
+  height: 2px;
   border-radius: 2px;
-  background: #f5b335;
-  box-shadow: 0 0 6px rgb(245 179 53 / 0.45);
+  background: #ebe4ca;
+  box-shadow: 0 0 6px rgb(235 228 202 / 0.35);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 220ms cubic-bezier(0.3, 1, 0.5, 1);
@@ -70,10 +71,10 @@ a.item:focus-visible {
   content: '';
   position: absolute;
   left: -1.3em;
-  width: 0.55em;
-  height: 0.55em;
+  width: 0.6em;
+  height: 0.6em;
   border-radius: 50%;
-  background: radial-gradient(circle at 45% 40%, #fff6c4 0 35%, #ffc45c 75%);
+  background: radial-gradient(circle at 45% 40%, #fff3a6 0 40%, #f7c548 80%);
   box-shadow:
     0 0 0.35em rgb(255 190 80 / 0.9),
     0 0 0.9em rgb(255 160 40 / 0.45);

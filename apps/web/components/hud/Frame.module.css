@@ -1,12 +1,12 @@
 .frame {
-  --line: #e8dab4;
+  --line: #ebe4ca;
   --mark: #8fdc9f;
   --radius: 14px;
   --inset: 5px;
   --corner: 13px;
   position: relative;
   isolation: isolate;
-  border: 2px solid var(--line);
+  border: 1.5px solid var(--line);
   border-radius: var(--radius);
   background: rgb(4 7 16 / 0.9);
   box-shadow:

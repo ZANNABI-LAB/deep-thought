@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { scramble, settled } from '@/lib/scramble';
 import styles from './CockpitHud.module.css';
 
 export const HUD_EVENT = 'cockpit:hud';
@@ -8,19 +9,8 @@ export const HUD_EVENT = 'cockpit:hud';
 const TARGET = { x: 930, y: 140, r: 11 };
 const TEXT = { x: 975, y: 118 };
 const READOUT = 'TARGET: KEPLER-442b · 4.2 AU';
-const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*/<>';
 const START_MS = 550;
-const SETTLE_MS = 420;
-const SPREAD_MS = 24;
-
-const scramble = (text: string, elapsed: number) =>
-  [...text]
-    .map((char, i) => {
-      if (char === ' ' || elapsed >= SETTLE_MS + i * SPREAD_MS) return char;
-      if (elapsed < i * SPREAD_MS * 0.5) return ' ';
-      return GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
-    })
-    .join('');
+const TYPE = { settle: 420, spread: 24, blank: true };
 
 export function CockpitHud() {
   const [on, setOn] = useState(false);
@@ -40,10 +30,10 @@ export function CockpitHud() {
     let last = 0;
     const frame = (now: number) => {
       const elapsed = now - begin - START_MS;
-      const done = elapsed >= SETTLE_MS + READOUT.length * SPREAD_MS;
+      const done = settled(READOUT, elapsed, TYPE);
       if (now - last >= 45 || done) {
         last = now;
-        setLine(elapsed < 0 ? '' : scramble(READOUT, elapsed));
+        setLine(elapsed < 0 ? '' : scramble(READOUT, elapsed, TYPE));
       }
       if (!done) id = requestAnimationFrame(frame);
     };
