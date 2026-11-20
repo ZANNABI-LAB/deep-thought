@@ -2,7 +2,7 @@
   position: absolute;
   left: 0;
   bottom: calc(var(--glass-bottom) * -0.85);
-  width: min(85.59cqh, calc(100cqw - max(380px, 31cqw)));
+  width: min(784.3px, calc(100cqw - max(380px, 31cqw)));
   aspect-ratio: 85.59 / 27.5;
   container-type: size;
   pointer-events: none;
