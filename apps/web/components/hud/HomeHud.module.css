@@ -24,3 +24,11 @@
 .brand {
   position: relative;
 }
+
+.panel {
+  grid-area: 2 / 2;
+  display: flex;
+  flex-direction: column;
+  gap: max(16px, 2cqh);
+  padding-top: 17.7cqh;
+}

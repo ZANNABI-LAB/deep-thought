@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from 'react';
 import { preload } from 'react-dom';
+import type { PostIndex } from '@/components/hud/AskCard';
 import { HomeHud } from '@/components/hud/HomeHud';
 import { CockpitHud } from './CockpitHud';
 import { ShootingStars } from './ShootingStars';
@@ -9,7 +10,7 @@ import { POSTER, SpaceBackdrop } from './SpaceBackdrop';
 import styles from './SpaceScene.module.css';
 import { FRAME_SRC, type GlassLayout, LIGHTS_SRC, WindowFrame } from './WindowFrame';
 
-export function SpaceScene() {
+export function SpaceScene({ posts }: { posts: PostIndex[] }) {
   preload(POSTER, { as: 'image', fetchPriority: 'high' });
   preload(FRAME_SRC, { as: 'image', fetchPriority: 'high' });
   preload(LIGHTS_SRC, { as: 'image' });
@@ -42,7 +43,7 @@ export function SpaceScene() {
       </div>
       {glass && (
         <div className={styles.hud}>
-          <HomeHud />
+          <HomeHud posts={posts} />
         </div>
       )}
     </div>

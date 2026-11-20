@@ -1,0 +1,146 @@
+.card {
+  display: grid;
+  gap: max(14px, 1.6cqh);
+  padding: max(20px, 2.4cqh) max(18px, 2.2cqh) max(18px, 2.2cqh);
+  color: #efe4cb;
+}
+
+.title {
+  position: relative;
+  z-index: 1;
+  margin: max(30px, 4.6cqh) 0 max(4px, 0.6cqh) 0.3em;
+  font-family: var(--font-display);
+  font-size: max(36px, 5.6cqh);
+  font-weight: 400;
+  line-height: 0.98;
+  letter-spacing: 0.005em;
+}
+
+.art {
+  position: absolute;
+  right: 8%;
+  top: min(-16px, -2.2cqh);
+  z-index: 4;
+  width: 41%;
+  aspect-ratio: 200 / 176;
+  background: url('/world/cockpit-drone.webp') 0 0 / 4900% auto no-repeat;
+  pointer-events: none;
+}
+
+.field {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: max(48px, 6.2cqh);
+  padding: 0 6px 0 max(14px, 1.6cqh);
+  border: 1.5px solid #ebe4ca;
+  border-radius: 10px;
+  background: rgb(4 7 16 / 0.92);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: #efe4cb;
+  font-family: var(--font-sans);
+  font-size: max(17px, 2.75cqh);
+  outline: none;
+}
+
+.input::placeholder {
+  color: #efe4cb;
+  opacity: 0.85;
+}
+
+.send {
+  display: grid;
+  place-items: center;
+  width: max(40px, 5.3cqh);
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 8px;
+  background: #262e40;
+  color: #efe4cb;
+  cursor: pointer;
+  transition: background-color 160ms ease-out;
+}
+
+.send:hover,
+.send:focus-visible {
+  background: #2f3850;
+  outline: none;
+}
+
+.send svg {
+  width: 62%;
+  height: 62%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.field:focus-within {
+  border-color: #b9f5c8;
+}
+
+.answer {
+  position: relative;
+  z-index: 3;
+}
+
+.note {
+  margin: 0;
+  color: rgb(239 228 203 / 0.78);
+  font-size: max(13px, 1.6cqh);
+}
+
+.results {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.result {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 2px;
+  border-bottom: 1px solid rgb(235 228 202 / 0.35);
+  color: #efe4cb;
+  font-size: max(14px, 1.8cqh);
+  text-decoration: none;
+}
+
+.result:hover,
+.result:focus-visible {
+  color: #b9f5c8;
+  outline: none;
+}
+
+.sparkTop,
+.sparkSide {
+  position: absolute;
+  z-index: 2;
+  fill: #f3ead0;
+  filter: drop-shadow(0 0 4px rgb(243 234 208 / 0.6));
+  pointer-events: none;
+}
+
+.sparkTop {
+  top: -10px;
+  left: 46%;
+  width: 20px;
+}
+
+.sparkSide {
+  top: 9%;
+  right: 3.5%;
+  width: 16px;
+}
