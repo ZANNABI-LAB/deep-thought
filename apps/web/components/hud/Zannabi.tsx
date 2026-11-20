@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { HUD_EVENT } from '@/components/space/CockpitHud';
+import * as L from './cockpit-layout';
 import styles from './Zannabi.module.css';
 import {
   type Behavior,
@@ -38,14 +39,10 @@ import {
 
 const CELL: Box = [0, 0, 200, 240];
 const CANVAS: Box = [-60, -60, 420, 314];
-const BODY_HALF = 64;
-const STOOL_GAP = 22;
-const HOLO = { frames: 24, fps: 14, w: 296, h: 441, dummy: 21 };
+const HOLO = { frames: 24, fps: 14, w: 296, h: 441 };
 const DRONE = { w: 200, h: 304, frames: 49, fps: 21, crop: 491, from: 11, to: 36 };
 const DRONE_DY = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 23, 45, 63, 68, 71, 71, 63, 35, 9, -15, -24, -31, -35, -36, -37, -38, -39, -39, -39, -35, -30, -19, -12, -4, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 const GLOBE = { size: 176, spin: 24, off: 25, fps: 21, spinFps: 10.5 };
-const SABER_REACH = 250;
-const PILOT_AT = 0.3;
 const DESK_W = 554;
 const DESK_H = 307;
 const DESK_LIGHTS: [number, number, number, number, 'amber' | 'violet', number][] = [
@@ -57,11 +54,6 @@ const HOLD_MS = 900;
 const NOTICE = { reach: 1.8, cooldown: 25000 };
 const DONE_MS = 1100;
 const ANSWER_MS = 4500;
-const TERM_GAP = 17;
-const DECK = { left: 225.45, bottom: 17.45 };
-const ROAM: { left: [number, number]; bottom: [number, number]; chance: number } = { left: [87.27, 210.91], bottom: [94.55, 145.45], chance: 0.7 };
-const LOGO_GAP = 10;
-const DRONE_REACH = 1.1;
 const DIGITS = '0123456789ABCDEF';
 const SHAKE_MS = 420;
 
@@ -101,6 +93,11 @@ export function Zannabi() {
   const termRef = useRef<HTMLDivElement>(null);
   const readoutRef = useRef<HTMLSpanElement>(null);
   const droneRef = useRef<HTMLCanvasElement>(null);
+  const [guide, setGuide] = useState(false);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'production') setGuide(new URLSearchParams(location.search).has('layout'));
+  }, []);
 
   useEffect(() => {
     const lane = laneRef.current!;
@@ -138,45 +135,30 @@ export function Zannabi() {
     const globeSpin = new Image();
     const globeOff = new Image();
 
-    let width = 0;
-    let margin = 0;
-    let scale = 1;
-    let seatX = 0;
-    let saberX = 0;
-    let pilotX = 0;
-    let askX = 0;
-    let x = 0;
+    let zoom = 1;
+    let x = L.WALK.from + (L.WALK.to - L.WALK.from) * 0.55;
     let drawn = '';
     let holoDrawn = -1;
     let globeDrawn = '';
     let droneDrawn = -1;
     const measure = () => {
-      const dpr = devicePixelRatio;
-      canvas.width = Math.round(canvas.clientWidth * dpr);
-      canvas.height = Math.round(canvas.clientHeight * dpr);
-      holo.width = Math.round(holo.clientWidth * dpr);
-      holo.height = Math.round(holo.clientHeight * dpr);
-      globe.width = globe.height = Math.round(globe.clientWidth * dpr);
-      drone.width = Math.round(drone.clientWidth * dpr);
-      drone.height = Math.round(drone.clientHeight * dpr);
+      const hud = getComputedStyle(lane.parentElement!);
+      const inner = lane.parentElement!.clientWidth - parseFloat(hud.paddingLeft) - parseFloat(hud.paddingRight);
+      zoom = Math.min(1, (inner - Math.max(380, inner * 0.31)) / L.ROOM.w);
+      lane.style.setProperty('--zoom', `${zoom}`);
+      for (const c of [canvas, holo, globe, drone]) {
+        const { width, height } = c.getBoundingClientRect();
+        c.width = Math.round(width * devicePixelRatio);
+        c.height = Math.round(height * devicePixelRatio);
+      }
       droneDrawn = -1;
       for (const c of [ctx, holoCtx, globeCtx]) c.imageSmoothingQuality = 'high';
       globeDrawn = '';
       drawn = '';
       holoDrawn = -1;
-      scale = body.clientHeight / CELL[3];
-      margin = BODY_HALF * scale;
-      width = Math.max(0, Math.min(lane.clientWidth, holo.offsetLeft, projector.offsetLeft) - margin * 2);
-      const stool = getComputedStyle(seat);
-      seatX = parseFloat(stool.left) + parseFloat(stool.width) / 2 + STOOL_GAP * scale - margin;
-      pilotX = desk.offsetLeft + desk.offsetWidth * PILOT_AT - margin;
-      askX = (DECK.left * lane.clientHeight) / 100 - TERM_GAP * scale - margin;
-      saberX = holo.offsetLeft + (HOLO.dummy - SABER_REACH) * scale - margin + body.clientWidth / 2;
-      x = Math.min(x, width);
     };
     measure();
 
-    x = width * 0.55;
     let dir = 1;
     let queue: Step[] = [];
     let step: Step | null = null;
@@ -198,13 +180,13 @@ export function Zannabi() {
     let droneAcc = 0;
 
     const clip = (): Clip => step?.clip ?? 'idle';
-    const clamp = (value: number) => Math.min(Math.max(value, 0), width);
+    const clamp = (value: number) => Math.min(Math.max(value, L.WALK.from), L.WALK.to);
     const pace = () => step?.pace ?? 1;
     const spec = (): Spec => CLIPS[clip()];
 
     const paint = () => {
       const current = clip();
-      const left = Math.round((margin + x - body.clientWidth / 2) * devicePixelRatio) / devicePixelRatio;
+      const left = Math.round((x - L.BODY.w / 2) * devicePixelRatio * zoom) / (devicePixelRatio * zoom);
       const key = `${current} ${tick} ${left} ${dir}`;
       if (key === drawn) return;
       drawn = key;
@@ -266,27 +248,26 @@ export function Zannabi() {
       terminal.style.setProperty('--lift', `${lift}`);
     };
 
-    let parked = parseFloat(getComputedStyle(terminal).bottom) / (lane.clientHeight / 100);
+    let parked = L.DRONE.y;
     const park = (left: number, bottom: number) => {
       parked = bottom;
-      terminal.style.left = `${left}cqh`;
-      terminal.style.bottom = `${bottom}cqh`;
+      terminal.style.left = `${left}px`;
+      terminal.style.bottom = `${bottom}px`;
     };
     const ceiling = () => {
-      const unit = lane.clientHeight / 100;
-      const room = (lane.getBoundingClientRect().bottom - logo.getBoundingClientRect().bottom) / unit;
-      return room - (terminal.offsetHeight / unit) * DRONE_REACH - LOGO_GAP;
+      const room = (lane.getBoundingClientRect().bottom - logo.getBoundingClientRect().bottom) / zoom;
+      return room - L.DRONE.h * L.DRONE_REACH - L.LOGO_GAP;
     };
     const roam = () => {
-      const top = Math.min(ROAM.bottom[1], ceiling());
-      park(between(ROAM.left), between([Math.min(ROAM.bottom[0], top), top]));
+      const top = Math.min(L.ROAM.y[1], ceiling());
+      park(between(L.ROAM.x), between([Math.min(L.ROAM.y[0], top), top]));
     };
 
     const advanceDrone = () => {
       const state = terminal.dataset.state;
       if ((state === 'compute' || state === 'answer') && (droneTick < DRONE.from || droneTick > DRONE.to)) return;
       droneTick = (droneTick + 1) % DRONE.frames;
-      if (state === 'idle' && droneTick === DRONE.from && Math.random() < ROAM.chance) roam();
+      if (state === 'idle' && droneTick === DRONE.from && Math.random() < L.ROAM.chance) roam();
     };
 
     const advanceGlobe = () => {
@@ -315,7 +296,7 @@ export function Zannabi() {
       );
 
     const leg = (from: number, facing: number, spot: number): Step[] | null => {
-      const length = Math.abs(spot - from) / scale;
+      const length = Math.abs(spot - from) / L.PX;
       const turn: Step[] = (spot > from ? 1 : -1) !== facing ? [{ clip: 'turn-around', flip: true }] : [];
       const even = Math.max(0, (length - TRIP) / STRIDE);
       for (const cycles of [Math.round(even), Math.floor(even), Math.ceil(even)]) {
@@ -331,10 +312,10 @@ export function Zannabi() {
     const route = (spot: number, face?: number): Step[] | null => {
       let steps: Step[] | null = [];
       let end = dir;
-      if (Math.abs(spot - x) / scale > NEAR) {
+      if (Math.abs(spot - x) / L.PX > NEAR) {
         end = spot > x ? 1 : -1;
         steps = leg(x, dir, spot);
-        if (!steps && Math.abs(spot - x) / scale < SHORT * SHORT_PACE[0]) {
+        if (!steps && Math.abs(spot - x) / L.PX < SHORT * SHORT_PACE[0]) {
           steps = [{ clip: 'idle', glide: spot - x, stop: GLIDE_FRAMES }];
           end = dir;
         }
@@ -344,23 +325,17 @@ export function Zannabi() {
     };
 
     const clearSpot = () => {
-      const unit = lane.clientHeight / 100;
-      const blocks = [seat, desk, holo]
-        .map((el): [number, number] => [el.offsetLeft - margin, el.offsetLeft + el.offsetWidth - margin])
-        .concat([[DECK.left * unit - margin, DECK.left * unit + terminal.offsetWidth - margin]])
-        .map(([a, b]): [number, number] => [a - BODY_HALF * scale, b + BODY_HALF * scale])
-        .sort((a, b) => a[0] - b[0]);
-      let best: [number, number] = [0, 0];
-      let edge = 0;
-      for (const [a, b] of [...blocks, [width, width] as [number, number]]) {
-        if (Math.min(a, width) - edge > best[1] - best[0]) best = [edge, Math.min(a, width)];
+      let best: [number, number] = [L.WALK.from, L.WALK.from];
+      let edge = L.WALK.from;
+      for (const [a, b] of [...[...L.BLOCKS].sort((m, n) => m[0] - n[0]), [L.WALK.to, L.WALK.to] as [number, number]]) {
+        if (Math.min(a, L.WALK.to) - edge > best[1] - best[0]) best = [edge, Math.min(a, L.WALK.to)];
         edge = Math.max(edge, b);
       }
       return (best[0] + best[1]) / 2;
     };
     const places: Record<Place, { at: () => number; face?: number; scene: () => Step[] }> = {
       read: {
-        at: () => seatX,
+        at: () => L.SPOTS.read,
         face: 1,
         scene: () => [
           { clip: 'sit', scene: true },
@@ -369,7 +344,7 @@ export function Zannabi() {
         ],
       },
       saber: {
-        at: () => saberX,
+        at: () => L.SPOTS.saber,
         face: 1,
         scene: () => [
           { clip: 'idle', holo: 'appear', scene: true },
@@ -379,7 +354,7 @@ export function Zannabi() {
         ],
       },
       pilot: {
-        at: () => pilotX,
+        at: () => L.SPOTS.pilot,
         face: 1,
         scene: () => [
           { clip: 'turn-back', scene: true },
@@ -401,7 +376,7 @@ export function Zannabi() {
         ],
       },
       ask: {
-        at: () => askX,
+        at: () => L.SPOTS.ask,
         face: 1,
         scene: () => [
           { clip: 'turn-back', scene: true },
@@ -418,7 +393,7 @@ export function Zannabi() {
       clearTimeout(answered);
       terminal.dataset.state = state;
       if (state === 'idle') roam();
-      else park(DECK.left, DECK.bottom);
+      else park(L.DECK.x, L.DECK.y);
       if (state === 'compute') {
         computing = window.setInterval(() => {
           readout.textContent = Array.from({ length: 3 }, () =>
@@ -441,10 +416,11 @@ export function Zannabi() {
     };
 
     const wander = (): Step[] | null => {
-      const edge = Math.min(STRIDE * scale, width / 4);
+      const span = L.WALK.to - L.WALK.from;
+      const edge = Math.min(STRIDE * L.PX, span / 4);
       for (let tries = 0; tries < 8; tries += 1) {
-        const spot = edge + Math.random() * (width - edge * 2);
-        if (Math.abs(spot - x) < width * MIN_TRIP) continue;
+        const spot = L.WALK.from + edge + Math.random() * (span - edge * 2);
+        if (Math.abs(spot - x) < span * MIN_TRIP) continue;
         const steps = route(spot);
         if (steps) return steps;
       }
@@ -501,7 +477,7 @@ export function Zannabi() {
         return;
       }
       const steps = spec().advance;
-      if (steps) x = clamp(x + dir * (steps[tick] ?? 0) * scale * pace());
+      if (steps) x = clamp(x + dir * (steps[tick] ?? 0) * L.PX * pace());
       if (step.walk) {
         tick = (tick + 1) % spec().frames;
         if (tick === 0) loops += 1;
@@ -548,8 +524,8 @@ export function Zannabi() {
     const redirect = (place: Place) => {
       if (!step?.walk || waveWanted) return false;
       const { at, face, scene } = places[place];
-      const rest = sum(CLIPS.walk.advance?.slice(tick)) * scale * pace();
-      const length = ((at() - x) * dir - rest) / scale;
+      const rest = sum(CLIPS.walk.advance?.slice(tick)) * L.PX * pace();
+      const length = ((at() - x) * dir - rest) / L.PX;
       if (length <= 0) return false;
       const even = Math.max(0, (length - STOP) / STRIDE);
       for (const cycles of [Math.round(even), Math.floor(even), Math.ceil(even)]) {
@@ -734,8 +710,8 @@ export function Zannabi() {
   }, []);
 
   return (
-    <div ref={laneRef} className={styles.lane} aria-hidden>
-      <div ref={deskRef} className={styles.desk}>
+    <div ref={laneRef} className={styles.lane} style={{ width: L.ROOM.w, height: L.ROOM.h }} aria-hidden>
+      <div ref={deskRef} className={styles.desk} style={L.box(L.DESK)}>
         <img src="/world/cockpit-desk.webp" alt="" width={DESK_W} height={DESK_H} draggable={false} />
         <Tip>Pilot the ship</Tip>
         {DESK_LIGHTS.map(([x, y, w, h, tone, delay]) => (
@@ -745,13 +721,13 @@ export function Zannabi() {
             style={{ left: `${(x / DESK_W) * 100}%`, top: `${(y / DESK_H) * 100}%`, width: `${(w / DESK_W) * 100}%`, height: `${(h / DESK_H) * 100}%`, animationDelay: `${delay}ms` }}
           />
         ))}
-        <canvas ref={globeRef} className={styles.globe} />
+        <canvas ref={globeRef} className={styles.globe} style={{ left: `${L.GLOBE.x * 100}%`, bottom: `${L.GLOBE.y * 100}%`, width: L.GLOBE.w }} />
       </div>
-      <div ref={seatRef} className={styles.seat}>
+      <div ref={seatRef} className={styles.seat} style={L.box(L.SEAT)}>
         <img src="/world/cockpit-stool.webp" alt="" width={141} height={130} draggable={false} />
         <Tip>Read a book</Tip>
       </div>
-      <div ref={termRef} className={styles.terminal} data-state="idle">
+      <div ref={termRef} className={styles.terminal} style={L.box(L.DRONE)} data-state="idle">
         <span className={styles.shadow} />
         <span className={styles.drone}>
           <canvas ref={droneRef} className={styles.droneArt} />
@@ -763,8 +739,8 @@ export function Zannabi() {
         </span>
         <Tip>Ask Deep Thought</Tip>
       </div>
-      <canvas ref={holoRef} className={styles.holo} />
-      <div ref={projectorRef} className={styles.projector}>
+      <canvas ref={holoRef} className={styles.holo} style={L.box(L.HOLO)} />
+      <div ref={projectorRef} className={styles.projector} style={L.box(L.PROJECTOR)}>
         <Tip>Saber training</Tip>
       </div>
       <div ref={bodyRef} className={styles.body}>
@@ -773,6 +749,29 @@ export function Zannabi() {
           <Tip>Say hi</Tip>
         </div>
       </div>
+      {guide && <LayoutGuide />}
+    </div>
+  );
+}
+
+function LayoutGuide() {
+  const rects: [string, L.Rect][] = [
+    ['seat', L.SEAT],
+    ['desk', L.DESK],
+    ['holo', L.HOLO],
+    ['projector', L.PROJECTOR],
+    ['deck', { ...L.DRONE, ...L.DECK }],
+    ['roam', { x: L.ROAM.x[0], y: L.ROAM.y[0], w: L.ROAM.x[1] - L.ROAM.x[0] + L.DRONE.w, h: L.ROAM.y[1] - L.ROAM.y[0] + L.DRONE.h }],
+  ];
+  return (
+    <div className={styles.guide}>
+      <span className={styles.walk} style={{ left: L.WALK.from, width: L.WALK.to - L.WALK.from }} />
+      {rects.map(([name, rect]) => (
+        <span key={name} className={styles.rect} style={L.box(rect)} data-name={name} />
+      ))}
+      {Object.entries(L.SPOTS).map(([name, at]) => (
+        <span key={name} className={styles.spot} style={{ left: at }} data-name={name} />
+      ))}
     </div>
   );
 }
