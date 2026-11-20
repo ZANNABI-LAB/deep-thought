@@ -1,4 +1,5 @@
 import { HomeLogo } from '@/components/space/HomeLogo';
+import { SINCE, SITE_NAME } from '@/lib/site';
 import { HomeNav } from './HomeNav';
 import styles from './HomeHud.module.css';
 import { Zannabi } from './Zannabi';
@@ -13,6 +14,9 @@ export function HomeHud() {
         </div>
       </div>
       <Zannabi />
+      <p className={styles.copyright}>
+        <span className={styles.mark}>©</span> {SINCE} {SITE_NAME}. All rights reserved.
+      </p>
     </div>
   );
 }
