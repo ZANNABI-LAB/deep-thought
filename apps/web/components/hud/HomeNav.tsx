@@ -5,13 +5,12 @@ import { useRef } from 'react';
 import { scramble, settled } from '@/lib/scramble';
 import styles from './HomeNav.module.css';
 
-type Item = { label: string; href: string; locked?: boolean };
+type Item = { label: string; href: string };
 
 const ITEMS: Item[] = [
   { label: 'Home', href: '/' },
   { label: 'Writing', href: '/writing' },
   { label: 'Portfolio', href: '/portfolio' },
-  { label: 'Lab', href: '/lab', locked: true },
   { label: 'Arcade', href: '/arcade' },
   { label: 'About me', href: '/about' },
 ];
@@ -51,15 +50,10 @@ export function HomeNav({ current = '/' }: { current?: string }) {
   return (
     <nav className={styles.nav} aria-label="Main">
       <ul className={styles.list}>
-        {ITEMS.map(({ label, href, locked }) => (
+        {ITEMS.map(({ label, href }) => (
           <li key={label}>
-            <Link href={href} className={styles.item} aria-label={locked ? `${label} (locked)` : label} aria-current={href === current ? 'page' : undefined}>
+            <Link href={href} className={styles.item} aria-label={label} aria-current={href === current ? 'page' : undefined}>
               <Label text={label} />
-              {locked && (
-                <svg className={styles.lock} viewBox="0 0 12 14" aria-hidden>
-                  <path d="M3 6V4a3 3 0 0 1 6 0v2M2 6h8v7H2zM6 9v2" />
-                </svg>
-              )}
             </Link>
           </li>
         ))}

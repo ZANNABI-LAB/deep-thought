@@ -12,10 +12,6 @@
   color: #efe4cb;
 }
 
-.page[data-status='denied'] {
-  --accent: #ffb445;
-}
-
 .area {
   margin: 0;
   color: rgb(239 228 203 / 0.62);

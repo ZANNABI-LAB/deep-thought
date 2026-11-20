@@ -8,8 +8,10 @@ import styles from './Pending.module.css';
 const TYPE = { settle: 360, spread: 55, blank: true };
 const STEP_MS = 40;
 
-export function Pending({ area, status, message }: { area: string; status: 'COMING SOON' | 'ACCESS DENIED'; message: string }) {
-  const [line, setLine] = useState<string>(status);
+const STATUS = 'COMING SOON';
+
+export function Pending({ area, message }: { area: string; message: string }) {
+  const [line, setLine] = useState(STATUS);
 
   useEffect(() => {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -18,21 +20,21 @@ export function Pending({ area, status, message }: { area: string; status: 'COMI
     let last = 0;
     const frame = (now: number) => {
       const elapsed = now - begin;
-      const done = settled(status, elapsed, TYPE);
+      const done = settled(STATUS, elapsed, TYPE);
       if (now - last >= STEP_MS || done) {
         last = now;
-        setLine(done ? status : scramble(status, elapsed, TYPE));
+        setLine(done ? STATUS : scramble(STATUS, elapsed, TYPE));
       }
       if (!done) id = requestAnimationFrame(frame);
     };
     id = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(id);
-  }, [status]);
+  }, []);
 
   return (
-    <main className={styles.page} data-status={status === 'ACCESS DENIED' ? 'denied' : 'soon'}>
+    <main className={styles.page}>
       <p className={styles.area}>&gt; {area}</p>
-      <h1 className={styles.status} aria-label={status}>
+      <h1 className={styles.status} aria-label={STATUS}>
         <span aria-hidden>{line}</span>
       </h1>
       <p className={styles.message}>{message}</p>
