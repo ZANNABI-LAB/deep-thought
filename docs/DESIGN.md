@@ -23,7 +23,7 @@
 | `art/refs/zannabi-gpt-style-v1.png` | **Zannabi 모습 기준** (v4, 유리 헬멧, 옆 원반, 선글라스, 크림색 우주복) |
 | `art/refs/space/space-bg-v3-4k.webp` | **창밖 우주 원본** (4096×2304, ChatGPT 원본 1672×940을 Bytedance로 업스케일) |
 | `art/refs/logo-mark-gpt-v3.png` | 헤더 로고 원본 (potrace로 SVG) |
-| `apps/web/app/favicon.ico` | **파비콘** (2026-11-19): 헬멧 쓴 선글라스 잔나비 도트(16·32·48·64px). 사용자가 직접 만든 완성본이라 원본 그림은 따로 두지 않는다 |
+| `apps/web/app/favicon.ico` | **파비콘** (2026-11-20): 라벤더 단말기 모니터(16·32·48·64px). 사용자가 직접 만든 완성본이라 원본 그림은 따로 두지 않는다. 그전엔 헬멧 쓴 선글라스 잔나비 도트였다 |
 | `docs/assets/zannabi-original-logo.png` | 브랜드 출발점 (흑백 우주 원숭이) |
 
 ---
