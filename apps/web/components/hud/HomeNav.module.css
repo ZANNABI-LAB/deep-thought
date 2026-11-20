@@ -1,0 +1,116 @@
+.nav {
+  position: absolute;
+  top: 12.5cqh;
+  left: 3.7cqw;
+  width: 52cqw;
+  min-width: 560px;
+  height: max(38px, 5.2cqh);
+  padding: 0 max(48px, 6.6cqh) 0 max(70px, 9.8cqh);
+  border: 1.5px solid rgb(222 204 150 / 0.9);
+  border-radius: 999px;
+  background: rgb(6 10 22 / 0.55);
+  font-family: var(--font-hud);
+  font-size: max(14px, 2.4cqh);
+  pointer-events: auto;
+}
+
+.nav::before,
+.nav::after {
+  content: '';
+  position: absolute;
+  top: 20%;
+  bottom: 20%;
+  width: max(10px, 1.4cqh);
+  border: 1.5px solid #8fdc9f;
+  border-radius: 999px;
+}
+
+.nav::before {
+  left: max(12px, 1.6cqh);
+  border-right: none;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.nav::after {
+  right: max(12px, 1.6cqh);
+  border-left: none;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.list {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  padding: 0.35em 0.2em;
+  color: #ede3d1;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 160ms ease-out;
+}
+
+.item::after {
+  content: '';
+  position: absolute;
+  left: -0.5em;
+  right: -0.5em;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: #ffc45c;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 220ms cubic-bezier(0.3, 1, 0.5, 1);
+}
+
+a.item:hover::after,
+a.item:focus-visible::after,
+.item[aria-current='page']::after {
+  transform: scaleX(1);
+}
+
+a.item:hover,
+a.item:focus-visible {
+  color: #fff6e3;
+  outline: none;
+}
+
+.item[aria-current='page'] {
+  font-weight: 500;
+}
+
+.item[aria-current='page']::before {
+  content: '';
+  position: absolute;
+  left: -1.3em;
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: 50%;
+  background: #ffc45c;
+  box-shadow: 0 0 0.5em rgb(255 196 92 / 0.6);
+}
+
+.item[aria-disabled] {
+  cursor: default;
+}
+
+.lock {
+  width: 0.8em;
+  height: 0.95em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
