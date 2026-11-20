@@ -46,7 +46,8 @@ export const STOP = travel('turn-stop');
 export const TRIP = travel('turn') + sum(CLIPS.walk.advance?.slice(WALK_ENTRY)) + STOP;
 export const SHORT = travel('turn') + STOP;
 export const PACE: [number, number] = [0.7, 1.3];
-export const SHORT_PACE: [number, number] = [0.7, 1];
+export const SHORT_PACE: [number, number] = [0.4, 1.07];
+export const GLIDE_FRAMES = 6;
 export const NEAR = 4;
 export const READS: Clip[] = ['read', 'read-nod'];
 export const REST_MS: [number, number] = [3000, 8000];
@@ -68,6 +69,8 @@ export type Step = {
   holo?: Holo;
   hud?: boolean;
   term?: 'compute' | 'answer';
+  glide?: number;
+  stop?: number;
 };
 const WALKING: Clip[] = ['turn', 'walk', 'turn-stop', 'turn-around'];
 const NEEDED = {

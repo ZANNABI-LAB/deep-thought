@@ -14,6 +14,7 @@ import {
   CLIPS,
   FIRST,
   FPS,
+  GLIDE_FRAMES,
   IDLE_CUTS,
   MIN_TRIP,
   NEAR,
@@ -320,6 +321,10 @@ export function Zannabi() {
       if (Math.abs(spot - x) / scale > NEAR) {
         end = spot > x ? 1 : -1;
         steps = leg(x, dir, spot);
+        if (!steps && Math.abs(spot - x) / scale < SHORT * SHORT_PACE[0]) {
+          steps = [{ clip: 'idle', glide: spot - x, stop: GLIDE_FRAMES }];
+          end = dir;
+        }
         for (const side of [-end, end]) {
           if (steps) break;
           for (const reach of [1, 1.5]) {
@@ -503,9 +508,10 @@ export function Zannabi() {
         if (tick === 0 && (arrived || loops > (step.cycles ?? 0))) next();
         return;
       }
+      if (step.glide) x = clamp(x + step.glide / (step.stop ?? spec().frames));
       tick += 1;
       if (spec().hits?.includes(tick)) flash();
-      if (tick < spec().frames) return;
+      if (tick < (step.stop ?? spec().frames)) return;
       loops += 1;
       if (loops < (step.repeat ?? 1)) {
         tick = spec().start ?? 0;
