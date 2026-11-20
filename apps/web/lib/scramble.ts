@@ -14,7 +14,7 @@ export const scramble = (text: string, elapsed: number, { settle, spread, blank 
     })
     .join('');
 
-export const settled = (text: string, elapsed: number, { settle, spread }: Scramble) => elapsed >= settle + text.length * spread;
+const settled = (text: string, elapsed: number, { settle, spread }: Scramble) => elapsed >= settle + text.length * spread;
 
 export function useScramble(text: string, options: Scramble, run: unknown) {
   const [line, setLine] = useState(text);

@@ -56,7 +56,7 @@ export const MIN_TRIP = 0.25;
 export const IDLE_CUTS = new Set([0, 1, 2, 3, 11, 12, 13, 14, 23, 24, 25, 26, 27]);
 export const FIRST: Clip[] = ['idle', 'turn', 'walk', 'turn-stop', 'turn-around', 'wave'];
 
-export type Holo = 'appear' | 'disappear';
+type Holo = 'appear' | 'disappear';
 export type Step = {
   clip: Clip;
   repeat?: number;
