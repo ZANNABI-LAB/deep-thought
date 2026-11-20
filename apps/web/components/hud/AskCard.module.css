@@ -1,5 +1,6 @@
 .card {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: max(14px, 1.6cqh);
   padding: max(20px, 2.4cqh) max(18px, 2.2cqh) max(18px, 2.2cqh);
   color: #efe4cb;
@@ -8,12 +9,12 @@
 .title {
   position: relative;
   z-index: 1;
-  margin: max(30px, 4.6cqh) 0 max(4px, 0.6cqh) 0.3em;
+  margin: max(34px, 5.2cqh) 0 max(14px, 2cqh) 0.35em;
   font-family: var(--font-display);
-  font-size: max(36px, 5.6cqh);
+  font-size: max(32px, 5cqh);
   font-weight: 400;
-  line-height: 0.98;
-  letter-spacing: 0.005em;
+  line-height: 1.08;
+  letter-spacing: 0.012em;
 }
 
 .art {
@@ -47,7 +48,7 @@
   background: transparent;
   color: #efe4cb;
   font-family: var(--font-sans);
-  font-size: max(17px, 2.75cqh);
+  font-size: max(17px, 2.9cqh);
   outline: none;
 }
 
