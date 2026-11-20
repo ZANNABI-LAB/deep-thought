@@ -39,6 +39,8 @@
 }
 
 .link {
+  display: block;
+  width: fit-content;
   color: rgb(239 228 203 / 0.62);
   font-family: var(--font-hud);
   font-size: 13px;

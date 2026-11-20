@@ -1,11 +1,11 @@
 .header {
-  margin: 32px 0 40px;
-  padding-bottom: 32px;
+  margin: 18px 0 40px;
+  padding-bottom: 40px;
   border-bottom: 1px solid rgb(235 228 202 / 0.18);
 }
 
 .meta {
-  margin: 0 0 16px;
+  margin: 0 0 12px;
   color: rgb(185 245 200 / 0.6);
   font-family: var(--font-hud);
   font-size: 12px;
@@ -14,7 +14,7 @@
 }
 
 .title {
-  margin: 0 0 16px;
+  margin: 0 0 18px;
   color: #efe4cb;
   font-size: clamp(30px, 4vw, 38px);
   font-weight: 700;
