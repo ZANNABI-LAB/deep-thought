@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import frame from './Frame.module.css';
 import styles from './HomeNav.module.css';
 
 type Item = { label: string; href?: string; locked?: boolean };
@@ -14,7 +15,7 @@ const ITEMS: Item[] = [
 
 export function HomeNav({ current = '/' }: { current?: string }) {
   return (
-    <nav className={styles.nav} aria-label="Main">
+    <nav className={`${frame.frame} ${frame.pill} ${styles.nav}`} aria-label="Main">
       <ul className={styles.list}>
         {ITEMS.map(({ label, href, locked }) => (
           <li key={label}>

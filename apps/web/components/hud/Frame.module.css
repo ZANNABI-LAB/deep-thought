@@ -1,0 +1,60 @@
+.frame {
+  --line: #e8dab4;
+  --mark: #8fdc9f;
+  --radius: 14px;
+  --inset: 5px;
+  --corner: 13px;
+  position: relative;
+  isolation: isolate;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: rgb(4 7 16 / 0.9);
+  box-shadow:
+    inset 0 0 0 1.5px rgb(0 0 0 / 0.55),
+    0 0 10px rgb(232 218 180 / 0.12);
+}
+
+.frame::before {
+  content: '';
+  position: absolute;
+  inset: var(--inset);
+  z-index: -1;
+  border: 1.5px solid var(--mark);
+  border-radius: calc(var(--radius) - var(--inset));
+  pointer-events: none;
+  mask:
+    linear-gradient(90deg, #000 var(--corner), transparent 0 calc(100% - var(--corner)), #000 0),
+    linear-gradient(#000 var(--corner), transparent 0 calc(100% - var(--corner)), #000 0);
+  mask-composite: intersect;
+}
+
+.pill {
+  --radius: 999px;
+}
+
+.pill::before,
+.pill::after {
+  content: '';
+  position: absolute;
+  top: 16%;
+  bottom: 16%;
+  width: max(11px, 1.5cqh);
+  border: 1.5px solid var(--mark);
+  border-radius: 999px;
+  mask: none;
+  pointer-events: none;
+}
+
+.pill::before {
+  inset: 16% auto 16% max(12px, 1.6cqh);
+  border-right: none;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.pill::after {
+  inset: 16% max(12px, 1.6cqh) 16% auto;
+  border-left: none;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
