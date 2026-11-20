@@ -25,9 +25,9 @@
   align-items: center;
   gap: 0.4em;
   padding: 0.5em 0;
-  color: rgb(239 228 203 / 0.78);
+  color: rgb(185 245 200 / 0.6);
   text-decoration: none;
-  text-shadow: 0 0 10px rgb(239 228 203 / 0.15);
+  text-shadow: 0 0 10px rgb(185 245 200 / 0.15);
   transition: color 160ms ease-out;
 }
 
@@ -36,15 +36,15 @@
   width: 0.62em;
   height: 1.05em;
   margin-left: -0.1em;
-  background: #efe4cb;
-  box-shadow: 0 0 8px rgb(239 228 203 / 0.45);
+  background: #b9f5c8;
+  box-shadow: 0 0 8px rgb(185 245 200 / 0.45);
   opacity: 0;
 }
 
 .item[aria-current='page'],
 .item:hover,
 .item:focus-visible {
-  color: #fff8e8;
+  color: #b9f5c8;
   outline: none;
 }
 
@@ -59,7 +59,7 @@
 }
 
 .list:hover .item[aria-current='page']:not(:hover) {
-  color: rgb(239 228 203 / 0.78);
+  color: rgb(185 245 200 / 0.6);
 }
 
 .item:hover::after,
