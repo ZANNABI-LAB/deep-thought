@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useRef } from 'react';
-import { scramble, settled } from '@/lib/scramble';
+import { useState } from 'react';
+import { useScramble } from '@/lib/scramble';
 import styles from './HomeNav.module.css';
 
 type Item = { label: string; href: string };
@@ -16,32 +16,15 @@ const ITEMS: Item[] = [
 ];
 
 const HOVER = { settle: 160, spread: 45 };
-const STEP_MS = 40;
 
 function Label({ text }: { text: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const running = useRef(0);
-
-  const play = () => {
-    const el = ref.current;
-    if (!el || running.current || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const begin = performance.now();
-    let last = 0;
-    const frame = (now: number) => {
-      const elapsed = now - begin;
-      const done = settled(text, elapsed, HOVER);
-      if (now - last >= STEP_MS || done) {
-        last = now;
-        el.textContent = done ? text : scramble(text, elapsed, HOVER);
-      }
-      running.current = done ? 0 : requestAnimationFrame(frame);
-    };
-    running.current = requestAnimationFrame(frame);
-  };
+  const [hovered, setHovered] = useState(0);
+  const line = useScramble(text, HOVER, hovered);
+  const play = () => setHovered((n) => n + 1);
 
   return (
-    <span ref={ref} onPointerEnter={play} onFocus={play}>
-      {text}
+    <span onPointerEnter={play} onFocus={play}>
+      {line}
     </span>
   );
 }

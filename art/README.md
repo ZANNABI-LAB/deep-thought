@@ -1,14 +1,12 @@
 # art — 기준 그림
 
-홈 시안·창틀·로고와 Zannabi의 기준 그림을 둔다. 쓰임은 [docs/DESIGN.md §1](../docs/DESIGN.md).
+창틀·로고·조종석 소품과 Zannabi의 기준 그림을 둔다. 쓰임은 [docs/DESIGN.md §1](../docs/DESIGN.md).
 
 ```text
 art/refs/
-  concept/home-gpt-v3.png          홈 시안 (ChatGPT). Zannabi 모습은 기준과 다르다
   concept/logo-gpt-v2.png          홈 로고 원본 (ChatGPT, 1808×870, 검정 배경)
   concept/window-frame-gpt-v2.png  창틀 원본 (ChatGPT, 1672×941, 창 안쪽 투명)
   space/space-bg-v3-4k.webp        창밖 우주 (ChatGPT 1672×940을 Bytedance Image Upscale로 4096×2304, 무손실 WebP)
-  logo-mark-gpt-v3.png             예전 헤더 로고 (GPT 흑백, 지금은 안 씀)
   cockpit/stool-gpt-v1.png         등받이 없는 의자 원본 (ChatGPT, 검정 배경)
   cockpit/desk-gpt-v3.png          조종 데스크 원본, 오른쪽 끝에 책 더미·메모 (ChatGPT, 1484×1060, 검정 배경)
   cockpit/hologram-dummy-gpt-v1.png 수련용 홀로그램 더미와 투사기 (ChatGPT, 1484×1060, 검정 배경)

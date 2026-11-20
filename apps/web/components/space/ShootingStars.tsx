@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { reducedMotion } from '@/lib/motion';
 import styles from './ShootingStars.module.css';
 
 const ART = { w: 1280, h: 720 };
@@ -92,7 +93,7 @@ export function ShootingStars() {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (reducedMotion()) return;
 
     const demo = process.env.NODE_ENV !== 'production' && new URLSearchParams(location.search).has('meteors');
     const [gapMin, gapMax] = demo ? DEMO_GAP_MS : GAP_MS;

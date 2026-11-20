@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { HUD_EVENT } from '@/components/space/CockpitHud';
+import { reducedMotion } from '@/lib/motion';
 import * as L from './cockpit-layout';
+import { DESK, DRONE, GLOBE, HOLO } from './cockpit-sheets';
 import styles from './Zannabi.module.css';
 import {
   type Behavior,
@@ -39,17 +41,6 @@ import {
 
 const CELL: Box = [0, 0, 200, 240];
 const CANVAS: Box = [-60, -60, 420, 314];
-const HOLO = { frames: 24, fps: 14, w: 296, h: 441 };
-const DRONE = { w: 200, h: 304, frames: 49, fps: 21, crop: 491, from: 11, to: 36 };
-const DRONE_DY = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 23, 45, 63, 68, 71, 71, 63, 35, 9, -15, -24, -31, -35, -36, -37, -38, -39, -39, -39, -35, -30, -19, -12, -4, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-const GLOBE = { size: 176, spin: 24, off: 25, fps: 21, spinFps: 10.5 };
-const DESK_W = 554;
-const DESK_H = 307;
-const DESK_LIGHTS: [number, number, number, number, 'amber' | 'violet', number][] = [
-  [65, 46, 22, 14, 'violet', 300],
-  [249, 118, 21, 14, 'amber', 0],
-  [281, 118, 20, 14, 'amber', 1200],
-];
 const HOLD_MS = 900;
 const NOTICE = { reach: 1.8, cooldown: 25000 };
 const DONE_MS = 1100;
@@ -243,7 +234,7 @@ export function Zannabi() {
       droneDrawn = droneTick;
       droneCtx.clearRect(0, 0, drone.width, drone.height);
       droneCtx.drawImage(droneImg, droneTick * DRONE.w, 0, DRONE.w, DRONE.h, 0, 0, drone.width, drone.height);
-      const lift = DRONE_DY[droneTick]! / DRONE.crop;
+      const lift = DRONE.dy[droneTick]! / DRONE.crop;
       droneBody.style.translate = `0 ${lift * 100}%`;
       terminal.style.setProperty('--lift', `${lift}`);
     };
@@ -606,7 +597,7 @@ export function Zannabi() {
       return behavior;
     };
 
-    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const still = reducedMotion();
     let id = 0;
     let last = 0;
     let acc = 0;
@@ -712,13 +703,13 @@ export function Zannabi() {
   return (
     <div ref={laneRef} className={styles.lane} style={{ width: L.ROOM.w, height: L.ROOM.h }} aria-hidden>
       <div ref={deskRef} className={styles.desk} style={L.box(L.DESK)}>
-        <img src="/world/cockpit-desk.webp" alt="" width={DESK_W} height={DESK_H} draggable={false} />
+        <img src="/world/cockpit-desk.webp" alt="" width={DESK.w} height={DESK.h} draggable={false} />
         <Tip>Pilot the ship</Tip>
-        {DESK_LIGHTS.map(([x, y, w, h, tone, delay]) => (
+        {DESK.lights.map(([x, y, w, h, tone, delay]) => (
           <span
             key={`${x}-${y}`}
             className={styles[tone]}
-            style={{ left: `${(x / DESK_W) * 100}%`, top: `${(y / DESK_H) * 100}%`, width: `${(w / DESK_W) * 100}%`, height: `${(h / DESK_H) * 100}%`, animationDelay: `${delay}ms` }}
+            style={{ left: `${(x / DESK.w) * 100}%`, top: `${(y / DESK.h) * 100}%`, width: `${(w / DESK.w) * 100}%`, height: `${(h / DESK.h) * 100}%`, animationDelay: `${delay}ms` }}
           />
         ))}
         <canvas ref={globeRef} className={styles.globe} style={{ left: `${L.GLOBE.x * 100}%`, bottom: `${L.GLOBE.y * 100}%`, width: L.GLOBE.w }} />

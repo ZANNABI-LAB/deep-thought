@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { reducedMotion } from '@/lib/motion';
 import styles from './WindowFrame.module.css';
 
 export const FRAME_SRC = '/world/window-frame.png';
@@ -87,7 +88,7 @@ export function WindowFrame({ onLayout }: { onLayout: (layout: GlassLayout) => v
     const lights = new Image();
     frame.src = FRAME_SRC;
     lights.src = LIGHTS_SRC;
-    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const still = reducedMotion();
     const ready = () => frame.complete && frame.naturalWidth > 0 && lights.complete && lights.naturalWidth > 0;
 
     let scale = 1;

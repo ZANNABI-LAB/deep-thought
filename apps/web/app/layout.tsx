@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport: Viewport = { themeColor: '#080F1F' };
+export const viewport: Viewport = { width: 1280, themeColor: '#080F1F' };
 
 const siteJsonLd = {
   '@context': 'https://schema.org',

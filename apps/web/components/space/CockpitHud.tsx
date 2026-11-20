@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { scramble, settled } from '@/lib/scramble';
+import { useScramble } from '@/lib/scramble';
 import styles from './CockpitHud.module.css';
 
 export const HUD_EVENT = 'cockpit:hud';
@@ -9,37 +9,17 @@ export const HUD_EVENT = 'cockpit:hud';
 const TARGET = { x: 930, y: 140, r: 11 };
 const TEXT = { x: 975, y: 118 };
 const READOUT = 'TARGET: KEPLER-442b · 4.2 AU';
-const START_MS = 550;
-const TYPE = { settle: 420, spread: 24, blank: true };
+const TYPE = { settle: 420, spread: 24, blank: true, delay: 550, step: 45 };
 
 export function CockpitHud() {
   const [on, setOn] = useState(false);
-  const [line, setLine] = useState('');
+  const line = useScramble(READOUT, TYPE, on);
 
   useEffect(() => {
     const toggle = (event: Event) => setOn((event as CustomEvent<boolean>).detail);
     window.addEventListener(HUD_EVENT, toggle);
     return () => window.removeEventListener(HUD_EVENT, toggle);
   }, []);
-
-  useEffect(() => {
-    if (!on) return setLine('');
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return setLine(READOUT);
-    const begin = performance.now();
-    let id = 0;
-    let last = 0;
-    const frame = (now: number) => {
-      const elapsed = now - begin - START_MS;
-      const done = settled(READOUT, elapsed, TYPE);
-      if (now - last >= 45 || done) {
-        last = now;
-        setLine(elapsed < 0 ? '' : scramble(READOUT, elapsed, TYPE));
-      }
-      if (!done) id = requestAnimationFrame(frame);
-    };
-    id = requestAnimationFrame(frame);
-    return () => cancelAnimationFrame(id);
-  }, [on]);
 
   const { x, y, r } = TARGET;
   const c = 5;
@@ -53,7 +33,7 @@ export function CockpitHud() {
       </g>
       <polyline points={`${x + r},${y - r + 2} ${x + r + 18},${TEXT.y - 3} ${TEXT.x - 6},${TEXT.y - 3}`} pathLength={1} className={`${styles.line} ${styles.leader}`} />
       <text x={TEXT.x} y={TEXT.y} className={styles.text}>
-        {line}
+        {on ? line : ''}
       </text>
     </svg>
   );

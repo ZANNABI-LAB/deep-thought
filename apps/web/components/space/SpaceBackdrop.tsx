@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { reducedMotion } from '@/lib/motion';
 import styles from './SpaceBackdrop.module.css';
 
 export const POSTER = '/world/space-loop-poster.webp';
@@ -18,8 +19,7 @@ export function SpaceBackdrop({ onReady }: { onReady: () => void }) {
     poster.decode().finally(() => alive && onReadyRef.current());
 
     const video = videoRef.current;
-    const still = matchMedia('(prefers-reduced-motion: reduce), (max-width: 768px)');
-    if (video && !still.matches) {
+    if (video && !reducedMotion() && !matchMedia('(hover: none)').matches) {
       video.src = VIDEO;
       video.play().catch(() => {});
     }

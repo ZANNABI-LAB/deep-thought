@@ -8,12 +8,12 @@
 ## 구조
 
 ```text
-apps/web    Next.js — 홈과 글 페이지
+apps/web    Next.js — 홈, 글(Writing), 준비 중 페이지
 art/        기준 그림
 docs/       설계 문서
 ```
 
-이 브랜치(`redesign/cockpit`)는 새 홈(우주선 창 + HUD)을 만드는 중이라 홈에는 창밖 우주 배경만 있다. 배포 중인 `main`은 v2.0 Godot 섬 월드다.
+홈은 우주선 창 너머 우주와 조종석에서 지내는 Zannabi(HUD 메뉴), 나머지 페이지는 같은 메뉴를 쓰는 HUD 스타일이다. 지금은 PC 웹만 맞춘다(폰·태블릿은 PC 화면을 축소해서 보여 준다).
 
 ## 글쓰기
 
@@ -23,7 +23,7 @@ docs/       설계 문서
 
 ```bash
 pnpm install
-pnpm dev          # http://localhost:3000
+pnpm dev          # http://localhost:3000 (개발용: ?layout 배치 보기, ?zannabi=read,saber 동작 순서 고정)
 pnpm test         # 단위 테스트
 pnpm typecheck
 pnpm --filter @deep-thought/web build
