@@ -60,6 +60,8 @@ const ANSWER_MS = 4500;
 const TERM_GAP = 17;
 const DECK = { left: 225.45, bottom: 17.45 };
 const ROAM: { left: [number, number]; bottom: [number, number]; chance: number } = { left: [87.27, 210.91], bottom: [94.55, 145.45], chance: 0.7 };
+const LOGO_GAP = 10;
+const DRONE_REACH = 1.1;
 const DIGITS = '0123456789ABCDEF';
 const SHAKE_MS = 420;
 
@@ -102,6 +104,7 @@ export function Zannabi() {
 
   useEffect(() => {
     const lane = laneRef.current!;
+    const logo = lane.parentElement!.querySelector<HTMLElement>('[data-logo] img')!;
     const seat = seatRef.current!;
     const desk = deskRef.current!;
     const body = bodyRef.current!;
@@ -263,11 +266,21 @@ export function Zannabi() {
       terminal.style.setProperty('--lift', `${lift}`);
     };
 
+    let parked = parseFloat(getComputedStyle(terminal).bottom) / (lane.clientHeight / 100);
     const park = (left: number, bottom: number) => {
+      parked = bottom;
       terminal.style.left = `${left}cqh`;
       terminal.style.bottom = `${bottom}cqh`;
     };
-    const roam = () => park(between(ROAM.left), between(ROAM.bottom));
+    const ceiling = () => {
+      const unit = lane.clientHeight / 100;
+      const room = (lane.getBoundingClientRect().bottom - logo.getBoundingClientRect().bottom) / unit;
+      return room - (terminal.offsetHeight / unit) * DRONE_REACH - LOGO_GAP;
+    };
+    const roam = () => {
+      const top = Math.min(ROAM.bottom[1], ceiling());
+      park(between(ROAM.left), between([Math.min(ROAM.bottom[0], top), top]));
+    };
 
     const advanceDrone = () => {
       const state = terminal.dataset.state;
@@ -664,12 +677,14 @@ export function Zannabi() {
     let ready = false;
     const observer = new ResizeObserver(() => {
       measure();
+      if (terminal.dataset.state === 'idle' && parked > ceiling()) roam();
       if (ready && still) {
         paint();
         paintHolo();
       }
     });
     observer.observe(lane);
+    observer.observe(lane.parentElement!);
     Promise.all([...FIRST.map(load), holoImg.decode()]).then(() => {
       if (!alive) return;
       ready = true;
