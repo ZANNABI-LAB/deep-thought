@@ -325,19 +325,6 @@ export function Zannabi() {
           steps = [{ clip: 'idle', glide: spot - x, stop: GLIDE_FRAMES }];
           end = dir;
         }
-        for (const side of [-end, end]) {
-          if (steps) break;
-          for (const reach of [1, 1.5]) {
-            const via = spot + side * TRIP * reach * scale;
-            if (via < 0 || via > width) continue;
-            const out = leg(x, dir, via);
-            const back = out && leg(via, via > x ? 1 : -1, spot);
-            if (back) {
-              steps = [...out!, ...back];
-              break;
-            }
-          }
-        }
       }
       if (!steps) return null;
       return face && face !== end ? [...steps, { clip: 'turn-around', flip: true }] : steps;
