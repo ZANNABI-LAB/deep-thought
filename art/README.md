@@ -12,6 +12,7 @@ art/refs/
   cockpit/stool-gpt-v1.png         등받이 없는 의자 원본 (ChatGPT, 검정 배경)
   cockpit/desk-gpt-v3.png          조종 데스크 원본, 오른쪽 끝에 책 더미·메모 (ChatGPT, 1484×1060, 검정 배경)
   cockpit/hologram-dummy-gpt-v1.png 수련용 홀로그램 더미와 투사기 (ChatGPT, 1484×1060, 검정 배경)
+  cockpit/ask-terminal-gpt-v1.png  Ask 카드 단말기 (ChatGPT, 1752×897, 검정 배경) → public/world/ask-terminal.webp
   zannabi-gpt-style-v1.png         잔나비 모습 기준 (v4 대기, ChatGPT, 데스크와 같은 그림체)
 ```
 

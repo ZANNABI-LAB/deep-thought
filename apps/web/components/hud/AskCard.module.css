@@ -18,12 +18,12 @@
 
 .art {
   position: absolute;
-  right: 8%;
-  top: min(-16px, -2.2cqh);
+  right: 11%;
+  top: min(-20px, -3.4cqh);
   z-index: 4;
-  width: 41%;
-  aspect-ratio: 200 / 176;
-  background: url('/world/cockpit-drone.webp') 0 0 / 4900% auto no-repeat;
+  width: 39%;
+  aspect-ratio: 480 / 498;
+  background: url('/world/ask-terminal.webp') center / contain no-repeat;
   pointer-events: none;
 }
 
