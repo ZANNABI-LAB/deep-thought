@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { usable } from '@/lib/image';
 import { reducedMotion } from '@/lib/motion';
 import styles from './WindowFrame.module.css';
 
@@ -89,7 +90,7 @@ export function WindowFrame({ onLayout }: { onLayout: (layout: GlassLayout) => v
     frame.src = FRAME_SRC;
     lights.src = LIGHTS_SRC;
     const still = reducedMotion();
-    const ready = () => frame.complete && frame.naturalWidth > 0 && lights.complete && lights.naturalWidth > 0;
+    const ready = () => usable(frame);
 
     let scale = 1;
     let toScreen = (r: Rect): Rect => r;
@@ -114,6 +115,7 @@ export function WindowFrame({ onLayout }: { onLayout: (layout: GlassLayout) => v
       const [px, py, pw, ph] = toScreen(pad);
       ctx.clearRect(px, py, pw, ph);
       ctx.drawImage(frame, ...pad, px, py, pw, ph);
+      if (!usable(lights)) return;
       for (const { rect, level } of parts) {
         const [sx, sy, sw, sh] = toScreen(rect);
         ctx.globalAlpha = level;
@@ -172,7 +174,7 @@ export function WindowFrame({ onLayout }: { onLayout: (layout: GlassLayout) => v
     let frameId = 0;
     let last = 0;
     const tick = (now: number) => {
-      if (now - last > 50 && ready()) {
+      if (now - last > 50 && ready() && usable(lights)) {
         shine(now);
         last = now;
       }
@@ -185,13 +187,16 @@ export function WindowFrame({ onLayout }: { onLayout: (layout: GlassLayout) => v
       resizeId = requestAnimationFrame(draw);
     };
 
+    const bare = () => onLayoutRef.current({ left: 0, top: 0, right: 0, bottom: 0, px: 1 / devicePixelRatio });
     frame.addEventListener('load', draw);
+    frame.addEventListener('error', bare);
     lights.addEventListener('load', draw);
     window.addEventListener('resize', onResize);
     draw();
     if (!still) frameId = requestAnimationFrame(tick);
     return () => {
       frame.removeEventListener('load', draw);
+      frame.removeEventListener('error', bare);
       lights.removeEventListener('load', draw);
       window.removeEventListener('resize', onResize);
       cancelAnimationFrame(frameId);

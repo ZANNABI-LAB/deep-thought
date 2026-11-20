@@ -19,7 +19,7 @@ export default function WritingPage() {
 
   return (
     <>
-      <p className={hud.eyebrow}>&gt; Writing Station</p>
+      <p className={hud.eyebrow}>&gt; Deep Thought / Writing</p>
       <h1 className={hud.heading}>Writing</h1>
       <p className={hud.lede}>{DESCRIPTION}</p>
       {posts.length === 0 ? (

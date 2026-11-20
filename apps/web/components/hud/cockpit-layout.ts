@@ -4,6 +4,7 @@ export const ROOM = { w: 784.3, h: 252 };
 export const CELL = { w: 200, h: 240 };
 export const PX = ROOM.h / CELL.h;
 export const BODY = { w: CELL.w * PX, half: 64 * PX };
+export const CANVAS: [x: number, y: number, w: number, h: number] = [-60, -60, 420, 314];
 
 const fit = (x: number, y: number, h: number, ratio: number): Rect => ({ x, y, w: h * ratio, h });
 

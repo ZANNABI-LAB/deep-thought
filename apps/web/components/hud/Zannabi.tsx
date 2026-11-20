@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { HUD_EVENT } from '@/components/space/CockpitHud';
+import { usable } from '@/lib/image';
 import { reducedMotion } from '@/lib/motion';
+import { between, count } from '@/lib/random';
 import * as L from './cockpit-layout';
 import { DESK, DRONE, GLOBE, HOLO } from './cockpit-sheets';
 import styles from './Zannabi.module.css';
@@ -10,7 +12,6 @@ import {
   type Behavior,
   type Box,
   type Clip,
-  type Holo,
   type Place,
   type Spec,
   type Step,
@@ -32,15 +33,49 @@ import {
   STRIDE,
   TRIP,
   WALK_ENTRY,
-  between,
-  count,
   isPlace,
   pick,
   sum,
 } from './zannabi-motion';
 
-const CELL: Box = [0, 0, 200, 240];
-const CANVAS: Box = [-60, -60, 420, 314];
+const CELL: Box = [0, 0, L.CELL.w, L.CELL.h];
+const CANVAS = L.CANVAS;
+const MIN_ZOOM = 0.3;
+const PLACES = (Object.keys(NEEDS) as Behavior[]).filter(isPlace);
+
+type Fade = { mode: 'off' | 'appear' | 'on' | 'disappear'; tick: number; last: number };
+type Clock = { acc: number; at: number };
+
+const fade = (f: Fade, on: boolean) => {
+  if (on && (f.mode === 'off' || f.mode === 'disappear')) {
+    if (f.mode === 'off') f.tick = f.last;
+    f.mode = 'appear';
+  } else if (!on && (f.mode === 'on' || f.mode === 'appear')) {
+    if (f.mode === 'on') f.tick = 0;
+    f.mode = 'disappear';
+  }
+};
+
+const stepFade = (f: Fade) => {
+  if (f.mode === 'appear' && --f.tick <= 0) {
+    f.tick = 0;
+    f.mode = 'on';
+  } else if (f.mode === 'disappear' && ++f.tick >= f.last) {
+    f.tick = f.last;
+    f.mode = 'off';
+  }
+};
+
+const run = (clock: Clock, now: number, fps: number, active: boolean, step: () => void) => {
+  if (active) {
+    clock.acc += Math.min(now - clock.at, 250);
+    while (clock.acc >= 1000 / fps) {
+      clock.acc -= 1000 / fps;
+      step();
+    }
+  }
+  clock.at = now;
+};
 const HOLD_MS = 900;
 const NOTICE = { reach: 1.8, cooldown: 25000 };
 const DONE_MS = 1100;
@@ -113,11 +148,31 @@ export function Zannabi() {
     const R = devicePixelRatio > 1.25 ? 2 : 1;
     const images = new Map<Clip, HTMLImageElement>();
     const loaded = new Set<Clip>();
+    const requests = new Map<Clip, Promise<void>>();
     const load = (clip: Clip) => {
-      const img = new Image();
-      img.src = `/world/zannabi-${clip}${R === 2 ? '@2x' : ''}.webp`;
-      images.set(clip, img);
-      return img.decode().then(() => loaded.add(clip));
+      let request = requests.get(clip);
+      if (!request) {
+        const img = new Image();
+        img.src = `/world/zannabi-${clip}${R === 2 ? '@2x' : ''}.webp`;
+        images.set(clip, img);
+        request = img.decode().then(
+          () => void loaded.add(clip),
+          () => {},
+        );
+        requests.set(clip, request);
+      }
+      return request;
+    };
+    const has = (behavior: Behavior) => NEEDS[behavior].every((c) => loaded.has(c));
+    const ensure = (behavior: Behavior) => Promise.all(NEEDS[behavior].map(load));
+    let fetching = false;
+    const prefetch = () => {
+      const missing = (Object.keys(NEEDS) as Behavior[]).filter((b) => !has(b) && NEEDS[b].some((c) => !requests.has(c)));
+      if (fetching || !missing.length) return;
+      fetching = true;
+      ensure(missing[Math.floor(Math.random() * missing.length)]!).then(() => {
+        fetching = false;
+      });
     };
     const holoImg = new Image();
     holoImg.src = '/world/hologram-dummy.webp';
@@ -135,18 +190,24 @@ export function Zannabi() {
     const measure = () => {
       const hud = getComputedStyle(lane.parentElement!);
       const inner = lane.parentElement!.clientWidth - parseFloat(hud.paddingLeft) - parseFloat(hud.paddingRight);
-      zoom = Math.min(1, (inner - Math.max(380, inner * 0.31)) / L.ROOM.w);
+      zoom = Math.max(MIN_ZOOM, Math.min(1, (inner - Math.max(380, inner * 0.31)) / L.ROOM.w));
       lane.style.setProperty('--zoom', `${zoom}`);
+      let resized = false;
       for (const c of [canvas, holo, globe, drone]) {
         const { width, height } = c.getBoundingClientRect();
-        c.width = Math.round(width * devicePixelRatio);
-        c.height = Math.round(height * devicePixelRatio);
+        const w = Math.round(width * devicePixelRatio);
+        const h = Math.round(height * devicePixelRatio);
+        if (c.width === w && c.height === h) continue;
+        c.width = w;
+        c.height = h;
+        resized = true;
       }
-      droneDrawn = -1;
-      for (const c of [ctx, holoCtx, globeCtx]) c.imageSmoothingQuality = 'high';
-      globeDrawn = '';
+      if (!resized) return;
+      for (const c of [ctx, holoCtx, globeCtx, droneCtx]) c.imageSmoothingQuality = 'high';
       drawn = '';
       holoDrawn = -1;
+      globeDrawn = '';
+      droneDrawn = -1;
     };
     measure();
 
@@ -161,14 +222,9 @@ export function Zannabi() {
     let waveWanted = false;
     let wanted: Place | null = null;
     let arrived = false;
-    let holoMode: Holo | 'on' | 'off' = 'off';
-    let holoTick = HOLO.frames - 1;
-    let holoAcc = 0;
-    let globeMode: 'off' | 'appear' | 'on' | 'disappear' = 'off';
-    let globeTick = 0;
-    let globeAcc = 0;
+    const holoFade: Fade = { mode: 'off', tick: HOLO.frames - 1, last: HOLO.frames - 1 };
+    const globeFade: Fade = { mode: 'off', tick: 0, last: GLOBE.off - 1 };
     let droneTick = 0;
-    let droneAcc = 0;
 
     const clip = (): Clip => step?.clip ?? 'idle';
     const clamp = (value: number) => Math.min(Math.max(value, L.WALK.from), L.WALK.to);
@@ -183,13 +239,15 @@ export function Zannabi() {
       drawn = key;
       body.style.transform = `translateX(${left}px) scaleX(${dir})`;
       body.style.setProperty('--dir', `${dir}`);
+      const img = images.get(current);
+      if (!img || !usable(img)) return;
       const { box = CELL, cols } = spec();
       const [bx, by, bw, bh] = box;
       const k = canvas.width / CANVAS[2];
       const col = cols[R - 1]!;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(
-        images.get(current)!,
+        img,
         (tick % col) * bw * R,
         Math.floor(tick / col) * bh * R,
         bw * R,
@@ -202,35 +260,29 @@ export function Zannabi() {
     };
 
     const paintHolo = () => {
-      if (holoTick === holoDrawn) return;
-      holoDrawn = holoTick;
+      if (holoFade.tick === holoDrawn || !usable(holoImg)) return;
+      holoDrawn = holoFade.tick;
       holoCtx.clearRect(0, 0, holo.width, holo.height);
-      holoCtx.drawImage(holoImg, holoTick * HOLO.w, 0, HOLO.w, HOLO.h, 0, 0, holo.width, holo.height);
+      holoCtx.drawImage(holoImg, holoFade.tick * HOLO.w, 0, HOLO.w, HOLO.h, 0, 0, holo.width, holo.height);
     };
 
     const advanceHolo = () => {
-      if (holoMode === 'appear') {
-        holoTick -= 1;
-        if (holoTick === 0) holoMode = 'on';
-      } else if (holoMode === 'disappear') {
-        holoTick += 1;
-        if (holoTick === HOLO.frames - 1) holoMode = 'off';
-      }
-      holo.toggleAttribute('data-on', holoMode === 'on');
+      stepFade(holoFade);
+      holo.toggleAttribute('data-on', holoFade.mode === 'on');
     };
 
     const paintGlobe = () => {
-      const key = `${globeMode} ${globeTick}`;
-      if (key === globeDrawn) return;
+      const img = globeFade.mode === 'on' ? globeSpin : globeOff;
+      const key = `${globeFade.mode} ${globeFade.tick}`;
+      if (key === globeDrawn || (globeFade.mode !== 'off' && !usable(img))) return;
       globeDrawn = key;
       globeCtx.clearRect(0, 0, globe.width, globe.height);
-      if (globeMode === 'off') return;
-      const img = globeMode === 'on' ? globeSpin : globeOff;
-      globeCtx.drawImage(img, globeTick * GLOBE.size, 0, GLOBE.size, GLOBE.size, 0, 0, globe.width, globe.height);
+      if (globeFade.mode === 'off') return;
+      globeCtx.drawImage(img, globeFade.tick * GLOBE.size, 0, GLOBE.size, GLOBE.size, 0, 0, globe.width, globe.height);
     };
 
     const paintDrone = () => {
-      if (droneTick === droneDrawn || !droneImg.complete) return;
+      if (droneTick === droneDrawn || !usable(droneImg)) return;
       droneDrawn = droneTick;
       droneCtx.clearRect(0, 0, drone.width, drone.height);
       droneCtx.drawImage(droneImg, droneTick * DRONE.w, 0, DRONE.w, DRONE.h, 0, 0, drone.width, drone.height);
@@ -262,18 +314,8 @@ export function Zannabi() {
     };
 
     const advanceGlobe = () => {
-      if (globeMode === 'appear') {
-        globeTick -= 1;
-        if (globeTick <= 0) {
-          globeMode = 'on';
-          globeTick = 0;
-        }
-      } else if (globeMode === 'on') {
-        globeTick = (globeTick + 1) % GLOBE.spin;
-      } else if (globeMode === 'disappear') {
-        globeTick += 1;
-        if (globeTick >= GLOBE.off - 1) globeMode = 'off';
-      }
+      if (globeFade.mode === 'on') globeFade.tick = (globeFade.tick + 1) % GLOBE.spin;
+      else stepFade(globeFade);
     };
 
     const flash = () =>
@@ -396,13 +438,7 @@ export function Zannabi() {
     };
     const signal = (on: boolean) => {
       desk.toggleAttribute('data-active', on);
-      if (on && (globeMode === 'off' || globeMode === 'disappear')) {
-        if (globeMode === 'off') globeTick = GLOBE.off - 1;
-        globeMode = 'appear';
-      } else if (!on && (globeMode === 'on' || globeMode === 'appear')) {
-        if (globeMode === 'on') globeTick = 0;
-        globeMode = 'disappear';
-      }
+      fade(globeFade, on);
       window.dispatchEvent(new CustomEvent(HUD_EVENT, { detail: on }));
     };
 
@@ -445,15 +481,12 @@ export function Zannabi() {
       seat.toggleAttribute('data-seated', !!step && !!CLIPS[step.clip].seated);
       if (step?.hud !== undefined) signal(step.hud);
       if (step?.term) think(step.term);
-      if (step?.holo) {
-        holoMode = step.holo;
-        holoTick = step.holo === 'appear' ? HOLO.frames - 1 : 0;
-        holoAcc = 0;
-      }
+      if (step?.holo) fade(holoFade, step.holo === 'appear');
       tick = step?.from ?? (step ? (CLIPS[step.clip].start ?? 0) : 0);
       loops = 0;
       if (step) return;
       if (asked()) return answer();
+      prefetch();
       restUntil = performance.now() + (demo.length ? 1200 : between(REST_MS));
     };
 
@@ -538,8 +571,12 @@ export function Zannabi() {
       return false;
     };
 
-    const go = (place: Place) => {
-      if ((previous === place && queue.some((s) => s.scene)) || !NEEDS[place].every((c) => loaded.has(c))) return;
+    const go = (place: Place): void => {
+      if (previous === place && queue.some((s) => s.scene)) return;
+      if (!has(place)) {
+        ensure(place).then(() => alive && has(place) && go(place));
+        return;
+      }
       if (redirect(place)) return;
       wanted = place;
       wrapUp();
@@ -592,48 +629,30 @@ export function Zannabi() {
         : [];
     let demoAt = 0;
     const rehearse = (): Behavior | null => {
-      const behavior = demo[demoAt++ % demo.length];
-      if (!behavior || !NEEDS[behavior].every((c) => loaded.has(c))) return null;
+      const behavior = demo[demoAt % demo.length];
+      if (!behavior) return null;
+      if (!has(behavior)) {
+        ensure(behavior);
+        return null;
+      }
+      demoAt += 1;
       return behavior;
     };
 
     const still = reducedMotion();
     let id = 0;
-    let last = 0;
-    let acc = 0;
-    let holoLast = 0;
-    let globeLast = 0;
-    let droneLast = 0;
+    const clocks = { body: { acc: 0, at: 0 }, holo: { acc: 0, at: 0 }, globe: { acc: 0, at: 0 }, drone: { acc: 0, at: 0 } };
     const loop = (now: number) => {
-      acc += Math.min(now - last, 250);
-      last = now;
-      while (acc >= 1000 / (spec().fps ?? FPS)) {
-        acc -= 1000 / (spec().fps ?? FPS);
+      const body = clocks.body;
+      body.acc += Math.min(now - body.at, 250);
+      body.at = now;
+      while (body.acc >= 1000 / (spec().fps ?? FPS)) {
+        body.acc -= 1000 / (spec().fps ?? FPS);
         advance(now);
       }
-      if (holoMode === 'appear' || holoMode === 'disappear') {
-        holoAcc += Math.min(now - holoLast, 250);
-        while (holoAcc >= 1000 / HOLO.fps) {
-          holoAcc -= 1000 / HOLO.fps;
-          advanceHolo();
-        }
-      }
-      holoLast = now;
-      if (globeMode !== 'off') {
-        globeAcc += Math.min(now - globeLast, 250);
-        const rate = 1000 / (globeMode === 'on' ? GLOBE.spinFps : GLOBE.fps);
-        while (globeAcc >= rate) {
-          globeAcc -= rate;
-          advanceGlobe();
-        }
-      }
-      globeLast = now;
-      droneAcc += Math.min(now - droneLast, 250);
-      droneLast = now;
-      while (droneAcc >= 1000 / DRONE.fps) {
-        droneAcc -= 1000 / DRONE.fps;
-        advanceDrone();
-      }
+      run(clocks.holo, now, HOLO.fps, holoFade.mode === 'appear' || holoFade.mode === 'disappear', advanceHolo);
+      run(clocks.globe, now, globeFade.mode === 'on' ? GLOBE.spinFps : GLOBE.fps, globeFade.mode !== 'off', advanceGlobe);
+      run(clocks.drone, now, DRONE.fps, true, advanceDrone);
       paintDrone();
       paint();
       paintHolo();
@@ -642,35 +661,30 @@ export function Zannabi() {
     };
     let alive = true;
     let ready = false;
+    const repaint = () => {
+      paint();
+      paintHolo();
+      paintDrone();
+    };
     const observer = new ResizeObserver(() => {
       measure();
       if (terminal.dataset.state === 'idle' && parked > ceiling()) roam();
-      if (ready && still) {
-        paint();
-        paintHolo();
-      }
+      if (ready && still) repaint();
     });
-    observer.observe(lane);
     observer.observe(lane.parentElement!);
-    Promise.all([...FIRST.map(load), holoImg.decode()]).then(() => {
+    const quiet = () => {};
+    Promise.all([...FIRST.map(load), holoImg.decode().catch(quiet), droneImg.decode().catch(quiet)]).then(async () => {
       if (!alive) return;
       ready = true;
-      for (const clip of Object.keys(CLIPS) as Clip[]) if (!images.has(clip)) load(clip);
+      if (still) return repaint();
       globeSpin.src = '/world/cockpit-globe-spin.webp';
       globeOff.src = '/world/cockpit-globe-off.webp';
-      if (still) {
-        paint();
-        return paintHolo();
-      }
-      last = holoLast = globeLast = droneLast = performance.now();
+      const now = performance.now();
+      for (const clock of Object.values(clocks)) clock.at = now;
       id = requestAnimationFrame(loop);
+      for (const place of PLACES) if (alive) await ensure(place);
     });
 
-    for (const [el, press] of presses) {
-      el.addEventListener('pointerdown', press);
-      el.addEventListener('pointerleave', release);
-    }
-    window.addEventListener('pointerup', lift);
     let noticedAt = -Infinity;
     const approach = (event: PointerEvent) => {
       if (step || waveWanted || wanted || performance.now() - noticedAt < NOTICE.cooldown || !loaded.has('notice')) return;
@@ -681,8 +695,17 @@ export function Zannabi() {
       noticedAt = performance.now();
       start('notice');
     };
-    window.addEventListener('pointermove', approach);
-    window.addEventListener('pointercancel', release);
+
+    lane.toggleAttribute('data-still', still);
+    if (!still) {
+      for (const [el, press] of presses) {
+        el.addEventListener('pointerdown', press);
+        el.addEventListener('pointerleave', release);
+      }
+      window.addEventListener('pointerup', lift);
+      window.addEventListener('pointermove', approach);
+      window.addEventListener('pointercancel', release);
+    }
     return () => {
       alive = false;
       signal(false);
@@ -734,8 +757,17 @@ export function Zannabi() {
       <div ref={projectorRef} className={styles.projector} style={L.box(L.PROJECTOR)}>
         <Tip>Saber training</Tip>
       </div>
-      <div ref={bodyRef} className={styles.body}>
-        <canvas ref={canvasRef} className={styles.sprite} />
+      <div ref={bodyRef} className={styles.body} style={{ aspectRatio: `${L.CELL.w} / ${L.CELL.h}` }}>
+        <canvas
+          ref={canvasRef}
+          className={styles.sprite}
+          style={{
+            left: `${(CANVAS[0] / L.CELL.w) * 100}%`,
+            top: `${(CANVAS[1] / L.CELL.h) * 100}%`,
+            width: `${(CANVAS[2] / L.CELL.w) * 100}%`,
+            height: `${(CANVAS[3] / L.CELL.h) * 100}%`,
+          }}
+        />
         <div ref={hitRef} className={styles.hit}>
           <Tip>Say hi</Tip>
         </div>

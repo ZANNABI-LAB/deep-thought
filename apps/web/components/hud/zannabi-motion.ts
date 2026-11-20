@@ -99,8 +99,6 @@ const PLACES = ['read', 'saber', 'pilot', 'ask', 'gaze'] as const;
 export type Place = (typeof PLACES)[number];
 export const isPlace = (b: Behavior): b is Place => (PLACES as readonly Behavior[]).includes(b);
 
-export const between = ([min, max]: [number, number]) => min + Math.random() * (max - min);
-export const count = (min: number, max: number) => min + Math.floor(Math.random() * (max - min + 1));
 
 const WEIGHTS: [Behavior, number][] = [
   ['walk', 40],

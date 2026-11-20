@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { reducedMotion } from '@/lib/motion';
+import { between } from '@/lib/random';
 import styles from './ShootingStars.module.css';
 
 const ART = { w: 1280, h: 720 };
@@ -42,7 +43,6 @@ type Meteor = {
   start: number;
 };
 
-const rand = (min: number, max: number) => min + Math.random() * (max - min);
 
 function hitsBody(ax: number, ay: number, bx: number, by: number) {
   return BODIES.some(({ x, y, r }) => {
@@ -57,13 +57,13 @@ function spawn(now: number): Meteor | null {
   const ux = Math.cos(AXIS.angle);
   const uy = Math.sin(AXIS.angle);
   for (let i = 0; i < 24; i++) {
-    const angle = AXIS.angle + rand(-4, 4) * (Math.PI / 180);
+    const angle = AXIS.angle + between([-4, 4]) * (Math.PI / 180);
     const dx = Math.cos(angle);
     const dy = Math.sin(angle);
-    const travel = rand(140, 260);
-    const tail = travel * rand(0.45, 0.7);
-    const along = rand(AXIS.from, AXIS.to - travel);
-    const across = rand(-LANE_HALF_WIDTH, LANE_HALF_WIDTH);
+    const travel = between([140, 260]);
+    const tail = travel * between([0.45, 0.7]);
+    const along = between([AXIS.from, AXIS.to - travel]);
+    const across = between([-LANE_HALF_WIDTH, LANE_HALF_WIDTH]);
     const x = TOP_PLANET.x + ux * along - uy * across;
     const y = TOP_PLANET.y + uy * along + ux * across;
     const ex = x + dx * travel;
@@ -77,9 +77,9 @@ function spawn(now: number): Meteor | null {
       dy,
       travel,
       tail,
-      width: rand(0.9, 1.5),
-      peak: rand(0.55, 0.95),
-      duration: travel * rand(2.6, 3.6),
+      width: between([0.9, 1.5]),
+      peak: between([0.55, 0.95]),
+      duration: travel * between([2.6, 3.6]),
       start: now,
     };
   }
@@ -167,7 +167,7 @@ export function ShootingStars() {
           if (!frame) frame = requestAnimationFrame(tick);
         }
         schedule();
-      }, rand(gapMin, gapMax));
+      }, between([gapMin, gapMax]));
     };
     schedule();
 

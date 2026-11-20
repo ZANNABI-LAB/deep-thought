@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { CELL } from '../components/hud/cockpit-layout';
 import { CLIPS, type Clip } from '../components/hud/zannabi-motion';
 
 const WORLD = join(__dirname, '..', 'public', 'world');
@@ -19,7 +20,7 @@ function webpSize(file: string): [number, number] {
 describe('Zannabi 스프라이트 띠', () => {
   for (const [clip, spec] of Object.entries(CLIPS) as [Clip, (typeof CLIPS)[Clip]][]) {
     it(`${clip}의 띠 크기가 칸 정의와 맞는다`, () => {
-      const [, , w, h] = spec.box ?? [0, 0, 200, 240];
+      const [, , w, h] = spec.box ?? [0, 0, CELL.w, CELL.h];
       spec.cols.forEach((cols, i) => {
         const r = i + 1;
         const file = join(WORLD, `zannabi-${clip}${r === 2 ? '@2x' : ''}.webp`);

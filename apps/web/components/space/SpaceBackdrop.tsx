@@ -16,7 +16,8 @@ export function SpaceBackdrop({ onReady }: { onReady: () => void }) {
     let alive = true;
     const poster = new Image();
     poster.src = POSTER;
-    poster.decode().finally(() => alive && onReadyRef.current());
+    const done = () => alive && onReadyRef.current();
+    poster.decode().then(done, done);
 
     const video = videoRef.current;
     if (video && !reducedMotion() && !matchMedia('(hover: none)').matches) {

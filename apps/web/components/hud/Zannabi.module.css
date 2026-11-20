@@ -127,16 +127,11 @@
   left: 0;
   bottom: 0;
   height: 100%;
-  aspect-ratio: 200 / 240;
   will-change: transform;
 }
 
 .sprite {
   position: absolute;
-  left: -30%;
-  top: -25%;
-  width: 210%;
-  height: 130.833%;
   pointer-events: none;
 }
 
@@ -522,4 +517,12 @@
   top: -14px;
   color: #ffc45c;
   white-space: nowrap;
+}
+
+.lane[data-still] .tip {
+  display: none;
+}
+
+.lane[data-still] :is(.seat, .desk, .projector, .terminal, .hit) {
+  cursor: default;
 }
