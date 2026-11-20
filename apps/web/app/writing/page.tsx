@@ -21,7 +21,7 @@ export default function WritingPage() {
     <>
       <p className={hud.eyebrow}>&gt; Writing Station</p>
       <h1 className={hud.heading}>Writing</h1>
-      <p className={`${hud.lede} ${styles.lede}`}>{DESCRIPTION}</p>
+      <p className={hud.lede}>{DESCRIPTION}</p>
       {posts.length === 0 ? (
         <p className={styles.empty}>첫 글을 쓰는 중이에요.</p>
       ) : (
