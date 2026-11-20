@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useRef } from 'react';
 import { scramble, settled } from '@/lib/scramble';
-import frame from './Frame.module.css';
 import styles from './HomeNav.module.css';
 
 type Item = { label: string; href?: string; locked?: boolean };
@@ -42,7 +41,7 @@ function Label({ text }: { text: string }) {
   };
 
   return (
-    <span ref={ref} className={styles.label} onPointerEnter={play} onFocus={play}>
+    <span ref={ref} onPointerEnter={play} onFocus={play}>
       {text}
     </span>
   );
@@ -50,7 +49,7 @@ function Label({ text }: { text: string }) {
 
 export function HomeNav({ current = '/' }: { current?: string }) {
   return (
-    <nav className={`${frame.frame} ${frame.pill} ${styles.nav}`} aria-label="Main">
+    <nav className={styles.nav} aria-label="Main">
       <ul className={styles.list}>
         {ITEMS.map(({ label, href, locked }) =>
           href ? (
