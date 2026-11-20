@@ -3,14 +3,15 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { scramble, settled } from '@/lib/scramble';
+import hud from './Hud.module.css';
+import { PageShell } from './PageShell';
 import styles from './Pending.module.css';
 
+const STATUS = 'COMING SOON';
 const TYPE = { settle: 360, spread: 55, blank: true };
 const STEP_MS = 40;
 
-const STATUS = 'COMING SOON';
-
-export function Pending({ area, message }: { area: string; message: string }) {
+export function Pending({ current, area, message }: { current: string; area: string; message: string }) {
   const [line, setLine] = useState(STATUS);
 
   useEffect(() => {
@@ -32,15 +33,15 @@ export function Pending({ area, message }: { area: string; message: string }) {
   }, []);
 
   return (
-    <main className={styles.page}>
-      <p className={styles.area}>&gt; {area}</p>
-      <h1 className={styles.status} aria-label={STATUS}>
+    <PageShell current={current}>
+      <p className={hud.eyebrow}>&gt; {area}</p>
+      <h1 className={hud.heading} aria-label={STATUS}>
         <span aria-hidden>{line}</span>
       </h1>
-      <p className={styles.message}>{message}</p>
-      <Link href="/" className={styles.back}>
+      <p className={hud.lede}>{message}</p>
+      <Link href="/" className={`${hud.link} ${styles.back}`}>
         ← BACK TO COCKPIT
       </Link>
-    </main>
+    </PageShell>
   );
 }

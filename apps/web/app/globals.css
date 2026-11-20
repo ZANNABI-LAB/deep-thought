@@ -8,14 +8,10 @@
   --text-body: #d6d9e0;
   --text-secondary: #a9b1c3;
   --text-muted: #7c869b;
-  --accent-blue: #3b82f6;
-  --accent-blue-soft: #93c5fd;
 
   --font-sans: 'Pretendard Variable', Pretendard, system-ui, sans-serif;
-  --font-serif: var(--font-newsreader), Georgia, serif;
   --font-mono: var(--font-jetbrains), ui-monospace, monospace;
   --font-hud: var(--font-plex), ui-monospace, monospace;
-  --font-display: var(--font-instrument), Georgia, serif;
 
   --radius-card: 12px;
   --card-border: rgb(255 255 255 / 0.08);
@@ -45,14 +41,8 @@ button {
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent-blue-soft);
+  outline: 2px solid #b9f5c8;
   outline-offset: 2px;
-}
-
-.mono {
-  font-family: var(--font-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 @media (prefers-reduced-motion: reduce) {

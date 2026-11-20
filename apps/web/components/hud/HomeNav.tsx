@@ -46,9 +46,9 @@ function Label({ text }: { text: string }) {
   );
 }
 
-export function HomeNav({ current = '/' }: { current?: string }) {
+export function HomeNav({ current, className }: { current: string; className?: string }) {
   return (
-    <nav className={styles.nav} aria-label="Main">
+    <nav className={className ? `${styles.nav} ${className}` : styles.nav} aria-label="Main">
       <ul className={styles.list}>
         {ITEMS.map(({ label, href }) => (
           <li key={label}>

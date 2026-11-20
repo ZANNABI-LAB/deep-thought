@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AUTHOR, jsonLdScript, OG_IMAGE, OPEN_GRAPH_BASE, SITE_URL } from '@/lib/site';
 import { formatDate, getPost, getPosts } from '@/lib/writing';
+import hud from '@/components/Hud.module.css';
 import styles from './page.module.css';
 
 interface Props {
@@ -57,11 +58,11 @@ export default async function PostPage({ params }: Props) {
   return (
     <article>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }} />
-      <Link href="/writing" className={`${styles.back} mono`}>
-        &lt; Writing
+      <Link href="/writing" className={hud.link}>
+        ← Writing
       </Link>
       <header className={styles.header}>
-        <p className={`${styles.meta} mono`}>
+        <p className={styles.meta}>
           {post.category} · {formatDate(post.date)}
         </p>
         <h1 className={styles.title}>{post.title}</h1>

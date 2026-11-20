@@ -3,6 +3,10 @@
   padding: 24px 40px 96px;
 }
 
+.shell .nav {
+  font-size: 14px;
+}
+
 .main {
   max-width: 720px;
   margin: 72px auto 0;
@@ -12,6 +16,7 @@
   .shell {
     padding: 24px 16px 64px;
   }
+
   .main {
     margin-top: 40px;
   }

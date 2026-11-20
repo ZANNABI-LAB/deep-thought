@@ -23,7 +23,7 @@
 | `art/refs/concept/window-frame-gpt-v2.png` | **창틀 원본** (1672×941, 창 안쪽 투명). 2px 격자로 정리해 씀 |
 | `art/refs/zannabi-gpt-style-v1.png` | **Zannabi 모습 기준** (v4, 유리 헬멧, 옆 원반, 선글라스, 크림색 우주복) |
 | `art/refs/space/space-bg-v3-4k.webp` | **창밖 우주 원본** (4096×2304, ChatGPT 원본 1672×940을 Bytedance로 업스케일) |
-| `art/refs/logo-mark-gpt-v3.png` | 헤더 로고 원본 (potrace로 SVG) |
+| `art/refs/logo-mark-gpt-v3.png` | 예전 헤더 로고 원본. 헤더(`SiteHeader`)와 `zannabi-mark.svg`는 2026-11-20 새 메뉴로 바꾸며 지웠다 |
 | `apps/web/app/favicon.ico` | **파비콘** (2026-11-20): 라벤더 단말기 모니터(16·32·48·64px). 사용자가 직접 만든 완성본이라 원본 그림은 따로 두지 않는다. 그전엔 헬멧 쓴 선글라스 잔나비 도트였다 |
 | `docs/assets/zannabi-original-logo.png` | 브랜드 출발점 (흑백 우주 원숭이) |
 
@@ -84,10 +84,10 @@
 
 | 요소 | 역할·콘텐츠 | 동작 |
 | --- | --- | --- |
-| **상단 메뉴** | Home · Writing · Portfolio · Arcade · About me | `HomeNav`, 로고 가로 중심에 맞춰 유리 위 3.5cqh. 2026-11-20 컨셉 시안의 알약(크림 테두리 + 초록 모서리 괄호)으로 만들었다가 사용자가 '메뉴 자체가 별로'라고 해서 **테두리 없이 글자만**으로 바꿨다: IBM Plex Mono 대문자, max(13px, 2cqh)·자간 0.18em(후보 비교에서 사용자 선택), 색은 오브젝트 툴팁과 같은 민트 `#b9f5c8`(2026-11-20 사용자 요청), 평소 60% 투명도, 지금 페이지와 호버 항목은 100% + 뒤에 깜빡이는 민트 블록 커서(호버하면 커서가 옮겨 감), 호버·포커스 때 스크램블(`lib/scramble.ts`). Writing 말고는 준비 중 페이지로 간다(`components/Pending.tsx`: 초록 COMING SOON이 스크램블로 타이핑되고 블록 커서, noindex, 사이트맵 제외). Lab은 2026-11-20 메뉴에서 뺐다(사용자: 따로 새 페이지로 만들 예정). 알약용 공용 틀(`Frame.module.css`)은 카드에 쓴다 |
+| **상단 메뉴** | Home · Writing · Portfolio · Arcade · About me | `HomeNav`, 로고 가로 중심에 맞춰 유리 위 3.5cqh. 2026-11-20 컨셉 시안의 알약(크림 테두리 + 초록 모서리 괄호)으로 만들었다가 사용자가 '메뉴 자체가 별로'라고 해서 **테두리 없이 글자만**으로 바꿨다: IBM Plex Mono 대문자, max(13px, 2cqh)·자간 0.18em(후보 비교에서 사용자 선택), 색은 오브젝트 툴팁과 같은 민트 `#b9f5c8`(2026-11-20 사용자 요청), 평소 60% 투명도, 지금 페이지와 호버 항목은 100% + 뒤에 깜빡이는 민트 블록 커서(호버하면 커서가 옮겨 감), 호버·포커스 때 스크램블(`lib/scramble.ts`). Writing 말고는 준비 중 페이지로 간다(`components/Pending.tsx`: 초록 COMING SOON이 스크램블로 타이핑되고 블록 커서, noindex, 사이트맵 제외). Lab은 2026-11-20 메뉴에서 뺐다(사용자: 따로 새 페이지로 만들 예정). 홈 말고 모든 페이지(Writing 목록·본문, 준비 중, 404)는 공용 레이아웃 `PageShell`(왼쪽 위 메뉴 14px, 본문 폭 720px)을 쓰고, 글자 스타일은 `components/Hud.module.css`(`> 표시`·민트 큰 제목+커서·본문·링크)를 같이 쓴다(2026-11-20). 메뉴 위치는 각 페이지가 정한다(홈은 `HomeHud`의 `.nav`). 예전 파란 강조색·Newsreader·Instrument Serif는 쓰는 곳이 없어져 지웠다. 알약·카드용 공용 틀(`Frame.module.css`)은 Ask 카드와 함께 빼 뒀다 |
 | **Command palette** | 공개 글 검색, 프로젝트 검색, 페이지 바로가기 | 클릭 또는 `Ctrl K` / Mac `⌘ K`. 방향키로 고르고 Enter로 이동. 검색 기능이 없으니 실제 공개 페이지 빠른 이동만 (가짜 결과 금지) |
 | **메인 로고** | 사이트 정체성과 두 줄 슬로건 | 정지 그림 (HUD와 함께 나타남). 내부 페이지에서는 홈 링크 |
-| **Ask Deep Thought 카드** | 오른쪽 칸 맨 위(`AskCard`, HUD 둘째 줄에서 14.4cqh 아래) | 공용 틀(모서리 초록 괄호) + 테두리 위 반짝이 2개, 제목 Instrument Serif 5cqh·줄간 1.08·자간 0.012em 두 줄(시안과 1px 안으로 맞춤, 제목과 입력창 사이 2cqh), 오른쪽에 단말기 그림이 카드 위로 튀어나오고 입력창 윗선에 걸침(`ask-terminal.webp`, 사용자 ChatGPT 그림 `art/refs/cockpit/ask-terminal-gpt-v1.png`에서 가장자리와 이어진 검정만 지워 480px로, 카드 폭 39%), 둥근 입력창 '블로그에 질문하기_' + → 버튼. 입력하면 홈에 넘겨준 공개 글 목록(제목·요약·분류·태그)에서 찾아 카드 안에 최대 3개 링크. 글이 0편이면 '아직 공개된 글이 없어요', 못 찾으면 그렇다고 말한다(가짜 결과 없음). AI 답변은 나중(로드맵 7) |
+| **Ask Deep Thought 카드** | **2026-11-20 빼 둠**(사용자: 메뉴까지만, 오른쪽 영역은 비워 두기). 되살릴 때는 커밋 `9bb28b1`의 `AskCard`·`Frame.module.css`·`ask-terminal.webp`. 당시 설계: 오른쪽 칸 맨 위(HUD 둘째 줄에서 14.4cqh 아래) | 공용 틀(모서리 초록 괄호) + 테두리 위 반짝이 2개, 제목 Instrument Serif 5cqh·줄간 1.08·자간 0.012em 두 줄(시안과 1px 안으로 맞춤, 제목과 입력창 사이 2cqh), 오른쪽에 단말기 그림이 카드 위로 튀어나오고 입력창 윗선에 걸침(`ask-terminal.webp`, 사용자 ChatGPT 그림 `art/refs/cockpit/ask-terminal-gpt-v1.png`에서 가장자리와 이어진 검정만 지워 480px로, 카드 폭 39%), 둥근 입력창 '블로그에 질문하기_' + → 버튼. 입력하면 홈에 넘겨준 공개 글 목록(제목·요약·분류·태그)에서 찾아 카드 안에 최대 3개 링크. 글이 0편이면 '아직 공개된 글이 없어요', 못 찾으면 그렇다고 말한다(가짜 결과 없음). AI 답변은 나중(로드맵 7) |
 | **Mission Log** | 최신 공개 글 3개: 제목·카테고리·발행일 | 행 전체가 글 링크. '전체 글'은 Writing으로. 글이 없으면 빈 상태 |
 | **Ask Zannabi** | 공개 글·프로젝트·이력에 관한 질문 | 질문 → 대화 패널, 답변과 원문 링크. 서버가 없어 우선 UI만 (`COMING SOON`) |
 | **Deep Thought 드론** | Ask Zannabi의 시각적 상징 | 로고 아래를 통통 날아다니는 레트로 컴퓨터 드론. 3.6절 |

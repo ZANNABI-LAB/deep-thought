@@ -1,6 +1,6 @@
 const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*/<>';
 
-export type Scramble = { settle: number; spread: number; blank?: boolean };
+type Scramble = { settle: number; spread: number; blank?: boolean };
 
 export const scramble = (text: string, elapsed: number, { settle, spread, blank }: Scramble) =>
   [...text]

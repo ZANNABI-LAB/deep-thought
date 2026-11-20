@@ -8,11 +8,11 @@ art/refs/
   concept/logo-gpt-v2.png          홈 로고 원본 (ChatGPT, 1808×870, 검정 배경)
   concept/window-frame-gpt-v2.png  창틀 원본 (ChatGPT, 1672×941, 창 안쪽 투명)
   space/space-bg-v3-4k.webp        창밖 우주 (ChatGPT 1672×940을 Bytedance Image Upscale로 4096×2304, 무손실 WebP)
-  logo-mark-gpt-v3.png             헤더 로고 (GPT 흑백)
+  logo-mark-gpt-v3.png             예전 헤더 로고 (GPT 흑백, 지금은 안 씀)
   cockpit/stool-gpt-v1.png         등받이 없는 의자 원본 (ChatGPT, 검정 배경)
   cockpit/desk-gpt-v3.png          조종 데스크 원본, 오른쪽 끝에 책 더미·메모 (ChatGPT, 1484×1060, 검정 배경)
   cockpit/hologram-dummy-gpt-v1.png 수련용 홀로그램 더미와 투사기 (ChatGPT, 1484×1060, 검정 배경)
-  cockpit/ask-terminal-gpt-v1.png  Ask 카드 단말기 (ChatGPT, 1752×897, 검정 배경) → public/world/ask-terminal.webp
+  cockpit/ask-terminal-gpt-v1.png  Ask 카드 단말기 (ChatGPT, 1752×897, 검정 배경). Ask 카드는 빼 둠, 웹용 파일은 커밋 9bb28b1에 있다
   zannabi-gpt-style-v1.png         잔나비 모습 기준 (v4 대기, ChatGPT, 데스크와 같은 그림체)
 ```
 

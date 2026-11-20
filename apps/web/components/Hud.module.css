@@ -1,0 +1,65 @@
+.eyebrow {
+  margin: 0 0 18px;
+  color: rgb(185 245 200 / 0.6);
+  font-family: var(--font-hud);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  gap: 0.15em;
+  margin: 0 0 18px;
+  color: #b9f5c8;
+  font-family: var(--font-hud);
+  font-size: clamp(30px, 6vw, 52px);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: pre;
+  text-shadow: 0 0 18px rgb(185 245 200 / 0.4);
+}
+
+.heading::after {
+  content: '';
+  width: 0.55em;
+  height: 0.95em;
+  background: #b9f5c8;
+  animation: blink 1.06s steps(1, end) infinite;
+}
+
+.lede {
+  margin: 0;
+  color: var(--text-body);
+  font-size: 16px;
+  line-height: 1.7;
+  word-break: keep-all;
+}
+
+.link {
+  color: rgb(239 228 203 / 0.62);
+  font-family: var(--font-hud);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition: color 160ms ease-out;
+}
+
+.link:hover,
+.link:focus-visible {
+  color: #b9f5c8;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heading::after {
+    animation: none;
+  }
+}

@@ -1,11 +1,5 @@
-import { SiteHeader } from '@/components/SiteHeader';
-import styles from './layout.module.css';
+import { PageShell } from '@/components/PageShell';
 
 export default function WritingLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className={styles.shell}>
-      <SiteHeader current="/writing" />
-      <main className={styles.main}>{children}</main>
-    </div>
-  );
+  return <PageShell current="/writing">{children}</PageShell>;
 }

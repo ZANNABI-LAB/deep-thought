@@ -1,8 +1,4 @@
 .nav {
-  position: absolute;
-  top: calc(3.5cqh - 80px - 19cqh);
-  left: 50%;
-  translate: -50% 0;
   font-family: var(--font-hud);
   font-size: max(13px, 2cqh);
   letter-spacing: 0.18em;
