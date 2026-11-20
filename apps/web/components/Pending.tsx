@@ -14,7 +14,7 @@ export function Pending({ current, area, message }: { current: string; area: str
 
   return (
     <PageShell current={current}>
-      <p className={hud.eyebrow}>&gt; {area}</p>
+      <p className={hud.eyebrow}>&gt; Deep Thought / {area}</p>
       <h1 className={hud.heading} aria-label={STATUS}>
         <span aria-hidden>{line}</span>
       </h1>
