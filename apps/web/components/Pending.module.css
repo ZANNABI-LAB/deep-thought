@@ -1,0 +1,79 @@
+.page {
+  --accent: #8fdc9f;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 18px;
+  min-height: 100svh;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 48px 24px;
+  font-family: var(--font-hud);
+  color: #efe4cb;
+}
+
+.page[data-status='denied'] {
+  --accent: #ffb445;
+}
+
+.area {
+  margin: 0;
+  color: rgb(239 228 203 / 0.62);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 0.15em;
+  margin: 0;
+  color: var(--accent);
+  font-size: clamp(30px, 6vw, 52px);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  white-space: pre;
+  text-shadow: 0 0 18px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.status::after {
+  content: '';
+  width: 0.55em;
+  height: 0.95em;
+  background: var(--accent);
+  animation: blink 1.06s steps(1, end) infinite;
+}
+
+.message {
+  margin: 0;
+  color: var(--text-body);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.back {
+  margin-top: 18px;
+  color: rgb(239 228 203 / 0.62);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  transition: color 160ms ease-out;
+}
+
+.back:hover,
+.back:focus-visible {
+  color: #fff8e8;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status::after {
+    animation: none;
+  }
+}
